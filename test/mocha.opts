@@ -1,0 +1,7 @@
+test/unit
+--harmony_async_iteration
+--use_strict
+--expose-gc
+--slow 50
+--no-exit
+--reporter list
