@@ -20,7 +20,7 @@
           'cflags_cc+': [
             '-std=c++11',
             '-flto',
-            '-Wall', '-Wextra', '-Wpedantic',
+            '-Wall', '-Wextra',
             '-Wno-unused-parameter', '-Wno-gnu-zero-variadic-macro-arguments'
           ],
         }],
@@ -33,7 +33,7 @@
             'OTHER_CPLUSPLUSFLAGS': [
               '-std=c++11',
               '-flto',
-              '-Wall', '-Wextra', '-Wpedantic',
+              '-Wall', '-Wextra',
               '-Wno-unused-parameter', '-Wno-gnu-zero-variadic-macro-arguments'
             ],
           },
