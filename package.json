@@ -16,7 +16,7 @@
     "weak": ">= 1.0"
   },
   "engines": {
-    "node": ">= 4"
+    "node": ">= 8.6"
   },
   "scripts": {
     "test": "node node_modules/node-gyp/bin/node-gyp.js rebuild && node node_modules/mocha/bin/mocha",

@@ -18,7 +18,7 @@
       'conditions': [
         ['OS != "win"', {
           'cflags_cc+': [
-            '-std=c++14',
+            '-std=c++11',
             '-flto',
             '-Wall', '-Wextra', '-Wpedantic',
             '-Wno-unused-parameter', '-Wno-gnu-zero-variadic-macro-arguments'
@@ -31,7 +31,7 @@
             'CLANG_CXX_LIBRARY': 'libc++',
             'MACOSX_DEPLOYMENT_TARGET': '10.9',
             'OTHER_CPLUSPLUSFLAGS': [
-              '-std=c++14',
+              '-std=c++11',
               '-flto',
               '-Wall', '-Wextra', '-Wpedantic',
               '-Wno-unused-parameter', '-Wno-gnu-zero-variadic-macro-arguments'

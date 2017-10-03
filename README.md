@@ -1,4 +1,4 @@
-## Examples using zeromq
+## Examples using ZeroMQ
 
 ### Push/Pull
 
