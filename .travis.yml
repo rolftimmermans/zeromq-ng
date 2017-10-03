@@ -4,4 +4,4 @@ node_js:
 addons:
   apt:
     packages:
-    - zeromq
+    - libzmq3-dev
