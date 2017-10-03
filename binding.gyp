@@ -21,7 +21,7 @@
             '-std=c++11',
             '-flto',
             '-Wall', '-Wextra',
-            '-Wno-unused-parameter', '-Wno-gnu-zero-variadic-macro-arguments'
+            '-Wno-unused-parameter'
           ],
         }],
 
@@ -34,7 +34,7 @@
               '-std=c++11',
               '-flto',
               '-Wall', '-Wextra',
-              '-Wno-unused-parameter', '-Wno-gnu-zero-variadic-macro-arguments'
+              '-Wno-unused-parameter'
             ],
           },
         }],
