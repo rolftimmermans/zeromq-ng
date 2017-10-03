@@ -18,9 +18,12 @@ Napi::Object init(Napi::Env env, Napi::Object exports) {
         static auto options = {"ipc", "pgm", "tipc", "norm", "curve", "gssapi", "draft"};
 
         auto result = Napi::Object::New(env);
+
+#ifdef ZMQ_HAS_CAPABILITIES
         for (auto& option : options) {
             result.Set(option, static_cast<bool>(zmq_has(option)));
         }
+#endif
 
         return result;
     }());
