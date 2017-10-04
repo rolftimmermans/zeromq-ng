@@ -85,15 +85,26 @@ namespace zmq {
         static const std::set<int32_t> immediate = {
             ZMQ_SUBSCRIBE, ZMQ_UNSUBSCRIBE,
             ZMQ_LINGER,
-            ZMQ_ROUTER_HANDOVER,
             ZMQ_ROUTER_MANDATORY,
             ZMQ_PROBE_ROUTER,
-            ZMQ_XPUB_VERBOSE, ZMQ_XPUB_VERBOSER,
+            ZMQ_XPUB_VERBOSE,
             ZMQ_REQ_CORRELATE,
             ZMQ_REQ_RELAXED,
-            ZMQ_SNDHWM, ZMQ_RCVHWM,
 
-            /* These take effect immediately due to our implementation, not libzmq. */
+#ifdef ZMQ_ROUTER_HANDOVER
+            ZMQ_ROUTER_HANDOVER,
+#endif
+
+#ifdef ZMQ_XPUB_VERBOSER
+            ZMQ_XPUB_VERBOSER,
+#endif
+
+#if ZMQ_VERSION >= ZMQ_MAKE_VERSION(4,2,0)
+            /* As of 4.2.0 these options can take effect after bind/connect. */
+            ZMQ_SNDHWM, ZMQ_RCVHWM,
+#endif
+
+            /* These take effect immediately due to our Node.js implementation. */
             ZMQ_SNDTIMEO, ZMQ_RCVTIMEO,
         };
 
