@@ -21,7 +21,8 @@
             '-std=c++11',
             '-flto',
             '-Wall', '-Wextra',
-            '-Wno-unused-parameter'
+            '-Wno-unused-parameter',
+            '-Wno-missing-field-initializers'
           ],
         }],
 
@@ -34,7 +35,8 @@
               '-std=c++11',
               '-flto',
               '-Wall', '-Wextra',
-              '-Wno-unused-parameter'
+              '-Wno-unused-parameter',
+              '-Wno-missing-field-initializers'
             ],
           },
         }],
