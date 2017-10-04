@@ -56,7 +56,7 @@ describe("socket construction", function() {
         assert.instanceOf(err, Error)
         assert.equal(err.message, "Invalid argument")
         assert.equal(err.code, "EINVAL")
-        assert.equal(err.errno, 22)
+        assert.typeOf(err.errno, "number")
       }
     })
 
@@ -79,7 +79,7 @@ describe("socket construction", function() {
         assert.instanceOf(err, Error)
         assert.equal(err.message, "Context is closed")
         assert.equal(err.code, "EFAULT")
-        assert.equal(err.errno, 14)
+        assert.typeOf(err.errno, "number")
       }
     })
 
@@ -168,7 +168,7 @@ describe("socket construction", function() {
         assert.instanceOf(err, Error)
         assert.equal(err.message, "Too many open file descriptors")
         assert.equal(err.code, "EMFILE")
-        assert.equal(err.errno, 24)
+        assert.typeOf(err.errno, "number")
       } finally {
         for (let i = 0; i < n; i++) {
           if (sockets[i]) sockets[i].close()

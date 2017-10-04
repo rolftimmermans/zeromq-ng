@@ -1,4 +1,5 @@
 const zmq = require("../..")
+const semver = require("semver")
 const weak = require("weak")
 const {assert} = require("chai")
 const {uniqAddress} = require("./helpers")
@@ -18,6 +19,10 @@ for (const proto of ["inproc", "ipc", "tcp"]) {
 
     describe("when not connected", function() {
       beforeEach(async function() {
+        /* ZMQ < 4.1 fails with assertion errors with inproc.
+           See: https://github.com/zeromq/libzmq/pull/2123/files */
+        if (proto == "inproc" && semver.satisfies(zmq.version, "< 4.1")) this.skip()
+
         this.sockA.sendHighWaterMark = 1
         await this.sockA.connect(uniqAddress(proto))
       })
@@ -46,7 +51,7 @@ for (const proto of ["inproc", "ipc", "tcp"]) {
           assert.instanceOf(err, Error)
           assert.equal(err.message, "Socket temporarily unavailable")
           assert.equal(err.code, "EAGAIN")
-          assert.equal(err.errno, 35)
+          assert.typeOf(err.errno, "number")
         }
       })
 
@@ -227,7 +232,7 @@ for (const proto of ["inproc", "ipc", "tcp"]) {
           assert.instanceOf(err, Error)
           assert.equal(err.message, "Socket temporarily unavailable")
           assert.equal(err.code, "EAGAIN")
-          assert.equal(err.errno, 35)
+          assert.typeOf(err.errno, "number")
         }
       })
 
@@ -299,7 +304,7 @@ for (const proto of ["inproc", "ipc", "tcp"]) {
           assert.instanceOf(err, Error)
           assert.equal(err.message, "Socket is closed")
           assert.equal(err.code, "EBADF")
-          assert.equal(err.errno, 9)
+          assert.typeOf(err.errno, "number")
         }
       })
 
@@ -311,7 +316,7 @@ for (const proto of ["inproc", "ipc", "tcp"]) {
           assert.instanceOf(err, Error)
           assert.equal(err.message, "Socket is closed")
           assert.equal(err.code, "EBADF")
-          assert.equal(err.errno, 9)
+          assert.typeOf(err.errno, "number")
         }
       })
     })

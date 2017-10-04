@@ -1,59 +1,63 @@
-// const zmq = require("../..")
-// const {assert} = require("chai")
-//
-// for (const address of ["inproc://pair", "tcp://127.0.0.1:10001"]) {
-//   describe(`socket pair with ${address.split(":").shift()}`, function() {
-//     beforeEach(function() {
-//       this.sockA = zmq.socket("pair")
-//       this.sockB = zmq.socket("pair")
-//     })
-//
-//     afterEach(function() {
-//       this.sockA.close()
-//       this.sockB.close()
-//     })
-//
-//     describe("send", function() {
-//       it("should deliver messages", function(done) {
-//         /* PAIR  -> foo ->  PAIR
-//            [A]   -> bar ->  [B]
-//                  -> baz ->  responds when received
-//                  -> qux ->
-//                  <- foo <-
-//                  <- bar <-
-//                  <- baz <-
-//                  <- qux <-
-//          */
-//
-//         const messages = ["foo", "bar", "baz", "qux"]
-//         const received = []
-//         let i = 0
-//
-//         this.sockB.on("message", msg => {
-//           assert.instanceOf(msg, Buffer)
-//           this.sockB.send(msg)
-//         })
-//
-//         this.sockA.on("message", msg => {
-//           assert.instanceOf(msg, Buffer)
-//
-//           i++
-//           received.push(msg.toString())
-//
-//           if (i == messages.length) {
-//             assert.deepEqual(received, messages)
-//             done()
-//           }
-//         })
-//
-//         this.sockB.bind(address).then(() => {
-//           this.sockA.connect(address)
-//
-//           for (const msg of messages) {
-//             this.sockA.send(msg)
-//           }
-//         })
-//       })
-//     })
-//   })
-// }
+const zmq = require("../..")
+const {assert} = require("chai")
+const {uniqAddress} = require("./helpers")
+
+for (const proto of ["inproc", "ipc", "tcp"]) {
+  describe(`socket with ${proto} pair/pair`, function() {
+    beforeEach(function() {
+      this.sockA = new zmq.Pair
+      this.sockB = new zmq.Pair
+    })
+
+    afterEach(function() {
+      this.sockA.close()
+      this.sockB.close()
+      gc()
+    })
+
+    describe("send", function() {
+      it("should deliver messages", async function() {
+        /* PAIR  -> foo ->  PAIR
+           [A]   -> bar ->  [B]
+                 -> baz ->  responds when received
+                 -> qux ->
+                 <- foo <-
+                 <- bar <-
+                 <- baz <-
+                 <- qux <-
+         */
+
+        const address = uniqAddress(proto)
+        const messages = ["foo", "bar", "baz", "qux"]
+        const received = []
+        let last = false
+
+        await this.sockA.bind(address)
+        await this.sockB.connect(address)
+
+        const echo = async () => {
+          for await (const msg of this.sockB) {
+            await new Promise(resolve => setTimeout(resolve, 0))
+            await this.sockB.send(msg)
+            if (last) break
+          }
+        }
+
+        const send = async () => {
+          for (const msg of messages) {
+            await this.sockA.send(msg)
+          }
+
+          for await (const msg of this.sockA) {
+            received.push(msg.toString())
+            if (received.length + 1 == messages.length) last = true
+            if (received.length == messages.length) break
+          }
+        }
+
+        await Promise.all([echo(), send()])
+        assert.deepEqual(received, messages)
+      })
+    })
+  })
+}

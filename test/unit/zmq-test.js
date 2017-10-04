@@ -9,13 +9,6 @@ describe("zmq", function() {
   })
 
   describe("capabilities", function() {
-    it("should return library capability", function() {
-      assert.deepEqual(
-        Object.keys(zmq.capability),
-        ["ipc", "pgm", "tipc", "norm", "curve", "gssapi", "draft"]
-      )
-    })
-
     it("should return library capability booleans", function() {
       assert.equal(
         Object.values(zmq.capability).every(c => typeof c == "boolean"),

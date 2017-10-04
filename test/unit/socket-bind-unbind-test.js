@@ -1,10 +1,15 @@
 const zmq = require("../..")
+const semver = require("semver")
 const {assert} = require("chai")
 const {uniqAddress} = require("./helpers")
 
 for (const proto of ["inproc", "ipc", "tcp"]) {
   describe(`socket with ${proto} bind/unbind`, function() {
     beforeEach(function() {
+      /* ZMQ < 4.1 fails with assertion errors with inproc.
+         See: https://github.com/zeromq/libzmq/pull/2123/files */
+      if (proto == "inproc" && semver.satisfies(zmq.version, "< 4.1")) this.skip()
+
       this.sock = new zmq.Dealer
     })
 
@@ -28,7 +33,7 @@ for (const proto of ["inproc", "ipc", "tcp"]) {
           assert.instanceOf(err, Error)
           assert.equal(err.message, "No such endpoint")
           assert.equal(err.code, "ENOENT")
-          assert.equal(err.errno, 2)
+          assert.typeOf(err.errno, "number")
           assert.equal(err.address, address)
         }
       })
@@ -41,7 +46,7 @@ for (const proto of ["inproc", "ipc", "tcp"]) {
           assert.instanceOf(err, Error)
           assert.equal(err.message, "Invalid argument")
           assert.equal(err.code, "EINVAL")
-          assert.equal(err.errno, 22)
+          assert.typeOf(err.errno, "number")
           assert.equal(err.address, "foo-bar")
         }
       })
@@ -54,7 +59,7 @@ for (const proto of ["inproc", "ipc", "tcp"]) {
           assert.instanceOf(err, Error)
           assert.equal(err.message, "Protocol not supported")
           assert.equal(err.code, "EPROTONOSUPPORT")
-          assert.equal(err.errno, 43)
+          assert.equal(err.errno, process.platform == "linux" ? 93 : 43)
           assert.equal(err.address, "foo://bar")
         }
       })
@@ -69,7 +74,7 @@ for (const proto of ["inproc", "ipc", "tcp"]) {
           assert.instanceOf(err, Error)
           assert.equal(err.message, "Socket is blocked by async operation (e.g. bind/unbind)")
           assert.equal(err.code, "EBUSY")
-          assert.equal(err.errno, 16)
+          assert.typeOf(err.errno, "number")
         }
         await promise
       })
@@ -91,7 +96,7 @@ for (const proto of ["inproc", "ipc", "tcp"]) {
           assert.instanceOf(err, Error)
           assert.equal(err.message, "Invalid argument")
           assert.equal(err.code, "EINVAL")
-          assert.equal(err.errno, 22)
+          assert.typeOf(err.errno, "number")
           assert.equal(err.address, "foo-bar")
         }
       })
@@ -104,7 +109,7 @@ for (const proto of ["inproc", "ipc", "tcp"]) {
           assert.instanceOf(err, Error)
           assert.equal(err.message, "Protocol not supported")
           assert.equal(err.code, "EPROTONOSUPPORT")
-          assert.equal(err.errno, 43)
+          assert.equal(err.errno, process.platform == "linux" ? 93 : 43)
           assert.equal(err.address, "foo://bar")
         }
       })
@@ -121,7 +126,7 @@ for (const proto of ["inproc", "ipc", "tcp"]) {
           assert.instanceOf(err, Error)
           assert.equal(err.message, "Socket is blocked by async operation (e.g. bind/unbind)")
           assert.equal(err.code, "EBUSY")
-          assert.equal(err.errno, 16)
+          assert.typeOf(err.errno, "number")
         }
         await promise
       })

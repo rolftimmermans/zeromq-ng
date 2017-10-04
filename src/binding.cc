@@ -22,6 +22,22 @@ Napi::Object init(Napi::Env env, Napi::Object exports) {
         for (auto& option : options) {
             result.Set(option, static_cast<bool>(zmq_has(option)));
         }
+#else
+#if !defined (ZMQ_HAVE_WINDOWS) && !defined (ZMQ_HAVE_OPENVMS)
+        result.Set("ipc", true);
+#endif
+#if defined (ZMQ_HAVE_OPENPGM)
+        result.Set("pgm", true);
+#endif
+#if defined (ZMQ_HAVE_TIPC)
+        result.Set("tipc", true);
+#endif
+#if defined (ZMQ_HAVE_NORM)
+        result.Set("norm", true);
+#endif
+#if defined (ZMQ_HAVE_CURVE)
+        result.Set("curve", true);
+#endif
 #endif
 
         return result;

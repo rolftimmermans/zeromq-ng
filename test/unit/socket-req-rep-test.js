@@ -88,7 +88,7 @@ for (const proto of ["inproc", "ipc", "tcp"]) {
             assert.instanceOf(err, Error)
             assert.equal(err.message, "Operation cannot be accomplished in current state")
             assert.equal(err.code, "EFSM")
-            assert.equal(err.errno, 156384763)
+            assert.typeOf(err.errno, "number")
           }
 
           const [msg] = await this.req.receive()

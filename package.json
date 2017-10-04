@@ -12,6 +12,7 @@
     "benchmark": ">= 0",
     "chai": ">= 4.1",
     "mocha": ">= 4.0",
+    "semver": ">= 0",
     "should": ">= 0",
     "weak": ">= 1.0"
   },
@@ -20,7 +21,8 @@
   },
   "scripts": {
     "test": "node node_modules/node-gyp/bin/node-gyp.js rebuild && node node_modules/mocha/bin/mocha",
-    "bench": "node node_modules/node-gyp/bin/node-gyp.js rebuild && node --use_strict --harmony_async_iteration --expose-gc test/bench/send-only.js"
+    "bench": "node node_modules/node-gyp/bin/node-gyp.js rebuild && node --use_strict --harmony_async_iteration --expose-gc test/bench/send-only.js",
+    "fmt": "find src -path -prune -o \\( -name \"*.cc\" -or -name \"*.h\" \\) -exec clang-format -i -style=file {} \\;"
   },
   "keywords": [
     "zeromq",

@@ -8,9 +8,9 @@ describe("context options", function() {
 
   it("should set and get bool socket option", function() {
     const context = new zmq.Context
-    assert.equal(context.blocky, true)
-    context.blocky = false
-    assert.equal(context.blocky, false)
+    assert.equal(context.ipv6, false)
+    context.ipv6 = true
+    assert.equal(context.ipv6, true)
   })
 
   it("should set and get int socket option", function() {
