@@ -351,7 +351,7 @@ namespace zmq {
             msg = info[0].As<Napi::Array>();
         } else {
             msg = Napi::Array::New(Env(), 1);
-            msg.Set(static_cast<int32_t>(0), info[0]);
+            msg.Set(static_cast<uint32_t>(0), info[0]);
         }
 
         if (send_timeout == 0 || HasEvents(ZMQ_POLLOUT)) {
