@@ -57,8 +57,8 @@ namespace zmq {
         force_inline void Receive(const Napi::Promise::Resolver& resolver);
 
         Napi::ObjectReference context;
-        void* socket = nullptr;
         Poller poller;
+        void* socket = nullptr;
 
         int64_t send_timeout = -1;
         int64_t receive_timeout = -1;

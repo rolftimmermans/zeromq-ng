@@ -20,8 +20,8 @@
     "node": ">= 8.6"
   },
   "scripts": {
-    "test": "node node_modules/node-gyp/bin/node-gyp.js rebuild && node node_modules/mocha/bin/mocha",
-    "bench": "node node_modules/node-gyp/bin/node-gyp.js rebuild && node --use_strict --harmony_async_iteration --expose-gc test/bench/send-only.js",
+    "test": "node node_modules/node-gyp/bin/node-gyp.js rebuild --debug --verbose && ZMQ_BUILD=Debug node node_modules/mocha/bin/mocha",
+    "bench": "node node_modules/node-gyp/bin/node-gyp.js rebuild --release --verbose && node --use_strict --harmony_async_iteration --expose-gc test/bench/send-only.js",
     "fmt": "find src -path -prune -o \\( -name \"*.cc\" -or -name \"*.h\" \\) -exec clang-format -i -style=file {} \\;"
   },
   "keywords": [

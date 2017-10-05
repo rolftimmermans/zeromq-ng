@@ -2,6 +2,7 @@
   'variables': {
     'zmq_external%': 'true',
   },
+
   'targets': [
     {
       'target_name': 'zeromq',
@@ -12,41 +13,20 @@
       ],
 
       'include_dirs': ["<!@(node -p \"require('node-addon-api').include\")"],
-      'dependencies': ["<!(node -p \"require('node-addon-api').gyp\")"],
-      'defines': [ 'NAPI_DISABLE_CPP_EXCEPTIONS' ],
+      'defines': ['NAPI_DISABLE_CPP_EXCEPTIONS'],
 
       'conditions': [
-        ['OS != "win"', {
-          'cflags_cc+': [
-            '-std=c++11',
-            '-flto',
-            '-Wall', '-Wextra',
-            '-Wno-unused-parameter',
-            '-Wno-missing-field-initializers'
-          ],
-        }],
-
-        ['OS == "mac"', {
-          'xcode_settings': {
-            'LLVM_LTO': 'YES',
-            'CLANG_CXX_LIBRARY': 'libc++',
-            'MACOSX_DEPLOYMENT_TARGET': '10.9',
-            'OTHER_CPLUSPLUSFLAGS': [
-              '-std=c++11',
-              '-flto',
-              '-Wall', '-Wextra',
-              '-Wno-unused-parameter',
-              '-Wno-missing-field-initializers'
-            ],
-          },
-        }],
-
         ["zmq_external == 'true'", {
           'link_settings': {
             'libraries': ['-lzmq'],
           },
         }, {
           'conditions': [
+            ['OS == "mac" or OS == "linux" or OS == "freebsd" or OS == "openbsd" or OS == "solaris"', {
+              'libraries': ['<(PRODUCT_DIR)/../../zmq/lib/libzmq.a'],
+              'include_dirs': ['<(PRODUCT_DIR)/../../zmq/include'],
+            }],
+
             ['OS == "win"', {
               'msbuild_toolset': 'v140',
               'defines': ['ZMQ_STATIC'],
@@ -57,20 +37,63 @@
                 'iphlpapi',
               ],
             }],
-
-            ['OS == "mac"', {
-              'xcode_settings': {},
-              'libraries': ['<(PRODUCT_DIR)/../../zmq/lib/libzmq.a'],
-              'include_dirs': ['<(PRODUCT_DIR)/../../zmq/include'],
-            }],
-
-            ['OS != "win" and OS != "mac"', {
-              'libraries': ['<(PRODUCT_DIR)/../../zmq/lib/libzmq.a'],
-              'include_dirs': ['<(PRODUCT_DIR)/../../zmq/include'],
-            }],
           ],
         }],
       ],
     }
-  ]
+  ],
+
+  'target_defaults': {
+
+    'configurations': {
+      'Debug': {
+        'conditions': [
+          ['OS == "linux" or OS == "freebsd" or OS == "openbsd" or OS == "solaris"', {
+            'cflags_cc+': [
+              '-std=c++11',
+              '-Wextra',
+              '-Wno-unused-parameter',
+              '-Wno-missing-field-initializers',
+            ],
+          }],
+
+          ['OS == "mac"', {
+            'xcode_settings': {
+              # https://pewpewthespells.com/blog/buildsettings.html
+              'CLANG_CXX_LIBRARY': 'libc++',
+              'CLANG_CXX_LANGUAGE_STANDARD': 'c++11',
+              'MACOSX_DEPLOYMENT_TARGET': '10.9',
+              'WARNING_CFLAGS': [
+                '-Wextra',
+                '-Wno-unused-parameter',
+                '-Wno-missing-field-initializers',
+              ],
+            },
+          }],
+        ],
+      },
+
+      'Release': {
+        'conditions': [
+          ['OS == "linux" or OS == "freebsd" or OS == "openbsd" or OS == "solaris"', {
+            'cflags_cc+': [
+              '-std=c++11',
+              '-flto',
+            ],
+          }],
+
+          ['OS == "mac"', {
+            # https://pewpewthespells.com/blog/buildsettings.html
+            'xcode_settings': {
+              'CLANG_CXX_LIBRARY': 'libc++',
+              'CLANG_CXX_LANGUAGE_STANDARD': 'c++11',
+              'MACOSX_DEPLOYMENT_TARGET': '10.9',
+              'LLVM_LTO': 'YES',
+              'GCC_OPTIMIZATION_LEVEL': '3',
+            },
+          }],
+        ],
+      },
+    },
+  },
 }

@@ -7,16 +7,17 @@ namespace zmq {
     /* Starts a UV poller with an attached timeout. The poller can be started
        and stopped multiple times. */
     class Poller {
-        int32_t events{0};
         UvHandle<uv_poll_t> poll;
 
         UvHandle<uv_timer_t> readable_timer;
-        UvHandle<uv_timer_t> writable_timer;
-
         std::function<bool()> readable_validate;
-        std::function<bool()> writable_validate;
         std::function<void()> readable_callback;
+
+        UvHandle<uv_timer_t> writable_timer;
+        std::function<bool()> writable_validate;
         std::function<void()> writable_callback;
+
+        int32_t events{0};
 
     public:
         ~Poller() {
