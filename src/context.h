@@ -8,6 +8,7 @@ namespace zmq {
 
     class Context : public Napi::ObjectWrap<Context> {
     public:
+        static Napi::FunctionReference Constructor;
         static void Initialize(Napi::Env& env, Napi::Object& exports);
 
         Context(const Napi::CallbackInfo& info);
@@ -28,5 +29,6 @@ namespace zmq {
         void* context = nullptr;
 
         friend class Socket;
+        friend class Observer;
     };
 }

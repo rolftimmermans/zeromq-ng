@@ -5,8 +5,8 @@ const {uniqAddress} = require("./helpers")
 for (const proto of ["inproc", "ipc", "tcp"]) {
   describe(`socket with ${proto} pair/pair`, function() {
     beforeEach(function() {
-      this.sockA = new zmq.Pair
-      this.sockB = new zmq.Pair
+      this.sockA = new zmq.Dealer
+      this.sockB = new zmq.Dealer
     })
 
     afterEach(function() {

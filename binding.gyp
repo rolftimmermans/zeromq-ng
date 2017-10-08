@@ -9,6 +9,7 @@
       'sources': [
         'src/binding.cc',
         'src/context.cc',
+        'src/observer.cc',
         'src/socket.cc',
       ],
 

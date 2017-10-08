@@ -29,8 +29,8 @@ namespace zmq {
         /* Initialize the poller with the given file descriptor. FD should be
            ZMQ style edge-triggered, with READABLE state indicating that ANY
            event may be present on the corresponding ZMQ socket. */
-        inline uint32_t Init(uv_os_sock_t& fd) {
-            uint32_t err;
+        inline int32_t Init(uv_os_sock_t& fd) {
+            int32_t err;
 
             poll->data = this;
             err = uv_poll_init_socket(uv_default_loop(), poll, fd);

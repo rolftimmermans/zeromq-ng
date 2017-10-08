@@ -1,6 +1,7 @@
 /* Copyright (c) 2017 Rolf Timmermans */
 #include "socket.h"
 #include "context.h"
+#include "observer.h"
 
 #include "inline/work.h"
 #include "inline/incoming.h"
@@ -18,6 +19,8 @@ namespace zmq {
         AddressContext(std::string&& address) : address(std::move(address)) {}
     };
 
+    Napi::FunctionReference Socket::Constructor;
+
     Socket::Socket(const Napi::CallbackInfo& info)
       : Napi::ObjectWrap<Socket>(info) {
 
@@ -31,19 +34,19 @@ namespace zmq {
         if (info[1].IsObject()) {
             auto options = info[1].As<Napi::Object>();
             if (options.Has("context")) {
-                context.Reset(options.Get("context").As<Napi::Object>(), 1);
+                context_ref.Reset(options.Get("context").As<Napi::Object>(), 1);
                 options.Delete("context");
             } else {
-                context.Reset(GlobalContext.Value(), 1);
+                context_ref.Reset(GlobalContext.Value(), 1);
             }
         } else {
-            context.Reset(GlobalContext.Value(), 1);
+            context_ref.Reset(GlobalContext.Value(), 1);
         }
 
-        auto ctxobj = Context::Unwrap(context.Value());
+        auto context = Context::Unwrap(context_ref.Value());
         if (Env().IsExceptionPending()) return;
 
-        socket = zmq_socket(ctxobj->context, type);
+        socket = zmq_socket(context->context, type);
         if (socket == nullptr) {
             ErrnoException(Env(), zmq_errno()).ThrowAsJavaScriptException();
             return;
@@ -56,9 +59,8 @@ namespace zmq {
             return;
         }
 
-        auto err = poller.Init(fd);
-        if (err != 0) {
-            ErrnoException(Env(), err).ThrowAsJavaScriptException();
+        if (poller.Init(fd) < 0) { // FIXME
+            ErrnoException(Env(), errno).ThrowAsJavaScriptException();
             return;
         }
 
@@ -148,7 +150,7 @@ namespace zmq {
         return events & requested;
     }
 
-    bool Socket::Close() {
+    void Socket::Close() {
         if (socket != nullptr) {
             Napi::HandleScope scope(Env());
 
@@ -160,18 +162,17 @@ namespace zmq {
                 endpoints = 0;
             }
 
-            if (zmq_close(socket) < 0) {
-                return false;
-            }
+            /* Close succeeds unless socket is invalid. */
+            auto err = zmq_close(socket);
+            assert(err == 0);
 
-            /* Release reference to context. */
-            context.Reset();
+            /* Release reference to context and observer. */
+            observer_ref.Reset();
+            context_ref.Reset();
 
-            socket = nullptr;
             state = State::Closed;
+            socket = nullptr;
         }
-
-        return true;
     }
 
     void Socket::Send(const Napi::Promise::Resolver& resolver, const Napi::Array& msg) {
@@ -192,6 +193,7 @@ namespace zmq {
     }
 
     void Socket::Receive(const Napi::Promise::Resolver& resolver) {
+
         auto msg = Napi::Array::New(Env(), 1);
 
         uint32_t i = 0;
@@ -331,9 +333,7 @@ namespace zmq {
         if (!ValidateArguments(info, {})) return;
         if (!ValidateNotBlocked()) return;
 
-        if (!Close()) {
-            ErrnoException(Env(), zmq_errno()).ThrowAsJavaScriptException();
-        }
+        Close();
     }
 
     Napi::Value Socket::Send(const Napi::CallbackInfo& info) {
@@ -351,7 +351,7 @@ namespace zmq {
             msg = info[0].As<Napi::Array>();
         } else {
             msg = Napi::Array::New(Env(), 1);
-            msg.Set(static_cast<uint32_t>(0), info[0]);
+            msg.Set(0u, info[0]);
         }
 
         if (send_timeout == 0 || HasEvents(ZMQ_POLLOUT)) {
@@ -567,27 +567,32 @@ namespace zmq {
         }
     }
 
-    Napi::Value Socket::GetClosed(const Napi::CallbackInfo& info) {
-        if (!ValidateArguments(info, {})) return Env().Undefined();
-        return Napi::Boolean::New(Env(), state == State::Closed);
+    Napi::Value Socket::GetEvents(const Napi::CallbackInfo& info) {
+        /* Reuse the same observer object every time it is accessed. */
+        if (observer_ref.IsEmpty()) {
+            observer_ref.Reset(Observer::Constructor.New({Value()}), 1);
+        }
+
+        return observer_ref.Value();
     }
 
     Napi::Value Socket::GetContext(const Napi::CallbackInfo& info) {
-        if (!ValidateArguments(info, {})) return Env().Undefined();
-        return context.Value();
+        return context_ref.Value();
+    }
+
+    Napi::Value Socket::GetClosed(const Napi::CallbackInfo& info) {
+        return Napi::Boolean::New(Env(), state == State::Closed);
     }
 
     Napi::Value Socket::GetReadable(const Napi::CallbackInfo& info) {
-        if (!ValidateArguments(info, {})) return Env().Undefined();
         return Napi::Boolean::New(Env(), HasEvents(ZMQ_POLLIN));
     }
 
     Napi::Value Socket::GetWritable(const Napi::CallbackInfo& info) {
-        if (!ValidateArguments(info, {})) return Env().Undefined();
         return Napi::Boolean::New(Env(), HasEvents(ZMQ_POLLOUT));
     }
 
-    void Socket::Initialize(Napi::Env env, Napi::Object exports) {
+    void Socket::Initialize(Napi::Env& env, Napi::Object& exports) {
         auto constructor = DefineClass(env, "Socket", {
             InstanceMethod("bind", &Socket::Bind),
             InstanceMethod("unbind", &Socket::Unbind),
@@ -613,12 +618,16 @@ namespace zmq {
             InstanceMethod("getStringOption", &Socket::GetSockOpt<char*>),
             InstanceMethod("setStringOption", &Socket::SetSockOpt<char*>),
 
-            InstanceAccessor("closed", &Socket::GetClosed, nullptr),
+            InstanceAccessor("events", &Socket::GetEvents, nullptr),
             InstanceAccessor("context", &Socket::GetContext, nullptr),
 
+            InstanceAccessor("closed", &Socket::GetClosed, nullptr),
             InstanceAccessor("readable", &Socket::GetReadable, nullptr),
             InstanceAccessor("writable", &Socket::GetWritable, nullptr),
         });
+
+        Constructor = Napi::Persistent(constructor);
+        Constructor.SuppressDestruct();
 
         exports.Set("Socket", constructor);
     }

@@ -13,7 +13,7 @@ describe("exports", function() {
         "global",
 
         /* Generic constructors. */
-        "Context", "Socket",
+        "Context", "Socket", "Observer",
 
         /* Specific socket constructors. */
         "Pair", "Publisher", "Subscriber", "Request", "Response",

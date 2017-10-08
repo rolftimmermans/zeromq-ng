@@ -1,5 +1,6 @@
 /* Copyright (c) 2017 Rolf Timmermans */
 #include "context.h"
+#include "observer.h"
 #include "socket.h"
 
 Napi::Object init(Napi::Env env, Napi::Object exports) {
@@ -45,6 +46,7 @@ Napi::Object init(Napi::Env env, Napi::Object exports) {
 
     zmq::Context::Initialize(env, exports);
     zmq::Socket::Initialize(env, exports);
+    zmq::Observer::Initialize(env, exports);
 
     return exports;
 }

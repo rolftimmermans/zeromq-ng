@@ -7,7 +7,8 @@
 namespace zmq {
     class Socket : public Napi::ObjectWrap<Socket> {
     public:
-        static void Initialize(Napi::Env env, Napi::Object exports);
+        static Napi::FunctionReference Constructor;
+        static void Initialize(Napi::Env& env, Napi::Object& exports);
 
         Socket(const Napi::CallbackInfo& info);
         ~Socket();
@@ -36,9 +37,10 @@ namespace zmq {
         template<typename T>
         inline void SetSockOpt(const Napi::CallbackInfo& info);
 
-        inline Napi::Value GetClosed(const Napi::CallbackInfo& info);
+        inline Napi::Value GetEvents(const Napi::CallbackInfo& info);
         inline Napi::Value GetContext(const Napi::CallbackInfo& info);
 
+        inline Napi::Value GetClosed(const Napi::CallbackInfo& info);
         inline Napi::Value GetReadable(const Napi::CallbackInfo& info);
         inline Napi::Value GetWritable(const Napi::CallbackInfo& info);
 
@@ -48,7 +50,7 @@ namespace zmq {
         inline bool ValidateNotBlocked() const;
         inline bool HasEvents(int32_t events);
 
-        inline bool Close();
+        inline void Close();
 
         /* Send/receive are usually in a hot path and will benefit slightly
            from being inlined. They are used in more than one location and are
@@ -56,7 +58,8 @@ namespace zmq {
         force_inline void Send(const Napi::Promise::Resolver& resolver, const Napi::Array& msg);
         force_inline void Receive(const Napi::Promise::Resolver& resolver);
 
-        Napi::ObjectReference context;
+        Napi::ObjectReference context_ref;
+        Napi::ObjectReference observer_ref;
         Poller poller;
         void* socket = nullptr;
 
@@ -65,5 +68,7 @@ namespace zmq {
         uint32_t endpoints = 0;
 
         State state = State::Open;
+
+        friend class Observer;
     };
 }

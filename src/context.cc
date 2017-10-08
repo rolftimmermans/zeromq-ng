@@ -6,6 +6,8 @@ namespace zmq {
        closed on process exit. This is the default context. */
     Napi::ObjectReference GlobalContext;
 
+    Napi::FunctionReference Context::Constructor;
+
     Context::Context(const Napi::CallbackInfo& info)
       : Napi::ObjectWrap<Context>(info) {
 
@@ -134,16 +136,19 @@ namespace zmq {
 
         /* Create global context that is closed on process exit. */
         auto global = constructor.New({});
-        exports.Set("global", global);
 
         GlobalContext = Napi::Persistent(global);
         GlobalContext.SuppressDestruct();
 
+        exports.Set("global", global);
+
         node::AtExit([](void*) {
             /* Close global context and release reference. */
-            std::cout << "exit" << std::endl;
             Context::Unwrap(GlobalContext.Value())->Close();
         }, nullptr);
+
+        Constructor = Napi::Persistent(constructor);
+        Constructor.SuppressDestruct();
 
         exports.Set("Context", constructor);
     }
