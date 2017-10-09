@@ -13,6 +13,9 @@ addons:
     packages:
     - libzmq3-dev
 
+before_install:
+- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install zeromq; fi
+
 deploy:
   provider: script
   skip_cleanup: true
