@@ -7,6 +7,8 @@ const {uniqAddress} = require("./helpers")
 for (const proto of ["inproc", "ipc", "tcp"]) {
   describe(`socket with ${proto} curve send/receive`, function() {
     beforeEach(function() {
+      if (!zmq.capability.curve) this.skip()
+
       const serverKeypair = zmq.curveKeypair()
       const clientKeypair = zmq.curveKeypair()
 
