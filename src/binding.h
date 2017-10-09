@@ -2,10 +2,14 @@
 #pragma once
 
 #include <napi.h>
+
 #include <zmq.h>
+#if ZMQ_VERSION < ZMQ_MAKE_VERSION(4,1,0)
+#   include <zmq_utils.h>
+#endif
+
 #include <node.h>
 #include <cassert>
-#include <iostream>
 
 #include "inline/arguments.h"
 #include "inline/error.h"
