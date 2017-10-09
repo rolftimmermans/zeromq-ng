@@ -1,3 +1,15 @@
+# ZeroMQ.js Next Generation
+
+## Installation
+
+Install ZeroMQ.js NG with the following:
+
+`npm install zeromq-nq`
+
+To use link dynamically with your system's libzmq (if it has been installed and development headers are available):
+
+`npm install zeromq-nq --zmq-dynamic`
+
 ## Examples using ZeroMQ
 
 ### Push/Pull
@@ -8,7 +20,7 @@ socket and how a worker pulls information from the socket.
 **producer.js**
 
 ```js
-const zmq = require("zeromq")
+const zmq = require("zeromq-ng")
 
 async function run() {
   const sock = new zmq.Push
@@ -28,7 +40,7 @@ run()
 **worker.js**
 
 ```js
-const zmq = require("zeromq")
+const zmq = require("zeromq-ng")
 
 async function run() {
   const sock = new zmq.Pull
@@ -53,7 +65,7 @@ Publisher/Subscriber, application.
 **publisher.js**
 
 ```js
-const zmq = require("zeromq")
+const zmq = require("zeromq-ng")
 
 async function run() {
   const sock = new zmq.Publisher
@@ -74,7 +86,7 @@ run()
 **subscriber.js**
 
 ```js
-const zmq = require("zeromq")
+const zmq = require("zeromq-ng")
 
 async function run() {
   const sock = new zmq.Subscriber

@@ -1,9 +1,13 @@
 {
-  "name": "zeromq",
+  "name": "zeromq-ng",
   "version": "5.0.0",
-  "description": "ZeroMQ bindings for Node.js",
+  "description": "Next-generation ZeroMQ bindings for Node.js",
   "main": "lib/index",
   "gypfile": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rolftimmermans/zeromq-ng.git"
+  },
   "dependencies": {
     "node-addon-api": "rolftimmermans/node-addon-api#master",
     "node-gyp": ">= 3.6.2",
