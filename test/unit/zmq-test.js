@@ -41,9 +41,11 @@ describe("zmq", function() {
   })
 
   describe("curve keypair", function() {
-    it("should return keypair", function() {
+    before(function() {
       if (!zmq.capability.curve) this.skip()
+    })
 
+    it("should return keypair", function() {
       const {publicKey, secretKey} = zmq.curveKeypair()
       assert.match(publicKey, /^[\x20-\x7F]{40}$/)
       assert.match(secretKey, /^[\x20-\x7F]{40}$/)
