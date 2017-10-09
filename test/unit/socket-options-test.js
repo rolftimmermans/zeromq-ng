@@ -2,7 +2,16 @@ const zmq = require("../..")
 const {assert} = require("chai")
 
 describe("socket options", function() {
+  beforeEach(function() {
+    this.warningListeners = process.listeners("warning")
+  })
+
   afterEach(function() {
+    process.removeAllListeners("warning")
+    for (const listener of this.warningListeners) {
+      process.on("warning", listener)
+    }
+
     gc()
   })
 
@@ -71,7 +80,9 @@ describe("socket options", function() {
     assert.equal(sock.getInt64Option(22), 0xffffffffffff)
   })
 
-  it.skip("should set and get uint64 socket option", function() {
+  it("should set and get uint64 socket option", function() {
+    process.removeAllListeners("warning")
+
     const sock = new zmq.Dealer
     assert.equal(sock.getUInt64Option(4), 0)
     sock.setUInt64Option(4, 0xffffffffffffffff)
@@ -184,6 +195,22 @@ describe("socket options", function() {
       )
 
       sock.close()
+    })
+
+    it("should be emitted when setting large uint64 socket option", async function() {
+      const warnings = []
+      process.removeAllListeners("warning")
+      process.on("warning", warning => warnings.push(warning))
+
+      const sock = new zmq.Dealer
+      sock.setUInt64Option(4, 0xfffffff7fab7fb)
+      assert.equal(sock.getUInt64Option(4), 0xfffffff7fab7fb)
+
+      await new Promise(process.nextTick)
+      assert.deepEqual(
+        warnings.map(w => w.message),
+        ["Value is larger than Number.MAX_SAFE_INTEGER and may not be rounded accurately"]
+      )
     })
   })
 })

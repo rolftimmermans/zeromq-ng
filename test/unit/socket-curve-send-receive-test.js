@@ -1,6 +1,4 @@
 const zmq = require("../..")
-const semver = require("semver")
-const weak = require("weak")
 const {assert} = require("chai")
 const {uniqAddress} = require("./helpers")
 

@@ -16,6 +16,7 @@
   "devDependencies": {
     "benchmark": ">= 0",
     "chai": ">= 4.1",
+    "eslint": ">= 4.0",
     "mocha": ">= 4.0",
     "prebuild": ">= 6.2.1",
     "semver": ">= 0",
@@ -27,9 +28,8 @@
   },
   "scripts": {
     "install": "prebuild-install || script/build.sh",
-    "test": "script/build.sh --debug --verbose && ZMQ_BUILD=Debug mocha",
-    "bench": "script/build.sh --release --verbose && node --use_strict --harmony_async_iteration --expose-gc test/bench/send-only.js",
-    "fmt": "find src -path -prune -o \\( -name \"*.cc\" -or -name \"*.h\" \\) -exec clang-format -i -style=file {} \\;"
+    "test": "eslint lib && script/fmt.sh && script/build.sh --debug --verbose && ZMQ_BUILD=Debug mocha",
+    "bench": "script/build.sh --verbose && node --use_strict --harmony_async_iteration --expose-gc test/bench/send-only.js"
   },
   "keywords": [
     "zeromq",

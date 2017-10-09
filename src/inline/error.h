@@ -4,52 +4,65 @@
 #include <errno.h>
 
 namespace zmq {
-    static inline const char* ErrnoMessage(int32_t errorno);
-    static inline const char* ErrnoCode(int32_t errorno);
+static inline const char* ErrnoMessage(int32_t errorno);
+static inline const char* ErrnoCode(int32_t errorno);
 
-    /* Generates a process warning message. */
-    static inline void Warn(const Napi::Env& env, const std::string& msg) {
-        auto global = env.Global();
-        auto fn = global.Get("process").As<Napi::Object>().Get("emitWarning").As<Napi::Function>();
-        fn.Call({Napi::String::New(env, msg)});
+/* Generates a process warning message. */
+static inline void Warn(const Napi::Env& env, const std::string& msg) {
+    auto global = env.Global();
+    auto fn = global.Get("process")
+                  .As<Napi::Object>()
+                  .Get("emitWarning")
+                  .As<Napi::Function>();
+    fn.Call({Napi::String::New(env, msg)});
+}
+
+/* This mostly duplicates node::ErrnoException, but it is not public. */
+static inline Napi::Error ErrnoException(const Napi::Env& env, int32_t error) {
+    Napi::HandleScope scope(env);
+    auto exception = Napi::Error::New(env, ErrnoMessage(error));
+    exception.Set("errno", Napi::Number::New(env, error));
+    exception.Set("code", Napi::String::New(env, ErrnoCode(error)));
+    return exception;
+}
+
+static inline Napi::Error ErrnoException(
+    const Napi::Env& env, int32_t error, const std::string& address) {
+    auto exception = ErrnoException(env, error);
+    exception.Set("address", Napi::String::New(env, address));
+    return exception;
+}
+
+/* Convert errno to human readable error message. */
+static inline const char* ErrnoMessage(int32_t errorno) {
+    /* Clarify a few confusing default messages; otherwise rely on zmq. */
+    switch (errorno) {
+        case EFAULT:
+            return "Context is closed";
+        case EAGAIN:
+            return "Socket temporarily unavailable";
+        case EMFILE:
+            return "Too many open file descriptors";
+        case ENOENT:
+            return "No such endpoint";
+        case EBUSY:
+            return "Socket is blocked by async operation (e.g. bind/unbind)";
+        case EBADF:
+            return "Socket is closed";
+        default:
+            return zmq_strerror(errorno);
     }
+}
 
-    /* This mostly duplicates node::ErrnoException, but it is not public. */
-    static inline Napi::Error ErrnoException(const Napi::Env& env, int32_t error) {
-        Napi::HandleScope scope(env);
-        auto exception = Napi::Error::New(env, ErrnoMessage(error));
-        exception.Set("errno", Napi::Number::New(env, error));
-        exception.Set("code", Napi::String::New(env, ErrnoCode(error)));
-        return exception;
-    }
+/* This is copied from Node.js; the mapping is not in a public API. */
+/* Copyright Node.js contributors. All rights reserved. */
+static inline const char* ErrnoCode(int32_t errorno) {
+#define ERRNO_CASE(e)                                                            \
+    case e:                                                                      \
+        return #e;
 
-    static inline Napi::Error ErrnoException(const Napi::Env& env, int32_t error, const std::string& address) {
-        auto exception = ErrnoException(env, error);
-        exception.Set("address", Napi::String::New(env, address));
-        return exception;
-    }
-
-    /* Convert errno to human readable error message. */
-    static inline const char* ErrnoMessage(int32_t errorno) {
-        /* Clarify a few confusing default messages; otherwise rely on zmq. */
-        switch (errorno) {
-        case EFAULT: return "Context is closed";
-        case EAGAIN: return "Socket temporarily unavailable";
-        case EMFILE: return "Too many open file descriptors";
-        case ENOENT: return "No such endpoint";
-        case EBUSY:  return "Socket is blocked by async operation (e.g. bind/unbind)";
-        case EBADF:  return "Socket is closed";
-        default: return zmq_strerror(errorno);
-        }
-    }
-
-    /* This is copied from Node.js; the mapping is not in a public API. */
-    /* Copyright Node.js contributors. All rights reserved. */
-    static inline const char* ErrnoCode(int32_t errorno) {
-#define ERRNO_CASE(e)  case e: return #e;
-
-        switch (errorno) {
-    /* ZMQ specific codes. */
+    switch (errorno) {
+/* ZMQ specific codes. */
 #ifdef EFSM
         ERRNO_CASE(EFSM);
 #endif
@@ -66,7 +79,7 @@ namespace zmq {
         ERRNO_CASE(EMTHREAD);
 #endif
 
-    /* Generic codes. */
+/* Generic codes. */
 #ifdef EACCES
         ERRNO_CASE(EACCES);
 #endif
@@ -88,9 +101,9 @@ namespace zmq {
 #endif
 
 #ifdef EWOULDBLOCK
-#   if EAGAIN != EWOULDBLOCK
+#if EAGAIN != EWOULDBLOCK
         ERRNO_CASE(EWOULDBLOCK);
-#   endif
+#endif
 #endif
 
 #ifdef EALREADY
@@ -258,9 +271,9 @@ namespace zmq {
 #endif
 
 #ifdef ENOLCK
-#   if ENOLINK != ENOLCK
+#if ENOLINK != ENOLCK
         ERRNO_CASE(ENOLCK);
-#   endif
+#endif
 #endif
 
 #ifdef ENOMEM
@@ -300,9 +313,9 @@ namespace zmq {
 #endif
 
 #ifdef ENOTEMPTY
-#   if ENOTEMPTY != EEXIST
+#if ENOTEMPTY != EEXIST
         ERRNO_CASE(ENOTEMPTY);
-#   endif
+#endif
 #endif
 
 #ifdef ENOTSOCK
@@ -312,9 +325,9 @@ namespace zmq {
 #ifdef ENOTSUP
         ERRNO_CASE(ENOTSUP);
 #else
-#   ifdef EOPNOTSUPP
+#ifdef EOPNOTSUPP
         ERRNO_CASE(EOPNOTSUPP);
-#   endif
+#endif
 #endif
 
 #ifdef ENOTTY
@@ -385,7 +398,8 @@ namespace zmq {
         ERRNO_CASE(EXDEV);
 #endif
 
-        default: return "";
-        }
+        default:
+            return "";
     }
+}
 }
