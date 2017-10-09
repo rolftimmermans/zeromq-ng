@@ -3,8 +3,8 @@
 #include "observer.h"
 #include "socket.h"
 
-Napi::Object init(Napi::Env env, Napi::Object exports) {
-    exports.Set("version", [&]() {
+namespace zmq {
+    static inline Napi::String Version(Napi::Env& env) {
         int32_t major, minor, patch;
         zmq_version(&major, &minor, &patch);
 
@@ -13,9 +13,9 @@ Napi::Object init(Napi::Env env, Napi::Object exports) {
             std::to_string(minor) + "." +
             std::to_string(patch)
         );
-    }());
+    }
 
-    exports.Set("capability", [&]() {
+    static inline Napi::Object Capabilities(Napi::Env& env) {
         auto result = Napi::Object::New(env);
 
 #ifdef ZMQ_HAS_CAPABILITIES
@@ -24,25 +24,45 @@ Napi::Object init(Napi::Env env, Napi::Object exports) {
             result.Set(option, static_cast<bool>(zmq_has(option)));
         }
 #else
-#if !defined (ZMQ_HAVE_WINDOWS) && !defined (ZMQ_HAVE_OPENVMS)
+#   if !defined (ZMQ_HAVE_WINDOWS) && !defined (ZMQ_HAVE_OPENVMS)
         result.Set("ipc", true);
-#endif
-#if defined (ZMQ_HAVE_OPENPGM)
+#   endif
+#   if defined (ZMQ_HAVE_OPENPGM)
         result.Set("pgm", true);
-#endif
-#if defined (ZMQ_HAVE_TIPC)
+#   endif
+#   if defined (ZMQ_HAVE_TIPC)
         result.Set("tipc", true);
-#endif
-#if defined (ZMQ_HAVE_NORM)
+#   endif
+#   if defined (ZMQ_HAVE_NORM)
         result.Set("norm", true);
-#endif
-#if defined (ZMQ_HAVE_CURVE)
+#   endif
+#   if defined (ZMQ_HAVE_CURVE)
         result.Set("curve", true);
-#endif
+#   endif
 #endif
 
         return result;
-    }());
+    }
+
+    static inline Napi::Value CurveKeypair(const Napi::CallbackInfo& info) {
+        char public_key[41];
+        char secret_key[41];
+        if (zmq_curve_keypair(public_key, secret_key) < 0) {
+            ErrnoException(info.Env(), zmq_errno()).ThrowAsJavaScriptException();
+            return info.Env().Undefined();
+        }
+
+        auto result = Napi::Object::New(info.Env());
+        result["publicKey"] = Napi::String::New(info.Env(), public_key);
+        result["secretKey"] = Napi::String::New(info.Env(), secret_key);
+        return result;
+    }
+}
+
+Napi::Object init(Napi::Env env, Napi::Object exports) {
+    exports.Set("version", zmq::Version(env));
+    exports.Set("capability", zmq::Capabilities(env));
+    exports.Set("curveKeypair", Napi::Function::New(env, zmq::CurveKeypair));
 
     zmq::Context::Initialize(env, exports);
     zmq::Socket::Initialize(env, exports);

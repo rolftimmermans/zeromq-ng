@@ -46,343 +46,344 @@ namespace zmq {
     /* This is copied from Node.js; the mapping is not in a public API. */
     /* Copyright Node.js contributors. All rights reserved. */
     static inline const char* ErrnoCode(int32_t errorno) {
-    #define ERRNO_CASE(e)  case e: return #e;
+#define ERRNO_CASE(e)  case e: return #e;
+
         switch (errorno) {
     /* ZMQ specific codes. */
-    #ifdef EFSM
+#ifdef EFSM
         ERRNO_CASE(EFSM);
-    #endif
+#endif
 
-    #ifdef ENOCOMPATPROTO
+#ifdef ENOCOMPATPROTO
         ERRNO_CASE(ENOCOMPATPROTO);
-    #endif
+#endif
 
-    #ifdef ETERM
+#ifdef ETERM
         ERRNO_CASE(ETERM);
-    #endif
+#endif
 
-    #ifdef EMTHREAD
+#ifdef EMTHREAD
         ERRNO_CASE(EMTHREAD);
-    #endif
+#endif
 
     /* Generic codes. */
-    #ifdef EACCES
+#ifdef EACCES
         ERRNO_CASE(EACCES);
-    #endif
+#endif
 
-    #ifdef EADDRINUSE
+#ifdef EADDRINUSE
         ERRNO_CASE(EADDRINUSE);
-    #endif
+#endif
 
-    #ifdef EADDRNOTAVAIL
+#ifdef EADDRNOTAVAIL
         ERRNO_CASE(EADDRNOTAVAIL);
-    #endif
+#endif
 
-    #ifdef EAFNOSUPPORT
+#ifdef EAFNOSUPPORT
         ERRNO_CASE(EAFNOSUPPORT);
-    #endif
+#endif
 
-    #ifdef EAGAIN
+#ifdef EAGAIN
         ERRNO_CASE(EAGAIN);
-    #endif
+#endif
 
-    #ifdef EWOULDBLOCK
-    # if EAGAIN != EWOULDBLOCK
+#ifdef EWOULDBLOCK
+#   if EAGAIN != EWOULDBLOCK
         ERRNO_CASE(EWOULDBLOCK);
-    # endif
-    #endif
+#   endif
+#endif
 
-    #ifdef EALREADY
+#ifdef EALREADY
         ERRNO_CASE(EALREADY);
-    #endif
+#endif
 
-    #ifdef EBADF
+#ifdef EBADF
         ERRNO_CASE(EBADF);
-    #endif
+#endif
 
-    #ifdef EBADMSG
+#ifdef EBADMSG
         ERRNO_CASE(EBADMSG);
-    #endif
+#endif
 
-    #ifdef EBUSY
+#ifdef EBUSY
         ERRNO_CASE(EBUSY);
-    #endif
+#endif
 
-    #ifdef ECANCELED
+#ifdef ECANCELED
         ERRNO_CASE(ECANCELED);
-    #endif
+#endif
 
-    #ifdef ECHILD
+#ifdef ECHILD
         ERRNO_CASE(ECHILD);
-    #endif
+#endif
 
-    #ifdef ECONNABORTED
+#ifdef ECONNABORTED
         ERRNO_CASE(ECONNABORTED);
-    #endif
+#endif
 
-    #ifdef ECONNREFUSED
+#ifdef ECONNREFUSED
         ERRNO_CASE(ECONNREFUSED);
-    #endif
+#endif
 
-    #ifdef ECONNRESET
+#ifdef ECONNRESET
         ERRNO_CASE(ECONNRESET);
-    #endif
+#endif
 
-    #ifdef EDEADLK
+#ifdef EDEADLK
         ERRNO_CASE(EDEADLK);
-    #endif
+#endif
 
-    #ifdef EDESTADDRREQ
+#ifdef EDESTADDRREQ
         ERRNO_CASE(EDESTADDRREQ);
-    #endif
+#endif
 
-    #ifdef EDOM
+#ifdef EDOM
         ERRNO_CASE(EDOM);
-    #endif
+#endif
 
-    #ifdef EDQUOT
+#ifdef EDQUOT
         ERRNO_CASE(EDQUOT);
-    #endif
+#endif
 
-    #ifdef EEXIST
+#ifdef EEXIST
         ERRNO_CASE(EEXIST);
-    #endif
+#endif
 
-    #ifdef EFAULT
+#ifdef EFAULT
         ERRNO_CASE(EFAULT);
-    #endif
+#endif
 
-    #ifdef EFBIG
+#ifdef EFBIG
         ERRNO_CASE(EFBIG);
-    #endif
+#endif
 
-    #ifdef EHOSTUNREACH
+#ifdef EHOSTUNREACH
         ERRNO_CASE(EHOSTUNREACH);
-    #endif
+#endif
 
-    #ifdef EIDRM
+#ifdef EIDRM
         ERRNO_CASE(EIDRM);
-    #endif
+#endif
 
-    #ifdef EILSEQ
+#ifdef EILSEQ
         ERRNO_CASE(EILSEQ);
-    #endif
+#endif
 
-    #ifdef EINPROGRESS
+#ifdef EINPROGRESS
         ERRNO_CASE(EINPROGRESS);
-    #endif
+#endif
 
-    #ifdef EINTR
+#ifdef EINTR
         ERRNO_CASE(EINTR);
-    #endif
+#endif
 
-    #ifdef EINVAL
+#ifdef EINVAL
         ERRNO_CASE(EINVAL);
-    #endif
+#endif
 
-    #ifdef EIO
+#ifdef EIO
         ERRNO_CASE(EIO);
-    #endif
+#endif
 
-    #ifdef EISCONN
+#ifdef EISCONN
         ERRNO_CASE(EISCONN);
-    #endif
+#endif
 
-    #ifdef EISDIR
+#ifdef EISDIR
         ERRNO_CASE(EISDIR);
-    #endif
+#endif
 
-    #ifdef ELOOP
+#ifdef ELOOP
         ERRNO_CASE(ELOOP);
-    #endif
+#endif
 
-    #ifdef EMFILE
+#ifdef EMFILE
         ERRNO_CASE(EMFILE);
-    #endif
+#endif
 
-    #ifdef EMLINK
+#ifdef EMLINK
         ERRNO_CASE(EMLINK);
-    #endif
+#endif
 
-    #ifdef EMSGSIZE
+#ifdef EMSGSIZE
         ERRNO_CASE(EMSGSIZE);
-    #endif
+#endif
 
-    #ifdef EMULTIHOP
+#ifdef EMULTIHOP
         ERRNO_CASE(EMULTIHOP);
-    #endif
+#endif
 
-    #ifdef ENAMETOOLONG
+#ifdef ENAMETOOLONG
         ERRNO_CASE(ENAMETOOLONG);
-    #endif
+#endif
 
-    #ifdef ENETDOWN
+#ifdef ENETDOWN
         ERRNO_CASE(ENETDOWN);
-    #endif
+#endif
 
-    #ifdef ENETRESET
+#ifdef ENETRESET
         ERRNO_CASE(ENETRESET);
-    #endif
+#endif
 
-    #ifdef ENETUNREACH
+#ifdef ENETUNREACH
         ERRNO_CASE(ENETUNREACH);
-    #endif
+#endif
 
-    #ifdef ENFILE
+#ifdef ENFILE
         ERRNO_CASE(ENFILE);
-    #endif
+#endif
 
-    #ifdef ENOBUFS
+#ifdef ENOBUFS
         ERRNO_CASE(ENOBUFS);
-    #endif
+#endif
 
-    #ifdef ENODATA
+#ifdef ENODATA
         ERRNO_CASE(ENODATA);
-    #endif
+#endif
 
-    #ifdef ENODEV
+#ifdef ENODEV
         ERRNO_CASE(ENODEV);
-    #endif
+#endif
 
-    #ifdef ENOENT
+#ifdef ENOENT
         ERRNO_CASE(ENOENT);
-    #endif
+#endif
 
-    #ifdef ENOEXEC
+#ifdef ENOEXEC
         ERRNO_CASE(ENOEXEC);
-    #endif
+#endif
 
-    #ifdef ENOLINK
+#ifdef ENOLINK
         ERRNO_CASE(ENOLINK);
-    #endif
+#endif
 
-    #ifdef ENOLCK
-    # if ENOLINK != ENOLCK
+#ifdef ENOLCK
+#   if ENOLINK != ENOLCK
         ERRNO_CASE(ENOLCK);
-    # endif
-    #endif
+#   endif
+#endif
 
-    #ifdef ENOMEM
+#ifdef ENOMEM
         ERRNO_CASE(ENOMEM);
-    #endif
+#endif
 
-    #ifdef ENOMSG
+#ifdef ENOMSG
         ERRNO_CASE(ENOMSG);
-    #endif
+#endif
 
-    #ifdef ENOPROTOOPT
+#ifdef ENOPROTOOPT
         ERRNO_CASE(ENOPROTOOPT);
-    #endif
+#endif
 
-    #ifdef ENOSPC
+#ifdef ENOSPC
         ERRNO_CASE(ENOSPC);
-    #endif
+#endif
 
-    #ifdef ENOSR
+#ifdef ENOSR
         ERRNO_CASE(ENOSR);
-    #endif
+#endif
 
-    #ifdef ENOSTR
+#ifdef ENOSTR
         ERRNO_CASE(ENOSTR);
-    #endif
+#endif
 
-    #ifdef ENOSYS
+#ifdef ENOSYS
         ERRNO_CASE(ENOSYS);
-    #endif
+#endif
 
-    #ifdef ENOTCONN
+#ifdef ENOTCONN
         ERRNO_CASE(ENOTCONN);
-    #endif
+#endif
 
-    #ifdef ENOTDIR
+#ifdef ENOTDIR
         ERRNO_CASE(ENOTDIR);
-    #endif
+#endif
 
-    #ifdef ENOTEMPTY
-    # if ENOTEMPTY != EEXIST
+#ifdef ENOTEMPTY
+#   if ENOTEMPTY != EEXIST
         ERRNO_CASE(ENOTEMPTY);
-    # endif
-    #endif
+#   endif
+#endif
 
-    #ifdef ENOTSOCK
+#ifdef ENOTSOCK
         ERRNO_CASE(ENOTSOCK);
-    #endif
+#endif
 
-    #ifdef ENOTSUP
+#ifdef ENOTSUP
         ERRNO_CASE(ENOTSUP);
-    #else
-    # ifdef EOPNOTSUPP
+#else
+#   ifdef EOPNOTSUPP
         ERRNO_CASE(EOPNOTSUPP);
-    # endif
-    #endif
+#   endif
+#endif
 
-    #ifdef ENOTTY
+#ifdef ENOTTY
         ERRNO_CASE(ENOTTY);
-    #endif
+#endif
 
-    #ifdef ENXIO
+#ifdef ENXIO
         ERRNO_CASE(ENXIO);
-    #endif
+#endif
 
-    #ifdef EOVERFLOW
+#ifdef EOVERFLOW
         ERRNO_CASE(EOVERFLOW);
-    #endif
+#endif
 
-    #ifdef EPERM
+#ifdef EPERM
         ERRNO_CASE(EPERM);
-    #endif
+#endif
 
-    #ifdef EPIPE
+#ifdef EPIPE
         ERRNO_CASE(EPIPE);
-    #endif
+#endif
 
-    #ifdef EPROTO
+#ifdef EPROTO
         ERRNO_CASE(EPROTO);
-    #endif
+#endif
 
-    #ifdef EPROTONOSUPPORT
+#ifdef EPROTONOSUPPORT
         ERRNO_CASE(EPROTONOSUPPORT);
-    #endif
+#endif
 
-    #ifdef EPROTOTYPE
+#ifdef EPROTOTYPE
         ERRNO_CASE(EPROTOTYPE);
-    #endif
+#endif
 
-    #ifdef ERANGE
+#ifdef ERANGE
         ERRNO_CASE(ERANGE);
-    #endif
+#endif
 
-    #ifdef EROFS
+#ifdef EROFS
         ERRNO_CASE(EROFS);
-    #endif
+#endif
 
-    #ifdef ESPIPE
+#ifdef ESPIPE
         ERRNO_CASE(ESPIPE);
-    #endif
+#endif
 
-    #ifdef ESRCH
+#ifdef ESRCH
         ERRNO_CASE(ESRCH);
-    #endif
+#endif
 
-    #ifdef ESTALE
+#ifdef ESTALE
         ERRNO_CASE(ESTALE);
-    #endif
+#endif
 
-    #ifdef ETIME
+#ifdef ETIME
         ERRNO_CASE(ETIME);
-    #endif
+#endif
 
-    #ifdef ETIMEDOUT
+#ifdef ETIMEDOUT
         ERRNO_CASE(ETIMEDOUT);
-    #endif
+#endif
 
-    #ifdef ETXTBSY
+#ifdef ETXTBSY
         ERRNO_CASE(ETXTBSY);
-    #endif
+#endif
 
-    #ifdef EXDEV
+#ifdef EXDEV
         ERRNO_CASE(EXDEV);
-    #endif
+#endif
 
         default: return "";
         }

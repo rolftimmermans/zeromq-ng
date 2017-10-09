@@ -70,7 +70,7 @@ namespace zmq {
       : Napi::ObjectWrap<Observer>(info) {
 
         if (!ValidateArguments(info, {
-            Argument{"Socket must be an object", {&Napi::Value::IsObject}},
+            Argument{"Socket must be a socket object", {&Napi::Value::IsObject}},
         })) return;
 
         auto target = Socket::Unwrap(info[0].As<Napi::Object>());
