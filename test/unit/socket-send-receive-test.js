@@ -32,7 +32,7 @@ for (const proto of ["inproc", "ipc", "tcp"]) {
       it("should not block", async function() {
         const start = new Date()
         await this.sockA.send(Buffer.from("foo"))
-        assert.isAtMost(new Date() - start, 2)
+        assert.isAtMost(new Date() - start, 5)
       })
 
       it("should be writable", async function() {
@@ -100,7 +100,7 @@ for (const proto of ["inproc", "ipc", "tcp"]) {
       it("should not block", async function() {
         const start = new Date()
         await this.sockA.send(Buffer.from("foo"))
-        assert.isAtMost(new Date() - start, 2)
+        assert.isAtMost(new Date() - start, 5)
       })
 
       it("should be writable", async function() {

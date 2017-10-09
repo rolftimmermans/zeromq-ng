@@ -24,7 +24,7 @@ for (const proto of ["inproc", "ipc", "tcp"]) {
       it("should not block", async function() {
         const start = new Date()
         await this.sock.connect(uniqAddress(proto))
-        assert.isAtMost(new Date() - start, 2)
+        assert.isAtMost(new Date() - start, 5)
       })
 
       it("should throw error for invalid uri", async function() {
@@ -60,7 +60,7 @@ for (const proto of ["inproc", "ipc", "tcp"]) {
         const start = new Date()
         await this.sock.connect(address)
         await this.sock.disconnect(address)
-        assert.isAtMost(new Date() - start, 2)
+        assert.isAtMost(new Date() - start, 5)
       })
 
       it("should throw error if not connected to endpoint", async function() {
