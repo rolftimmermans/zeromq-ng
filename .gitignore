@@ -1,5 +1,8 @@
 build
+prebuilds
+libzmq
 tmp
 node_modules
 yarn.lock
 yarn-error.log
+package-lock.json

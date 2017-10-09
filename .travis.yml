@@ -1,7 +1,32 @@
 language: node_js
+os:
+- osx
+- linux
 node_js:
 - 8.6
+env:
+- ZMQ_EXTERNAL=true
+- ZMQ_EXTERNAL=false
+
 addons:
   apt:
     packages:
     - libzmq3-dev
+
+matrix:
+  include:
+  - os: linux
+    env:
+    - DEPLOY=true
+  - os: osx
+    env:
+    - DEPLOY=true
+
+deploy:
+  provider: script
+  skip_cleanup: true
+  script:
+  - ./node_modules/prebuild/bin.js --target 8.6.0 --verbose --strip --upload ${GH_TOKEN}
+  on:
+    condition: $DEPLOY = "true"
+    tags: true

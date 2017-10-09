@@ -1,6 +1,6 @@
 {
   'variables': {
-    'zmq_external%': 'true',
+    'zmq_external%': 'false',
   },
 
   'targets': [
@@ -24,8 +24,8 @@
         }, {
           'conditions': [
             ['OS == "mac" or OS == "linux" or OS == "freebsd" or OS == "openbsd" or OS == "solaris"', {
-              'libraries': ['<(PRODUCT_DIR)/../../zmq/lib/libzmq.a'],
-              'include_dirs': ['<(PRODUCT_DIR)/../../zmq/include'],
+              'libraries': ['<(PRODUCT_DIR)/../../libzmq/lib/libzmq.a'],
+              'include_dirs': ['<(PRODUCT_DIR)/../../libzmq/include'],
             }],
 
             ['OS == "win"', {
@@ -50,10 +50,11 @@
       'Debug': {
         'conditions': [
           ['OS == "linux" or OS == "freebsd" or OS == "openbsd" or OS == "solaris"', {
+            'cflags_cc!': [
+              '-std=gnu++0x'
+            ],
             'cflags_cc+': [
               '-std=c++11',
-              '-Wextra',
-              '-Wno-unused-parameter',
               '-Wno-missing-field-initializers',
             ],
           }],
@@ -77,6 +78,9 @@
       'Release': {
         'conditions': [
           ['OS == "linux" or OS == "freebsd" or OS == "openbsd" or OS == "solaris"', {
+            'cflags_cc!': [
+              '-std=gnu++0x'
+            ],
             'cflags_cc+': [
               '-std=c++11',
               '-flto',
