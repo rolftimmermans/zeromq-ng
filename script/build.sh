@@ -1,8 +1,9 @@
 #!/bin/sh
 set -e
 
-if [[ "${npm_config_zmq_external}" == "true" ]]; then
-  echo "Requesting to use external libzmq; skipping build..."
+if [[ "${npm_config_zmq_dynamic}" == "true" ]] || [[ "${ZMQ_DYNAMIC}" == "true" ]]; then
+  echo "Requesting to use dynamically linked libzmq; skipping build..."
+  export ARGS="--zmq-dynamic"
 else
   export MACOSX_DEPLOYMENT_TARGET=10.9
   export ZMQ_REPO="libzmq"
@@ -48,9 +49,10 @@ else
   fi
 
   cd ".."
+  export ARGS=""
 fi
 
 echo "Building libzmq bindings..."
-node-gyp rebuild "$@"
+node-gyp rebuild "$@" "${ARGS}"
 
 echo "Build complete."

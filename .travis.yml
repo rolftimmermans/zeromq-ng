@@ -5,22 +5,13 @@ os:
 node_js:
 - 8.6
 env:
-- ZMQ_EXTERNAL=true
-- ZMQ_EXTERNAL=false
+- ZMQ_DYNAMIC=false
+- ZMQ_DYNAMIC=true
 
 addons:
   apt:
     packages:
     - libzmq3-dev
-
-matrix:
-  include:
-  - os: linux
-    env:
-    - DEPLOY=true
-  - os: osx
-    env:
-    - DEPLOY=true
 
 deploy:
   provider: script
@@ -28,5 +19,5 @@ deploy:
   script:
   - ./node_modules/prebuild/bin.js --target 8.6.0 --verbose --strip --upload ${GH_TOKEN}
   on:
-    condition: $DEPLOY = "true"
+    condition: "$ZMQ_DYNAMIC = false"
     tags: true
