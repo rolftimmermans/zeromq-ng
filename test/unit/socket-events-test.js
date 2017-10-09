@@ -62,15 +62,10 @@ for (const proto of ["inproc", "ipc", "tcp"]) {
         if (proto == "inproc") {
           assert.deepEqual(events, [["stop", {}]])
         } else {
-          assert.deepEqual(
-            events,
-            [
-              ["listening", {address}],
-              ["accept", {address}],
-              ["close", {address}],
-              ["stop", {}],
-            ]
-          )
+          assert.deepInclude(events, ["listening", {address}])
+          assert.deepInclude(events, ["accept", {address}])
+          assert.deepInclude(events, ["close", {address}])
+          assert.deepInclude(events, ["stop", {}])
         }
       })
 
@@ -95,23 +90,10 @@ for (const proto of ["inproc", "ipc", "tcp"]) {
 
         if (proto == "inproc") {
           assert.deepEqual(events, [["stop", {}]])
-        } else if (proto == "ipc") {
-          assert.deepEqual(
-            events,
-            [
-              ["connect", {address}],
-              ["stop", {}],
-            ]
-          )
         } else {
-          assert.deepEqual(
-            events,
-            [
-              ["connectDelay", {address}],
-              ["connect", {address}],
-              ["stop", {}],
-            ]
-          )
+          if (proto == "tcp") assert.deepInclude(events, ["connectDelay", {address}])
+          assert.deepInclude(events, ["connect", {address}])
+          assert.deepInclude(events, ["stop", {}])
         }
       })
 
@@ -145,15 +127,10 @@ for (const proto of ["inproc", "ipc", "tcp"]) {
         if (proto == "inproc") {
           assert.deepEqual(events, [["stop", {}]])
         } else {
-          assert.deepEqual(
-            events,
-            [
-              ["listening", {address}],
-              ["accept", {address}],
-              ["close", {address}],
-              ["stop", {}],
-            ]
-          )
+          assert.deepInclude(events, ["listening", {address}])
+          assert.deepInclude(events, ["accept", {address}])
+          assert.deepInclude(events, ["close", {address}])
+          assert.deepInclude(events, ["stop", {}])
         }
       })
     })

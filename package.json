@@ -23,7 +23,7 @@
   },
   "scripts": {
     "install": "prebuild-install || script/build.sh",
-    "test": "script/build.sh --debug --verbose && ZMQ_BUILD=Debug node node_modules/mocha/bin/mocha",
+    "test": "script/build.sh --debug --verbose && ZMQ_BUILD=Debug mocha",
     "bench": "script/build.sh --release --verbose && node --use_strict --harmony_async_iteration --expose-gc test/bench/send-only.js",
     "fmt": "find src -path -prune -o \\( -name \"*.cc\" -or -name \"*.h\" \\) -exec clang-format -i -style=file {} \\;"
   },
