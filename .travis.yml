@@ -30,9 +30,7 @@ jobs:
     os: linux
   - stage: publish binaries
     script: yarn run prebuild
-    os: linux
-    sudo: required
-    env: ALPINE=true
+    os: osx
 
   - stage: publish package
     script: skip
