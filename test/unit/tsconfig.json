@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "noEmit": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "types": ["node"],
+    "lib": ["ES7", "esnext.asynciterable"]
+  },
+  "files": [
+    "typings-test.ts",
+  ]
+}
