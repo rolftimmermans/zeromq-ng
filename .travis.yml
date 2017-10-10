@@ -11,18 +11,24 @@ env:
 matrix:
   include:
   - os: linux
+    stage: test
     env: ZMQ_DYNAMIC=false
   - os: linux
+    stage: test
     env: ZMQ_DYNAMIC=true
   - os: linux
+    stage: test
     sudo: required
     env: ZMQ_DYNAMIC=false ALPINE=true
   - os: linux
+    stage: test
     sudo: required
     env: ZMQ_DYNAMIC=true ALPINE=true
   - os: osx
+    stage: test
     env: ZMQ_DYNAMIC=false
   - os: osx
+    stage: test
     env: ZMQ_DYNAMIC=true
 
 jobs:
