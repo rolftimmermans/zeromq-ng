@@ -141,10 +141,10 @@ A ØMQ socket. This class should generally not be used directly. Instead, create
 
 Create a new socket by calling any of the child class constructors. Each subclass corresponds to a ØMQ socket type:
 
-* **Arguments**
+* **Arguments** <br/>
   <[Object]> An optional object with options that will be set on the socket. Any option setter can be used.
 
-* **Returns**
+* **Returns** <br/>
   <[Socket]> New socket of the given type.
 
 
@@ -175,10 +175,10 @@ new zmq.Stream(...)
 
 Binds the socket to the given address. During `bind()` the socket cannot be used. Do not call any other methods until the returned promise resolves. Make sure to use `await` or similar.
 
-* **Arguments**
+* **Arguments** <br/>
   <[string]> Address to bind this socket to.
 
-* **Returns**
+* **Returns** <br/>
   <[Promise]> Resolved when the socket was successfully bound.
 
 
@@ -191,10 +191,10 @@ await socket.bind("tcp://*:3456")
 
 Unbinds the socket to the given address. During `unbind()` the socket cannot be used. Do not call any other methods until the returned promise resolves. Make sure to use `await` or similar.
 
-* **Arguments**
+* **Arguments** <br/>
   <[string]> Address to unbind this socket from.
 
-* **Returns**
+* **Returns** <br/>
   <[Promise]> Resolved when the socket was successfully unbound.
 
 
@@ -207,10 +207,10 @@ await socket.bind("tcp://*:3456")
 
 Starts a new connection to the socket at the given address and returns immediately. The connection will be made asynchronously in the background.
 
-* **Arguments**
+* **Arguments** <br/>
   <[string]> Address to connect this socket to.
 
-* **Returns**
+* **Returns** <br/>
   <[undefined]>
 
 
@@ -223,10 +223,10 @@ socket.connect("tcp://127.0.0.1:3456")
 
 Disconnects a previously connected socket from the given address. Disonnection will happen asynchronously in the background.
 
-* **Arguments**
+* **Arguments** <br/>
   <[string]> Address to disconnect this socket from.
 
-* **Returns**
+* **Returns** <br/>
   <[undefined]>
 
 
@@ -245,10 +245,10 @@ Only **one** call to `send()` may be executed simultaneously. Do not call `send(
 
 **Note:** Due to the nature of Node.js and to avoid blocking the main thread, this method always sends messages with the `ZMQ_DONTWAIT` flag. It polls asynchronously if sending is not currently possible. This means that all functionality related to timeouts and blocking behaviour is reimplemented in the Node.js bindings. Any differences in behaviour with the native ZMQ library is considered a bug.
 
-* **Arguments**
+* **Arguments** <br/>
   <[string]> | <[Buffer]> | <[Array]<[string] | [Buffer]> Single message or multipart message to queue for sending.
 
-* **Returns**
+* **Returns** <br/>
   <[Promise]> Resolved when the message was successfully queued.
 
 
@@ -268,10 +268,10 @@ Only **one** call to `receive()` may be executed simultaneously. Do not call `re
 
 **Note:** Due to the nature of Node.js and to avoid blocking the main thread, this method always attempts to read messages with the `ZMQ_DONTWAIT` flag. It polls asynchronously if reading is not currently possible. This means that all functionality related to timeouts and blocking behaviour is reimplemented in the Node.js bindings. Any differences in behaviour with the native ZMQ library is considered a bug.
 
-* **Arguments**
+* **Arguments** <br/>
   (none)
 
-* **Returns**
+* **Returns** <br/>
   <[Promise]<[Array]<[Buffer]>>> Resolved with an array of message parts that were successfully read.
 
 
@@ -287,10 +287,10 @@ Closes the socket and disposes of all resources. Any messages that are queued ma
 
 After this method is called, it is no longer possible to call any other methods on this socket.
 
-* **Arguments**
+* **Arguments** <br/>
   (none)
 
-* **Returns**
+* **Returns** <br/>
   <[undefined]>
 
 
@@ -306,10 +306,10 @@ Async iterators are a TC39 stage 3 proposal. They can be used with Babel, TypeSc
 
 The well-known symbol `Symbol.asyncIterator` must be present for this method to be defined. That means any polyfill must be enabled **before** loading this library.
 
-* **Arguments**
+* **Arguments** <br/>
   (none)
 
-* **Returns**
+* **Returns** <br/>
   [AsyncIterator]<[Array]<[Buffer]>>
 
 
@@ -322,31 +322,31 @@ for await (const [msg] of socket) {
 
 ### socket.events
 
-* **Returns**
+* **Returns** <br/>
   <[Observer]> Event observer for this socket.
 
 
 ### socket.context
 
-* **Returns**
+* **Returns** <br/>
   <[Context]> Context that this socket belongs to.
 
 
 ### socket.closed
 
-* **Returns**
+* **Returns** <br/>
   <[boolean]> Whether this socket was previously closed with `close()`.
 
 
 ### socket.readable
 
-* **Returns**
+* **Returns** <br/>
   <[boolean]> Whether any messages are currently available. If `true`, the next call to `receive()` will immediately read a message from the socket.
 
 
 ### socket.writable
 
-* **Returns**
+* **Returns** <br/>
   <[boolean]> Whether any messages can be queued for sending. If `true`, the next call to `send()` will immediately queue a message on the socket.
 
 
@@ -367,116 +367,116 @@ Most socket options do not take effect until the next `bind()` or `connect()` ca
 
 The property names may differ somewhat from the native option names. This is intentional to improve readability of the resulting code. The native option name is **also** available as an alias, with underscores converted to camel case. For example, ZMQ_MAX_MSGSZ is named `maxMessageSize`, but is also available under the alias `maxMsgsz`.
 
-* **affinity** – ZMQ_AFFINITY
+* **affinity** – ZMQ_AFFINITY <br/>
   <[number]> I/O thread affinity, which determines which threads from the ØMQ I/O thread pool associated with the socket's context shall handle newly created connections.
 
   **Note:** This value is a bit mask, but values higher than `Number.MAX_SAFE_INTEGER` may not be represented accurately! This currently means that configurations beyond 52 threads are unreliable.
 
-* **backlog** – ZMQ_BACKLOG
+* **backlog** – ZMQ_BACKLOG <br/>
   <[number]> Maximum length of the queue of outstanding peer connections for the specified socket. This only applies to connection-oriented transports.
 
-* **immediate** – ZMQ_IMMEDIATE
+* **immediate** – ZMQ_IMMEDIATE <br/>
   <[boolean]> By default queues will fill on outgoing connections even if the connection has not completed. This can lead to "lost" messages on sockets with round-robin routing (`Req`, `Push`, `Dealer`). If this option is set to `true`, messages shall be queued only to completed connections. This will cause the socket to block if there are no other connections, but will prevent queues from filling on pipes awaiting connection.
 
-* **ipv6** – ZMQ_IPV6
+* **ipv6** – ZMQ_IPV6 <br/>
   <[boolean]> Enable or disable IPv6. When IPv6 is enabled, the socket will connect to, or accept connections from, both IPv4 and IPv6 hosts.
 
-* **lastEndpoint** (read only) – ZMQ_LAST_ENDPOINT
+* **lastEndpoint** (read only) – ZMQ_LAST_ENDPOINT <br/>
   <[string]> The last endpoint bound for TCP and IPC transports.
 
-* **linger** – ZMQ_LINGER
+* **linger** – ZMQ_LINGER <br/>
   <[number]> Determines how long pending messages which have yet to be sent to a peer shall linger in memory after a socket is closed with `close()`.
 
-* **mandatory** (only on `Router` sockets) – ZMQ_ROUTER_MANDATORY
+* **mandatory** (only on `Router` sockets) – ZMQ_ROUTER_MANDATORY <br/>
   <[boolean]> A value of `false` is the default and discards the message silently when it cannot be routed or the peer's high water mark is reached. A value of `true` causes `send()` to fail if it cannot be routed, or wait asynchronously if the high water mark is reached.
 
-* **maxMessageSize** – ZMQ_MAXMSGSIZE
+* **maxMessageSize** – ZMQ_MAXMSGSIZE <br/>
   <[number]> Limits the size of the inbound message. If a peer sends a message larger than the limit it is disconnected. Value of -1 means no limit.
 
-* **multicastHops** – ZMQ_MULTICAST_HOPS
+* **multicastHops** – ZMQ_MULTICAST_HOPS <br/>
   <[number]> Sets the time-to-live field in every multicast packet sent from this socket. The default is 1 which means that the multicast packets don't leave the local network.
 
-* **rate** – ZMQ_RATE
+* **rate** – ZMQ_RATE <br/>
   <[number]> Maximum send or receive data rate for multicast transports such as `pgm`.
 
-* **receiveBufferSize** – ZMQ_RCVBUF
+* **receiveBufferSize** – ZMQ_RCVBUF <br/>
   <[number]> Underlying kernel receive buffer size in bytes. A value of -1 means leave the OS default unchanged.
 
-* **receiveHighWaterMark** – ZMQ_RCVHWM
+* **receiveHighWaterMark** – ZMQ_RCVHWM <br/>
   <[number]> The high water mark is a hard limit on the maximum number of incoming messages ØMQ shall queue in memory for any single peer that the specified socket is communicating with. A value of zero means no limit.
 
   If this limit has been reached the socket shall enter an exceptional state and depending on the socket type, ØMQ shall take appropriate action such as blocking or dropping sent messages.
 
-* **receiveTimeout** – ZMQ_RCVTIMEO
+* **receiveTimeout** – ZMQ_RCVTIMEO <br/>
   <[number]> Sets the timeout receiving messages on the socket. If the value is 0, `receive()` will return a rejected promise immediately if there is no message to receive. If the value is -1, it will wait asynchronously until a message is available. For all other values, it will wait for a message for that amount of time before rejecting.
 
-* **reconnectInterval** – ZMQ_RECONNECT_IVL
+* **reconnectInterval** – ZMQ_RECONNECT_IVL <br/>
   <[number]> Oeriod ØMQ shall wait between attempts to reconnect disconnected peers when using connection-oriented transports. The value -1 means no reconnection.
 
-* **reconnectMaxInterval** – ZMQ_RECONNECT_IVL_MAX
+* **reconnectMaxInterval** – ZMQ_RECONNECT_IVL_MAX <br/>
   <[number]> Maximum period ØMQ shall wait between attempts to reconnect. On each reconnect attempt, the previous interval shall be doubled untill `reconnectMaxInterval` is reached. This allows for exponential backoff strategy. Zero (the default) means no exponential backoff is performed and reconnect interval calculations are only based on `reconnectInterval`.
 
-* **recoveryInterval** – ZMQ_RECOVERY_IVL
+* **recoveryInterval** – ZMQ_RECOVERY_IVL <br/>
   <[number]> Maximum time in milliseconds that a receiver can be absent from a multicast group before unrecoverable data loss will occur.
 
-* **routingId** – ZMQ_IDENTITY
+* **routingId** – ZMQ_IDENTITY <br/>
   <[string] | [Buffer]> The identity of the specified socket when connecting to a `Router` socket.
 
-* **sendBufferSize** – ZMQ_SNDBUF
+* **sendBufferSize** – ZMQ_SNDBUF <br/>
   <[number]> Underlying kernel transmit buffer size in bytes. A value of -1 means leave the OS default unchanged.
 
-* **sendHighWaterMark** – ZMQ_SNDHWM
+* **sendHighWaterMark** – ZMQ_SNDHWM <br/>
   <[number]> The high water mark is a hard limit on the maximum number of outgoing messages ØMQ shall queue in memory for any single peer that the specified socket is communicating with. A value of zero means no limit.
 
   If this limit has been reached the socket shall enter an exceptional state and depending on the socket type, ØMQ shall take appropriate action such as blocking or dropping sent messages.
 
-* **sendTimeout** – ZMQ_SNDTIMEO
+* **sendTimeout** – ZMQ_SNDTIMEO <br/>
   <[number]> Sets the timeout for sending messages on the socket. If the value is 0, `send()` will return a rejected promise immediately if the message cannot be sent. If the value is -1, it will wait asynchronously until the message is sent. For all other values, it will try to send the message for that amount of time before rejecting.
 
-* **tcpKeepalive** – ZMQ_TCP_KEEPALIVE
+* **tcpKeepalive** – ZMQ_TCP_KEEPALIVE <br/>
   <[number]> Override SO_KEEPALIVE socket option (if supported by OS). The default value of -1 leaves it to the OS default.
 
-* **tcpKeepaliveCount** – ZMQ_TCP_KEEPALIVE_CNT
+* **tcpKeepaliveCount** – ZMQ_TCP_KEEPALIVE_CNT <br/>
   <[number]> Overrides TCP_KEEPCNT socket option (if supported by OS). The default value of -1 leaves it to the OS default.
 
-* **tcpKeepaliveIdle** – ZMQ_TCP_KEEPALIVE_IDLE
+* **tcpKeepaliveIdle** – ZMQ_TCP_KEEPALIVE_IDLE <br/>
   <[number]> Overrides TCP_KEEPIDLE / TCP_KEEPALIVE socket option (if supported by OS). The default value of -1 leaves it to the OS default.
 
-* **tcpKeepaliveInterval** – ZMQ_TCP_KEEPALIVE_INTVL
+* **tcpKeepaliveInterval** – ZMQ_TCP_KEEPALIVE_INTVL <br/>
   <[number]> Overrides TCP_KEEPINTVL socket option (if supported by the OS). The default value of -1 leaves it to the OS default.
 
-* **type** (read only) – ZMQ_TYPE
+* **type** (read only) – ZMQ_TYPE <br/>
   <[number]> Retrieve the socket type. This is fairly useless because you can inspect the JavaScript constructor with `socket.constructor`.
 
-* **verbose** (only on `XPublisher` sockets) – ZMQ_XPUB_VERBOSE
+* **verbose** (only on `XPublisher` sockets) – ZMQ_XPUB_VERBOSE <br/>
   <[boolean]> If set to `true` the socket passes all subscribe messages to the caller. If set to `false` (default) these are not visible to the caller.
 
 ### socket security options
 
 Listed below are all socket options that are related to setting and retrieving the security mechanism.
 
-* **curveServer** – ZMQ_CURVE_SERVER
+* **curveServer** – ZMQ_CURVE_SERVER <br/>
   <[boolean]> Defines whether the socket will act as server for CURVE security. A value of `true` means the socket will act as CURVE server. A value of `false` means the socket will not act as CURVE server, and its security role then depends on other option settings.
 
-* **curveSecretKey** – ZMQ_CURVE_SECRETKEY
+* **curveSecretKey** – ZMQ_CURVE_SECRETKEY <br/>
   <[string] | [Buffer]> Sets the socket's long term secret key. You must set this on both CURVE client and server sockets. You can create a new keypair with `zmq.curveKeypair()`.
 
-* **curvePublicKey** – ZMQ_CURVE_PUBLICKEY
+* **curvePublicKey** – ZMQ_CURVE_PUBLICKEY <br/>
   <[string] | [Buffer]> Sets the socket's long term public key. You must set this on CURVE client sockets. A server socket does not need to know its own public key. You can create a new keypair with `zmq.curveKeypair()`.
 
-* **curveServerKey** – ZMQ_CURVE_SERVERKEY
+* **curveServerKey** – ZMQ_CURVE_SERVERKEY <br/>
   <[string] | [Buffer]> Sets the socket's long term server key. This is the public key of the CURVE *server* socket. You must set this on CURVE *client* sockets. This key must have been generated together with the server's secret key. You can create a new keypair with `zmq.curveKeypair()`.
 
-* **plainServer** – ZMQ_PLAIN_SERVER
+* **plainServer** – ZMQ_PLAIN_SERVER <br/>
   <[boolean]> Defines whether the socket will act as server for PLAIN security. A value of `true` means the socket will act as PLAIN server. A value of `false` means the socket will not act as PLAIN server, and its security role then depends on other option settings.
 
-* **plainUsername** – ZMQ_PLAIN_USERNAME
+* **plainUsername** – ZMQ_PLAIN_USERNAME <br/>
   <[string] | [Buffer]> Sets the username for outgoing connections over TCP or IPC. If you set this to a non-null value, the security mechanism used for connections shall be PLAIN.
 
-* **plainPassword** – ZMQ_PLAIN_PASSWORD
+* **plainPassword** – ZMQ_PLAIN_PASSWORD <br/>
   <[string] | [Buffer]> Sets the password for outgoing connections over TCP or IPC. If you set this to a non-null value, the security mechanism used for connections shall be PLAIN.
 
-* **securityMechanism** (read only) – ZMQ_MECHANISM
+* **securityMechanism** (read only) – ZMQ_MECHANISM <br/>
   <[null] | [string]> Returns the current security mechanism for the socket, if any. The security mechanism is set implictly by using any of the relevant security options. The returned value is one of:
   * `null` – No security mechanism is used.
   * `"plain"` – The PLAIN mechanism defines a simple username/password mechanism that lets a server authenticate a client. PLAIN makes no attempt at security or confidentiality.
@@ -493,10 +493,10 @@ A ØMQ context.
 
 Creates a new ØMQ context. It is usually not necessary to instantiate a new context – the global context `zmq.global` is used for new sockets by default.
 
-* **Arguments**
+* **Arguments** <br/>
   <[Object]> An optional object with options that will be set on the context. Any option setter can be used.
 
-* **Returns**
+* **Returns** <br/>
   <[Context]> New context.
 
 
@@ -510,10 +510,10 @@ const context = new zmq.Context({ioThreads: 5})
 
 Closes the context.
 
-* **Arguments**
+* **Arguments** <br/>
   (none)
 
-* **Returns**
+* **Returns** <br/>
   <[undefined]>
 
 
@@ -536,28 +536,28 @@ const context = new zmq.Context({ioThreads: 5})
 
 The property names may differ somewhat from the native option names. This is intentional to improve readability of the resulting code. The native option name is **also** available as an alias, with underscores converted to camel case. For example, ZMQ_MAX_MSGSZ is named `maxMessageSize`, but is also available under the alias `maxMsgsz`.
 
-* **blocky** – ZMQ_BLOCKY
+* **blocky** – ZMQ_BLOCKY <br/>
   <[boolean]> By default the context will block forever when closed with `close()`. The assumption behind this behavior is that abrupt termination will cause message loss. Most real applications use some form of handshaking to ensure applications receive termination messages, and then terminate the context with `linger` set to zero on all sockets. This setting is an easier way to get the same result. When `blocky` is set to false, all new sockets are given a linger timeout of zero. You must still close all sockets before calling `close()` on the context.
 
-* **ioThreads** – ZMQ_IO_THREADS
+* **ioThreads** – ZMQ_IO_THREADS <br/>
   <[number]> Size of the ØMQ thread pool to handle I/O operations. If your application is using only the `inproc` transport for messaging you may set this to zero, otherwise set it to at least one (default).
 
-* **ipv6** – ZMQ_IPV6
+* **ipv6** – ZMQ_IPV6 <br/>
   <[boolean]> Enable or disable IPv6. When IPv6 is enabled, a socket will connect to, or accept connections from, both IPv4 and IPv6 hosts.
 
-* **maxMessageSize** – ZMQ_MAX_MSGSZ
+* **maxMessageSize** – ZMQ_MAX_MSGSZ <br/>
   <[number]> Maximum allowed size of a message sent in the context.
 
-* **maxSockets** – ZMQ_MAX_SOCKETS
+* **maxSockets** – ZMQ_MAX_SOCKETS <br/>
   <[number]> Maximum number of sockets allowed on the context.
 
-* **maxSocketsLimit** (read only) – ZMQ_SOCKET_LIMIT
+* **maxSocketsLimit** (read only) – ZMQ_SOCKET_LIMIT <br/>
   <[number]> Largest number of sockets that can be set with `maxSockets`.
 
-* **threadPriority** (write only) – ZMQ_THREAD_PRIORITY
+* **threadPriority** (write only) – ZMQ_THREAD_PRIORITY <br/>
   <[number]> Scheduling priority for internal context's thread pool. This option is not available on Windows. Supported values for this option depend on chosen scheduling policy. Details can be found at http://man7.org/linux/man-pages/man2/sched_setscheduler.2.html. This option only applies before creating any sockets on the context.
 
-* **threadSchedulingPolicy** (write only) – ZMQ_THREAD_SCHED_POLICY
+* **threadSchedulingPolicy** (write only) – ZMQ_THREAD_SCHED_POLICY <br/>
   <[number]> Scheduling policy for internal context's thread pool. This option is not available on Windows. Supported values for this option can be found at http://man7.org/linux/man-pages/man2/sched_setscheduler.2.html. This option only applies before creating any sockets on the context.
 
 
@@ -573,10 +573,10 @@ An event observer for ØMQ sockets. The event observer can be used in one of two
 
 Creates a new ØMQ observer. It is usually not necessary to instantiate a new observer. Access an existing observer for a socket with `socket.events`.
 
-* **Arguments**
+* **Arguments** <br/>
   <[Socket]> The socket to observe.
 
-* **Returns**
+* **Returns** <br/>
   <[Observer]> New observer for the given socket.
 
 
@@ -599,15 +599,16 @@ Converts this observer into event emitter mode and attaches the event listener.
 
 Conversion to an event emitter means that this observer will now start to wait on events internally. Because only one call to `receive()` can be made simultaneously, **avoid any other calls** to `receive()` when the observer is in event emitter mode.
 
-* **Arguments**
+* **Arguments** <br/>
   <[string]> The name of the event.
+
   <[Function] (<[Object]>)> The callback function. The function will be invoked with an object with additional details related to this event. Details can include any of:
 
   * `address` <[string]> – The address that the socket is binding/unbinding/connecting/disconnecting to or from.
   * `reconnectInterval` <[number]> – The reconnect interval in milliseconds.
   * `errno` <[number]> – The error number (errno) generated by the system call that failed.
 
-* **Returns**
+* **Returns** <br/>
   <[EventEmitter]> The event emitter instance that the listener was attached on.
 
 
@@ -626,10 +627,10 @@ Only **one** call to `receive()` may be executed simultaneously. Do not call `re
 
 When reading events with `receive()` the observer **must not be in event emitter** mode. Avoid mixing calls to `receive()` with attached event handlers via `on()`.
 
-* **Arguments**
+* **Arguments** <br/>
   (none)
 
-* **Returns**
+* **Returns** <br/>
   <[Promise]<[[string], [Object]]>> Event name and additional details related to this event. Details can include any of:
   * `address` <[string]> – The address that the socket is binding/unbinding/connecting/disconnecting to or from.
   * `reconnectInterval` <[number]> – The reconnect interval in milliseconds.
@@ -653,10 +654,10 @@ while (!socket.events.closed) {
 
 Closes the context.
 
-* **Arguments**
+* **Arguments** <br/>
   (none)
 
-* **Returns**
+* **Returns** <br/>
   <[undefined]>
 
 
@@ -669,13 +670,12 @@ socket.events.close()
 
 Returns a new random key pair to be used with the CURVE security mechanism.
 
-* **Arguments**
+* **Arguments** <br/>
   (none)
 
-* **Returns**
+* **Returns** <br/>
   <[Object]> An object that contains the keypair as two properties
   * `publicKey` <[string]> – 40 character Z85-encoded string that contains the public key.
-
   * `secretKey` <[string]> – 40 character Z85-encoded string that contains the corresponding private key.
 
 
@@ -692,7 +692,7 @@ To correctly connect two sockets with the CURVE security mechanism:
 
 Exposes some of the optionally available ØMQ capabilities.
 
-* **Returns**
+* **Returns** <br/>
   <[Object]> Object with <[string]> keys corresponding to supported ØMQ features and transport protocols. Available capabilities will be set to `true`. Unavailable capabilities will be absent or set to `false`. Possible keys include:
 
   * `ipc` <[boolean]> – Support for the `ipc://` protocol.
@@ -714,7 +714,7 @@ if (zmq.capability.curve) {
 
 Any socket that has no explicit context passed in during construction will be associated with the global context. The global context is automatically closed on process exit.
 
-* **Returns**
+* **Returns** <br/>
   <[Context]> The default global ØMQ context.
 
 
@@ -722,7 +722,7 @@ Any socket that has no explicit context passed in during construction will be as
 
 The version of the ØMQ library the bindings were built with.
 
-* **Returns**
+* **Returns** <br/>
   <[string]> The ØMQ library version formatted as (major).(minor).(patch). For example: `"4.2.2"`.
 
 
