@@ -1,2 +1,4 @@
 #!/bin/sh
-find src -path -prune -o \( -name "*.cc" -or -name "*.h" \) -exec clang-format -i -style=file {} \;
+if [ -z "$CI" ]; then
+  clang-format -i -style=file src/*.cc src/*.h src/inline/*.h
+fi
