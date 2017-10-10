@@ -54,7 +54,7 @@ addons:
     - libzmq3-dev
 
 before_install:
-- if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew update && brew install zeromq; fi
+- if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew update && brew install zeromq yarn; fi
 - if [ -n "$ALPINE" ]; then wget https://raw.githubusercontent.com/alpinelinux/alpine-chroot-install/v0.6.0/alpine-chroot-install && echo 'a827a4ba3d0817e7c88bae17fe34e50204983d1e  alpine-chroot-install' | sha1sum -c; fi
 
 install:
