@@ -58,7 +58,7 @@ before_install:
 
 install:
 - if [ -z "$ALPINE" ]; then yarn install; fi
-- if [ -n "$ALPINE" ]; then sudo sh alpine-chroot-install -b v3.6 -r 'https://nl.alpinelinux.org/alpine/edge/testing' -p 'nodejs zeromq-dev' -k 'CI TRAVIS_.* ZMQ.*' && /alpine/enter-chroot -u $USER yarn install; fi
+- if [ -n "$ALPINE" ]; then sudo sh alpine-chroot-install -b v3.6 -r 'https://nl.alpinelinux.org/alpine/edge/testing' -p 'nodejs yarn zeromq-dev' -k 'CI TRAVIS_.* ZMQ.*' && /alpine/enter-chroot -u $USER yarn install; fi
 
 script:
 - if [ -z "$ALPINE" ]; then yarn test; fi
