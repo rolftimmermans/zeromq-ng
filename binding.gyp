@@ -1,6 +1,6 @@
 {
   'variables': {
-    'zmq_dynamic%': 'false',
+    'zmq_shared%': 'false',
   },
 
   'targets': [
@@ -17,7 +17,7 @@
       'defines': ['NAPI_DISABLE_CPP_EXCEPTIONS'],
 
       'conditions': [
-        ["zmq_dynamic == 'true'", {
+        ["zmq_shared == 'true'", {
           'link_settings': {
             'libraries': ['-lzmq'],
           },

@@ -27,9 +27,9 @@ Install ZeroMQ.js NG with the following:
 
 `npm install zeromq-nq`
 
-To use link dynamically with your system's libzmq (if it has been installed and development headers are available):
+To link against a shared library on your system (if it has been installed and development headers are available):
 
-`npm install zeromq-nq --zmq-dynamic`
+`npm install zeromq-nq --zmq-shared`
 
 
 # Examples

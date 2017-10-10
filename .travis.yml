@@ -14,16 +14,16 @@ jobs:
     env: ALPINE=true
     sudo: required
   - os: linux
-    env: ZMQ_DYNAMIC=true ALPINE=true
+    env: ZMQ_SHARED=true ALPINE=true
     sudo: required
 
   include:
   - os: linux
   - os: linux
-    env: ZMQ_DYNAMIC=true
+    env: ZMQ_SHARED=true
   - os: osx
   - os: osx
-    env: ZMQ_DYNAMIC=true
+    env: ZMQ_SHARED=true
 
   - stage: publish binaries
     script: yarn run prebuild

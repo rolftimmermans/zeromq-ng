@@ -1,9 +1,9 @@
 #!/bin/sh
 set -e
 
-if [ "${npm_config_zmq_dynamic}" == "true" ] || [ "${ZMQ_DYNAMIC}" == "true" ]; then
+if [ "${npm_config_zmq_shared}" == "true" ] || [ "${ZMQ_SHARED}" == "true" ]; then
   echo "Requesting to use dynamically linked libzmq; skipping build..."
-  export ARGS="--zmq-dynamic"
+  export ARGS="--zmq-shared"
 else
   export MACOSX_DEPLOYMENT_TARGET=10.9
   export ZMQ_REPO="libzmq"
