@@ -8,35 +8,24 @@ env:
   global:
     secure: aLDkRNWCca4+djvfGfIktX2f4tp2/7dNjV8ByfWgPVoUA4Di6Ik7IiIEv5Q7yIFb4S7GZbTUUv3/Gilj6XqL/jL5YrtrB60CUu87ofPoOGpfqFg/MciPp6dj2m5Fz8+1GbY+0VvCDnHgVHG4I4YmxXr5D3Cdmcc7Yb2TG/zeB6qesdbWgRxhu2FPSRNs9HbOfjWqY/9qOiDyyyIjjxcCp/9/1TiKwu06xkopDBwFbnH1HpJ5TGxVuL9y7yuwcfOHLv0mRoWRG63vIlJIiTJWtEVrvpLxNxTl+/ph53OfSzwFfyi+dEoe/5UiSrsRo2yVfrPPNy08eWz+yMUB2TUCz2hxN61cjgQ2WJFCNNL4wG16z8jhFMne2IcyXuyatR5G9VIWXeSn0yEK8KudeyZhhkQMRGr2UMQdbDPnqwhCu7C6R6nUUH9d2laZj2hvrbaWdtkxxSdv478dQgxHvfBTuzftvZeavJ1cmeEZcJFMZGRqpxbDPkLnwynuEJkILIemXiFkgI3FZ2f5eoB34e98odp7QKYVI+xWf3edVXYtNV9E1DeEPYus46OGLR0BVZh4DYFr3V6DFN6/TmnKeq45ajFb+KGZ1b9BpL07ZQ2yQs6kGvUR6CYnBj8SUthtaqA12j/Xqf2+72slaFrkCt8zLQBEVskRgn+E6mfzEFlUyE0=
 
-matrix:
+jobs:
   include:
   - os: linux
-    stage: test
     env: ZMQ_DYNAMIC=false
   - os: linux
-    stage: test
     env: ZMQ_DYNAMIC=true
   - os: linux
-    stage: test
     sudo: required
     env: ZMQ_DYNAMIC=false ALPINE=true
   - os: linux
-    stage: test
     sudo: required
     env: ZMQ_DYNAMIC=true ALPINE=true
   - os: osx
-    stage: test
     env: ZMQ_DYNAMIC=false
   - os: osx
-    stage: test
     env: ZMQ_DYNAMIC=true
 
-jobs:
-  include:
-  - stage: test
-
   - stage: publish binaries
-    if: tag IS present
     script: skip
     env: ZMQ_DYNAMIC=false
     deploy:
@@ -45,7 +34,6 @@ jobs:
       script: "yarn run prebuild"
 
   - stage: publish package
-    if: tag IS present
     script: skip
     env: ZMQ_DYNAMIC=false
     os: linux
@@ -55,6 +43,13 @@ jobs:
       email: r.w.timmermans@gmail.com
       api_key:
         secure: rg8GpeS20asj3JcgmfQpumBc1JV44hliyCIW3Y+rN/5gaurkm87K8MGVsNTVwwsdWyBFGjfGEYUhXF+H9q/OMLRchHqkfW6y7jzbWQx5QP5srbf7J8uWGIytKzJbX6yt41kHzk+FKFU2XAzrIP+51tvZiqBdpkkKCA/KdKG779mH04uphxcuaGtiEtqGhXdNe494r4ux727hvATRJwnGO6JvDzD6aM92i5SZdM/xKIPt+1KNRX92TIWj/op5XkpwvkPZjAERdOiHB052GM0mgaMxZiJdO0Xb5FeTh/1SXZXYE+XPIY4Sm3Pa75Kk3UFt5nI4DKFhl6V8UwOPAHiIFBZJPe/avOxPejHzwLxO3nBWEboiuc0OWds16x1NJsSLGk3CtDcFl6Zkanh8EFmyy7LMUuR1MEjY6+azQgTibVB2ynqN1MKYkxl/aDJB0xYtabDgaptiM5ITaMNUR7pUG4VRQkvi6L5TfMdzI8/mwxkjMnnVnFef8OGw5i0SRJMpEXeohrgCjkUN+uxpo+FIzPDf/tano35wgh/LYDbXNMfdEgd1L9MkOIS32vN46HbAbjrhSNIxK2u8PsOB07hPjmiFkoGRzrgg0veJ194FZ0k8LEJtqmDMCCMBaFiO1TuTHDNyGzAsR17Upk7/qZKeH/EPDhvbycH4hWvvri29yrI=
+
+stages:
+- name: test
+- name: publish binaries
+  if: tag IS present
+- name: publish package
+  if: tag IS present
 
 addons:
   apt:
