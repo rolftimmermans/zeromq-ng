@@ -11,29 +11,30 @@ env:
 jobs:
   include:
   - os: linux
-    env: ZMQ_DYNAMIC=false
   - os: linux
     env: ZMQ_DYNAMIC=true
   - os: linux
+    env: ALPINE=true
     sudo: required
-    env: ZMQ_DYNAMIC=false ALPINE=true
   - os: linux
-    sudo: required
     env: ZMQ_DYNAMIC=true ALPINE=true
+    sudo: required
   - os: osx
-    env: ZMQ_DYNAMIC=false
   - os: osx
     env: ZMQ_DYNAMIC=true
 
   - stage: publish binaries
     script: yarn run prebuild
-    env: ZMQ_DYNAMIC=false
+    os: linux
+  - stage: publish binaries
+    script: yarn run prebuild
+    os: linux
+    sudo: required
+    env: ALPINE=true
 
   - stage: publish package
     script: skip
-    env: ZMQ_DYNAMIC=false
     os: linux
-    node_js: 8.6
     deploy:
       provider: npm
       email: r.w.timmermans@gmail.com
