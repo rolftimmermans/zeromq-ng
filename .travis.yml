@@ -1,33 +1,55 @@
 language: node_js
+
 os:
 - osx
 - linux
+
 node_js:
 - 8.6
+
 env:
   matrix:
-  - ZMQ_DYNAMIC=false
   - ZMQ_DYNAMIC=true
+  - ZMQ_DYNAMIC=false
   global:
     secure: aLDkRNWCca4+djvfGfIktX2f4tp2/7dNjV8ByfWgPVoUA4Di6Ik7IiIEv5Q7yIFb4S7GZbTUUv3/Gilj6XqL/jL5YrtrB60CUu87ofPoOGpfqFg/MciPp6dj2m5Fz8+1GbY+0VvCDnHgVHG4I4YmxXr5D3Cdmcc7Yb2TG/zeB6qesdbWgRxhu2FPSRNs9HbOfjWqY/9qOiDyyyIjjxcCp/9/1TiKwu06xkopDBwFbnH1HpJ5TGxVuL9y7yuwcfOHLv0mRoWRG63vIlJIiTJWtEVrvpLxNxTl+/ph53OfSzwFfyi+dEoe/5UiSrsRo2yVfrPPNy08eWz+yMUB2TUCz2hxN61cjgQ2WJFCNNL4wG16z8jhFMne2IcyXuyatR5G9VIWXeSn0yEK8KudeyZhhkQMRGr2UMQdbDPnqwhCu7C6R6nUUH9d2laZj2hvrbaWdtkxxSdv478dQgxHvfBTuzftvZeavJ1cmeEZcJFMZGRqpxbDPkLnwynuEJkILIemXiFkgI3FZ2f5eoB34e98odp7QKYVI+xWf3edVXYtNV9E1DeEPYus46OGLR0BVZh4DYFr3V6DFN6/TmnKeq45ajFb+KGZ1b9BpL07ZQ2yQs6kGvUR6CYnBj8SUthtaqA12j/Xqf2+72slaFrkCt8zLQBEVskRgn+E6mfzEFlUyE0=
+
+jobs:
+  include:
+  - stage: test
+  - stage: publish binaries
+    if: tag IS present
+    script: skip
+    env: ZMQ_DYNAMIC=false
+    deploy:
+      provider: script
+      skip_cleanup: true
+      script: "npm run prebuild"
+  - stage: publish package
+    if: tag IS present
+    script: skip
+    env: ZMQ_DYNAMIC=false
+    os: linux
+    node_js: 8.6
+    deploy:
+      provider: npm
+      email: r.w.timmermans@gmail.com
+      api_key:
+        secure: rg8GpeS20asj3JcgmfQpumBc1JV44hliyCIW3Y+rN/5gaurkm87K8MGVsNTVwwsdWyBFGjfGEYUhXF+H9q/OMLRchHqkfW6y7jzbWQx5QP5srbf7J8uWGIytKzJbX6yt41kHzk+FKFU2XAzrIP+51tvZiqBdpkkKCA/KdKG779mH04uphxcuaGtiEtqGhXdNe494r4ux727hvATRJwnGO6JvDzD6aM92i5SZdM/xKIPt+1KNRX92TIWj/op5XkpwvkPZjAERdOiHB052GM0mgaMxZiJdO0Xb5FeTh/1SXZXYE+XPIY4Sm3Pa75Kk3UFt5nI4DKFhl6V8UwOPAHiIFBZJPe/avOxPejHzwLxO3nBWEboiuc0OWds16x1NJsSLGk3CtDcFl6Zkanh8EFmyy7LMUuR1MEjY6+azQgTibVB2ynqN1MKYkxl/aDJB0xYtabDgaptiM5ITaMNUR7pUG4VRQkvi6L5TfMdzI8/mwxkjMnnVnFef8OGw5i0SRJMpEXeohrgCjkUN+uxpo+FIzPDf/tano35wgh/LYDbXNMfdEgd1L9MkOIS32vN46HbAbjrhSNIxK2u8PsOB07hPjmiFkoGRzrgg0veJ194FZ0k8LEJtqmDMCCMBaFiO1TuTHDNyGzAsR17Upk7/qZKeH/EPDhvbycH4hWvvri29yrI=
+
 addons:
   apt:
     packages:
     - libzmq3-dev
+
 before_install:
-- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update && brew install zeromq; fi
-deploy:
-- provider: script
-  skip_cleanup: true
-  script:
-  - "./node_modules/prebuild/bin.js --target 8.6.0 --verbose --strip --upload ${GH_TOKEN}"
-  on:
-    condition: "$ZMQ_DYNAMIC = false"
-    tags: true
-- provider: npm
-  email: r.w.timmermans@gmail.com
-  api_key:
-    secure: rg8GpeS20asj3JcgmfQpumBc1JV44hliyCIW3Y+rN/5gaurkm87K8MGVsNTVwwsdWyBFGjfGEYUhXF+H9q/OMLRchHqkfW6y7jzbWQx5QP5srbf7J8uWGIytKzJbX6yt41kHzk+FKFU2XAzrIP+51tvZiqBdpkkKCA/KdKG779mH04uphxcuaGtiEtqGhXdNe494r4ux727hvATRJwnGO6JvDzD6aM92i5SZdM/xKIPt+1KNRX92TIWj/op5XkpwvkPZjAERdOiHB052GM0mgaMxZiJdO0Xb5FeTh/1SXZXYE+XPIY4Sm3Pa75Kk3UFt5nI4DKFhl6V8UwOPAHiIFBZJPe/avOxPejHzwLxO3nBWEboiuc0OWds16x1NJsSLGk3CtDcFl6Zkanh8EFmyy7LMUuR1MEjY6+azQgTibVB2ynqN1MKYkxl/aDJB0xYtabDgaptiM5ITaMNUR7pUG4VRQkvi6L5TfMdzI8/mwxkjMnnVnFef8OGw5i0SRJMpEXeohrgCjkUN+uxpo+FIzPDf/tano35wgh/LYDbXNMfdEgd1L9MkOIS32vN46HbAbjrhSNIxK2u8PsOB07hPjmiFkoGRzrgg0veJ194FZ0k8LEJtqmDMCCMBaFiO1TuTHDNyGzAsR17Upk7/qZKeH/EPDhvbycH4hWvvri29yrI=
-  on:
-    condition: "$ZMQ_DYNAMIC = false"
-    tags: true
+- if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew update && brew install zeromq; fi
+- if [ -n "$ELECTRON" ]; then npm install electron@${ELECTRON}; fi
+
+install:
+- if [ -n "$ELECTRON" ]; then npm install --runtime=electron --target=${ELECTRON} --disturl=https://atom.io/download/electron; fi
+- if [ -z "$ELECTRON" ]; then npm install; fi
+
+script:
+- if [ -n "$ELECTRON" ]; then npm run test:electron; fi
+- if [ -z "$ELECTRON" ]; then npm run test; fi

@@ -9,6 +9,7 @@
     "url": "https://github.com/rolftimmermans/zeromq-ng.git"
   },
   "dependencies": {
+    "detect-libc": ">= 0.2.0",
     "node-addon-api": "rolftimmermans/node-addon-api#master",
     "node-gyp": ">= 3.6.2",
     "prebuild-install": ">= 2.2.2"
@@ -27,7 +28,8 @@
     "node": ">= 8.6"
   },
   "scripts": {
-    "install": "prebuild-install || script/build.sh",
+    "install": "detect-libc prebuild-install || script/build.sh",
+    "prebuild": "detect-libc prebuild --verbose --target 8.6.0 --strip --upload",
     "test": "eslint lib && script/fmt.sh && script/build.sh --debug --verbose && ZMQ_BUILD=Debug mocha",
     "bench": "script/build.sh --verbose && node --use_strict --harmony_async_iteration --expose-gc test/bench/send-only.js"
   },
