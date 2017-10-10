@@ -14,7 +14,7 @@ describe("context construction", function() {
     assert.throws(
       () => zmq.Context(),
       TypeError,
-      "Class constructors cannot be invoked without 'new'",
+      "Class constructors cannot be invoked without 'new'"
     )
   })
 
@@ -22,7 +22,7 @@ describe("context construction", function() {
     assert.throws(
       () => new zmq.Context(1),
       TypeError,
-      "Options must be an object",
+      "Options must be an object"
     )
   })
 
@@ -30,7 +30,7 @@ describe("context construction", function() {
     assert.throws(
       () => new zmq.Context({}, 2),
       TypeError,
-      "Expected 1 argument",
+      "Expected 1 argument"
     )
   })
 
