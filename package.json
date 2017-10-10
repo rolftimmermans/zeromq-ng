@@ -2,7 +2,8 @@
   "name": "zeromq-ng",
   "version": "5.0.0-beta.1",
   "description": "Next-generation ZeroMQ bindings for Node.js",
-  "main": "lib/index",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "gypfile": true,
   "repository": {
     "type": "git",
@@ -15,13 +16,14 @@
     "prebuild-install": ">= 2.2.2"
   },
   "devDependencies": {
+    "@types/node": ">= 8.0",
     "benchmark": ">= 0",
     "chai": ">= 4.1",
     "eslint": ">= 4.0",
     "mocha": ">= 4.0",
     "prebuild": ">= 6.2.1",
     "semver": ">= 0",
-    "should": ">= 0",
+    "typescript": "^2.5.3",
     "weak": ">= 1.0"
   },
   "engines": {
@@ -30,7 +32,7 @@
   "scripts": {
     "install": "detect-libc prebuild-install || script/build.sh",
     "prebuild": "detect-libc prebuild --verbose --target 8.6.0 --strip --upload",
-    "test": "eslint lib && script/fmt.sh && script/build.sh --debug --verbose && ZMQ_BUILD=Debug mocha",
+    "test": "eslint lib && script/fmt.sh && script/build.sh --debug --verbose && ZMQ_BUILD=Debug mocha && tsc --project test/unit",
     "bench": "script/build.sh --verbose && node --use_strict --harmony_async_iteration --expose-gc test/bench/send-only.js"
   },
   "keywords": [
