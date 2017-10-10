@@ -16,7 +16,6 @@ env:
 
 jobs:
   include:
-  - stage: test
   - stage: publish binaries
     if: tag IS present
     script: skip
