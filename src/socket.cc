@@ -9,6 +9,7 @@
 #include "inline/work.h"
 
 #include <cmath>
+#include <limits>
 #include <set>
 
 namespace zmq {

@@ -101,19 +101,19 @@ for (const proto of ["inproc", "ipc", "tcp"]) {
         const address = uniqAddress(proto)
         const events = []
 
-        this.sockA.events.emitter.on("listening", data => {
+        this.sockA.events.on("listening", data => {
           events.push(["listening", data])
         })
 
-        this.sockA.events.emitter.on("accept", data => {
+        this.sockA.events.on("accept", data => {
           events.push(["accept", data])
         })
 
-        this.sockA.events.emitter.on("close", data => {
+        this.sockA.events.on("close", data => {
           events.push(["close", data])
         })
 
-        this.sockA.events.emitter.on("stop", data => {
+        this.sockA.events.on("stop", data => {
           events.push(["stop", data])
         })
 

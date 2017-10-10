@@ -22,7 +22,7 @@ describe("socket options", function() {
     assert.equal(sock.immediate, true)
   })
 
-  it("should set and get int socket option", function() {
+  it("should set and get int32 socket option", function() {
     const sock = new zmq.Dealer
     assert.equal(sock.backlog, 100)
     sock.backlog = 75
@@ -128,6 +128,13 @@ describe("socket options", function() {
       TypeError,
       "Cannot add property doesNotExist, object is not extensible"
     )
+  })
+
+  it("should get mechanism", function() {
+    const sock = new zmq.Dealer
+    assert.equal(sock.securityMechanism, null)
+    sock.plainServer = true
+    assert.equal(sock.securityMechanism, "plain")
   })
 
   describe("warnings", function() {
