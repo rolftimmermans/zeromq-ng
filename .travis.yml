@@ -1,4 +1,5 @@
 language: node_js
+cache: yarn
 
 node_js:
 - 8.6
@@ -33,7 +34,7 @@ jobs:
     deploy:
       provider: script
       skip_cleanup: true
-      script: "npm run prebuild"
+      script: "yarn run prebuild"
 
   - stage: publish package
     if: tag IS present
@@ -57,9 +58,9 @@ before_install:
 - if [ -n "$ALPINE" ]; then wget https://raw.githubusercontent.com/alpinelinux/alpine-chroot-install/v0.6.0/alpine-chroot-install && echo 'a827a4ba3d0817e7c88bae17fe34e50204983d1e  alpine-chroot-install' | sha1sum -c; fi
 
 install:
-- if [ -z "$ALPINE" ]; then npm install; fi
-- if [ -n "$ALPINE" ]; then sudo sh alpine-chroot-install -b v3.6 -r 'https://nl.alpinelinux.org/alpine/edge/testing' -p 'emscripten emscripten-libs-asmjs closure-compiler' -k 'CI TRAVIS_.* ZMQ.*' && alpine/enter-chroot -u $USER npm install; fi
+- if [ -z "$ALPINE" ]; then yarn install; fi
+- if [ -n "$ALPINE" ]; then sudo sh alpine-chroot-install -b v3.6 -r 'https://nl.alpinelinux.org/alpine/edge/testing' -p 'emscripten emscripten-libs-asmjs closure-compiler' -k 'CI TRAVIS_.* ZMQ.*' && alpine/enter-chroot -u $USER yarn install; fi
 
 script:
-- if [ -z "$ALPINE" ]; then npm run test; fi
-- if [ -n "$ALPINE" ]; then alpine/enter-chroot -u $USER npm run test; fi
+- if [ -z "$ALPINE" ]; then yarn test; fi
+- if [ -n "$ALPINE" ]; then alpine/enter-chroot -u $USER yarn test; fi
