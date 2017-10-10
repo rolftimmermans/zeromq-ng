@@ -55,8 +55,8 @@ for (const proto of ["inproc", "ipc", "tcp"]) {
         await this.sockB.connect(address)
         await new Promise(resolve => setTimeout(resolve, 5))
         this.sockA.close()
-        await new Promise(resolve => setTimeout(resolve, 5))
         this.sockB.close()
+        await new Promise(resolve => setTimeout(resolve, 5))
         await done
 
         if (proto == "inproc") {
