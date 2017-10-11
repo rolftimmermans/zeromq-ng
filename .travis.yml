@@ -18,13 +18,23 @@ jobs:
     sudo: required
 
   include:
+  # Test latest versions on Linux and macOS.
   - os: linux
+  - os: osx
+
+  # Test shared libraries on Linux and macOS.
   - os: linux
     env: ZMQ_SHARED=true
-  - os: osx
   - os: osx
     env: ZMQ_SHARED=true
 
+  # Test older version branches of ZMQ.
+  - os: linux
+    env: ZMQ_VERSION=4.1.6
+  - os: linux
+    env: ZMQ_VERSION=4.0.8
+
+  # Publish all binaries for Linux and macOS.
   - stage: publish binaries
     script: yarn run prebuild
     os: linux
@@ -32,6 +42,7 @@ jobs:
     script: yarn run prebuild
     os: osx
 
+  # Publish package to NPM.
   - stage: publish package
     script: skip
     os: linux
