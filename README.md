@@ -13,6 +13,7 @@ Next generation ØMQ bindings for Node.js. The goals of this library are:
 * [Examples](#examples)
    * [Push/Pull](#pushpull)
    * [Pub/Sub](#pubsub)
+* [Contribution](#contribution)
 * [API Documentation](#api-documentation)
    * [Class: zmq.Socket](#class-zmqsocket)
    * [Class: zmq.Context](#class-zmqcontext)
@@ -27,7 +28,9 @@ Next generation ØMQ bindings for Node.js. The goals of this library are:
 
 Install ZeroMQ.js NG with prebuilt binaries:
 
-`npm install zeromq-nq`
+```sh
+npm install zeromq-nq
+```
 
 Requirements for prebuilt binaries:
 
@@ -36,7 +39,9 @@ Requirements for prebuilt binaries:
 
 To link against a shared library on your system:
 
-`npm install zeromq-nq --zmq-shared`
+```sh
+npm install zeromq-nq --zmq-shared
+```
 
 Make sure you have the following installed before attempting to build against a shared library:
 
@@ -142,6 +147,42 @@ async function run() {
 
 run()
 ```
+
+
+# Contribution
+
+
+## Dependencies
+
+In order to develop and test the library, you'll need the following:
+
+* A working C/C++ compiler toolchain with make
+* Python 2
+* Node.js 8.6+
+* clang-format is strongly recommended
+
+
+## Testing
+
+The test suite can be run with:
+
+```sh
+npm test
+```
+
+The test suite will validate and fix the coding style, run all unit tests and verify the validity of the included TypeScript type definitions.
+
+
+## Publishing
+
+To publish a new version, run:
+
+```sh
+npm version <new version>
+git push --tags
+```
+
+After continuous integration successfully finishes running the tests, the prebuilt binaries will be automatically published. Afterwards a new library version will be pushed to NPM.
 
 
 # API Documentation
