@@ -33,7 +33,7 @@ jobs:
     os: osx
 
   - stage: publish package
-    script: skip
+    script: npm version from-git
     os: linux
     deploy:
       provider: npm
