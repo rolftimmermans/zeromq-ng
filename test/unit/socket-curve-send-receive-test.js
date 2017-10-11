@@ -6,9 +6,7 @@ for (const proto of ["inproc", "ipc", "tcp"]) {
   describe(`socket with ${proto} curve send/receive`, function() {
     beforeEach(function() {
       if (!zmq.capability.curve) this.skip()
-    })
 
-    beforeEach(function() {
       const serverKeypair = zmq.curveKeypair()
       const clientKeypair = zmq.curveKeypair()
 
@@ -35,6 +33,8 @@ for (const proto of ["inproc", "ipc", "tcp"]) {
 
     describe("when connected", function() {
       beforeEach(async function() {
+        if (!zmq.capability.curve) this.skip()
+
         const address = uniqAddress(proto)
         await this.sockB.bind(address)
         await this.sockA.connect(address)
