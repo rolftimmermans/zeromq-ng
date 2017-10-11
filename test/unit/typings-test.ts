@@ -1,3 +1,5 @@
+/* To test the typings this file should compile successfully with TypeScript.
+   It is not necessary for it to run successfully. */
 import * as zmq from "../.."
 
 const version: string = zmq.version
