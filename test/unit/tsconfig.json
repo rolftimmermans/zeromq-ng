@@ -10,6 +10,6 @@
     "lib": ["ES7", "esnext.asynciterable"]
   },
   "files": [
-    "typings-test.ts",
+    "typings-test.ts"
   ]
 }
