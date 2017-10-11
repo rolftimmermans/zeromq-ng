@@ -40,6 +40,8 @@ jobs:
       email: r.w.timmermans@gmail.com
       api_key:
         secure: rg8GpeS20asj3JcgmfQpumBc1JV44hliyCIW3Y+rN/5gaurkm87K8MGVsNTVwwsdWyBFGjfGEYUhXF+H9q/OMLRchHqkfW6y7jzbWQx5QP5srbf7J8uWGIytKzJbX6yt41kHzk+FKFU2XAzrIP+51tvZiqBdpkkKCA/KdKG779mH04uphxcuaGtiEtqGhXdNe494r4ux727hvATRJwnGO6JvDzD6aM92i5SZdM/xKIPt+1KNRX92TIWj/op5XkpwvkPZjAERdOiHB052GM0mgaMxZiJdO0Xb5FeTh/1SXZXYE+XPIY4Sm3Pa75Kk3UFt5nI4DKFhl6V8UwOPAHiIFBZJPe/avOxPejHzwLxO3nBWEboiuc0OWds16x1NJsSLGk3CtDcFl6Zkanh8EFmyy7LMUuR1MEjY6+azQgTibVB2ynqN1MKYkxl/aDJB0xYtabDgaptiM5ITaMNUR7pUG4VRQkvi6L5TfMdzI8/mwxkjMnnVnFef8OGw5i0SRJMpEXeohrgCjkUN+uxpo+FIzPDf/tano35wgh/LYDbXNMfdEgd1L9MkOIS32vN46HbAbjrhSNIxK2u8PsOB07hPjmiFkoGRzrgg0veJ194FZ0k8LEJtqmDMCCMBaFiO1TuTHDNyGzAsR17Upk7/qZKeH/EPDhvbycH4hWvvri29yrI=
+      on:
+        tags: true
 
 stages:
 - name: test
