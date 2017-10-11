@@ -12,7 +12,6 @@
   "dependencies": {
     "detect-libc": ">= 0.2.0",
     "node-addon-api": "rolftimmermans/node-addon-api#master",
-    "node-gyp": ">= 3.6.2",
     "prebuild-install": ">= 2.2.2"
   },
   "devDependencies": {

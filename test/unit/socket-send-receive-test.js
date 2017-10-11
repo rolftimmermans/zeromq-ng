@@ -242,12 +242,13 @@ for (const proto of ["inproc", "ipc", "tcp"]) {
           weak(msg, release)
         }
 
-        send(2048)
+        const sent = send(2048)
         await receive()
+        await sent
+        await new Promise(resolve => setTimeout(resolve, 5))
 
         gc()
-        gc()
-        assert.equal(released, 1)
+        assert.equal(released, proto == "inproc" ? 1 : 2)
       })
 
       if (proto == "inproc") {
