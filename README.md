@@ -25,14 +25,27 @@ Next generation ØMQ bindings for Node.js. The goals of this library are:
 
 # Installation
 
-Install ZeroMQ.js NG with the following:
+Install ZeroMQ.js NG with prebuilt binaries:
 
 `npm install zeromq-nq`
 
-To link against a shared library on your system (if it has been installed and development headers are available):
+Requirements for prebuilt binaries:
+
+* Node.js 8.6+
+* Linux or macOS (10.9+)
+
+To link against a shared library on your system:
 
 `npm install zeromq-nq --zmq-shared`
 
+Make sure you have the following installed before attempting to build against a shared library:
+
+* A working C/C++ compiler toolchain with make
+* Python 2
+* ZeroMQ 4.0+ with development headers
+* Node.js 8.6+
+
+Support for previous Node.js versions is pending on stabilisation of N-API.
 
 # Examples
 
