@@ -5,13 +5,21 @@ if [ "${npm_config_zmq_shared}" = "true" ] || [ "${ZMQ_SHARED}" = "true" ]; then
   echo "Requesting to use dynamically linked libzmq; skipping build..."
   export ARGS="--zmq-shared"
 else
-  export MACOSX_DEPLOYMENT_TARGET=10.9
-  export ZMQ_REPO="libzmq"
   export ZMQ_VERSION=${ZMQ_VERSION:-"4.2.2"}
+
+  if [ "${ZMQ_VERSION}" \< "4.1.0" ]; then
+    export ZMQ_REPO="zeromq4-x"
+  elif [ "${ZMQ_VERSION}" \< "4.2.0" ]; then
+    export ZMQ_REPO="zeromq4-1"
+  else
+    export ZMQ_REPO="libzmq"
+  fi
+
   export ZMQ_PREFIX="${PWD}/libzmq"
   export ZMQ_SOURCE="https://github.com/zeromq/${ZMQ_REPO}/releases/download/v${ZMQ_VERSION}/zeromq-${ZMQ_VERSION}.tar.gz"
   export ZMQ_SRC_DIR="zeromq-${ZMQ_VERSION}"
   export ZMQ_TARBALL="zeromq-${ZMQ_VERSION}.tar.gz"
+  export MACOSX_DEPLOYMENT_TARGET=10.9
 
   mkdir -p "${ZMQ_PREFIX}"
   cd "${ZMQ_PREFIX}"
