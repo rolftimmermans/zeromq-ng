@@ -35,11 +35,18 @@ else
 
     echo "Building libzmq..."
     test -f configure || ./autogen.sh
-    if [ "${ZMQ_VERSION}" -lt "4.2.0" ]; then
-      ./configure "--prefix=${ZMQ_PREFIX}" --with-relaxed --enable-static --disable-shared --without-documentation ${ZMQ_BUILD_OPTIONS}
-    else
-      ./configure "--prefix=${ZMQ_PREFIX}" --disable-pedantic --enable-static --disable-shared --without-docs ${ZMQ_BUILD_OPTIONS}
+
+    if [ "${npm_config_zmq_draft}" = "true" ] || [ "${ZMQ_DRAFT}" = "true" ]; then
+      export ZMQ_BUILD_OPTIONS=--enable-drafts ${ZMQ_BUILD_OPTIONS}
     fi
+
+    if [ "${ZMQ_VERSION}" \< "4.2.0" ]; then
+      export ZMQ_BUILD_OPTIONS="--with-relaxed --without-documentation ${ZMQ_BUILD_OPTIONS}"
+    else
+      export ZMQ_BUILD_OPTIONS="--disable-pedantic --without-docs ${ZMQ_BUILD_OPTIONS}"
+    fi
+
+    ./configure "--prefix=${ZMQ_PREFIX}" --enable-static --disable-shared ${ZMQ_BUILD_OPTIONS}
 
     make -j 2
     make install
