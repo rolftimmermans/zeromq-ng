@@ -41,7 +41,7 @@ describe("zmq", function() {
   })
 
   describe("curve keypair", function() {
-    before(function() {
+    beforeEach(function() {
       if (!zmq.capability.curve) this.skip()
     })
 

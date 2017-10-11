@@ -5,7 +5,7 @@ const {uniqAddress} = require("./helpers")
 
 for (const proto of ["inproc", "ipc", "tcp"]) {
   describe(`socket with ${proto} bind/unbind`, function() {
-    before(function() {
+    beforeEach(function() {
       /* ZMQ < 4.1 fails with assertion errors with inproc.
          See: https://github.com/zeromq/libzmq/pull/2123/files */
       if (proto == "inproc" && semver.satisfies(zmq.version, "< 4.1")) this.skip()
