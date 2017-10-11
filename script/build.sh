@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-if [ "${npm_config_zmq_shared}" == "true" ] || [ "${ZMQ_SHARED}" == "true" ]; then
+if [ "${npm_config_zmq_shared}" = "true" ] || [ "${ZMQ_SHARED}" = "true" ]; then
   echo "Requesting to use dynamically linked libzmq; skipping build..."
   export ARGS="--zmq-shared"
 else
@@ -35,7 +35,7 @@ else
 
     echo "Building libzmq..."
     test -f configure || ./autogen.sh
-    if [[ "${ZMQ_VERSION}" < "4.2.0" ]]; then
+    if [ "${ZMQ_VERSION}" -lt "4.2.0" ]; then
       ./configure "--prefix=${ZMQ_PREFIX}" --with-relaxed --enable-static --disable-shared --without-documentation ${ZMQ_BUILD_OPTIONS}
     else
       ./configure "--prefix=${ZMQ_PREFIX}" --disable-pedantic --enable-static --disable-shared --without-docs ${ZMQ_BUILD_OPTIONS}

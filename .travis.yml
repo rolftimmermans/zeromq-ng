@@ -26,10 +26,10 @@ jobs:
     env: ZMQ_SHARED=true
 
   - stage: publish binaries
-    script: yarn run prebuild
+    script: npm version from-git && yarn run prebuild
     os: linux
   - stage: publish binaries
-    script: yarn run prebuild
+    script: npm version from-git && yarn run prebuild
     os: osx
 
   - stage: publish package
