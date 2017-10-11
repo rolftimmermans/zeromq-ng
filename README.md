@@ -144,7 +144,7 @@ A ØMQ socket. This class should generally not be used directly. Instead, create
 Create a new socket by calling any of the child class constructors. Each subclass corresponds to a ØMQ socket type:
 
 * **Arguments** <br/>
-  <[Object]> An optional object with options that will be set on the socket. Any option setter can be used.
+  `options` <[Object]> An optional object with options that will be set on the socket. Any option setter can be used.
 
 * **Returns** <br/>
   <[Socket]> New socket of the given type.
@@ -178,7 +178,7 @@ new zmq.Stream(...)
 Binds the socket to the given address. During `bind()` the socket cannot be used. Do not call any other methods until the returned promise resolves. Make sure to use `await` or similar.
 
 * **Arguments** <br/>
-  <[string]> Address to bind this socket to.
+  `address` <[string]> Address to bind this socket to.
 
 * **Returns** <br/>
   <[Promise]> Resolved when the socket was successfully bound.
@@ -194,7 +194,7 @@ await socket.bind("tcp://*:3456")
 Unbinds the socket to the given address. During `unbind()` the socket cannot be used. Do not call any other methods until the returned promise resolves. Make sure to use `await` or similar.
 
 * **Arguments** <br/>
-  <[string]> Address to unbind this socket from.
+  `address` <[string]> Address to unbind this socket from.
 
 * **Returns** <br/>
   <[Promise]> Resolved when the socket was successfully unbound.
@@ -210,7 +210,7 @@ await socket.bind("tcp://*:3456")
 Starts a new connection to the socket at the given address and returns immediately. The connection will be made asynchronously in the background.
 
 * **Arguments** <br/>
-  <[string]> Address to connect this socket to.
+  `address` <[string]> Address to connect this socket to.
 
 * **Returns** <br/>
   <[undefined]>
@@ -226,7 +226,7 @@ socket.connect("tcp://127.0.0.1:3456")
 Disconnects a previously connected socket from the given address. Disonnection will happen asynchronously in the background.
 
 * **Arguments** <br/>
-  <[string]> Address to disconnect this socket from.
+  `address` <[string]> Address to disconnect this socket from.
 
 * **Returns** <br/>
   <[undefined]>
@@ -248,7 +248,7 @@ Only **one** call to `send()` may be executed simultaneously. Do not call `send(
 **Note:** Due to the nature of Node.js and to avoid blocking the main thread, this method always sends messages with the `ZMQ_DONTWAIT` flag. It polls asynchronously if sending is not currently possible. This means that all functionality related to timeouts and blocking behaviour is reimplemented in the Node.js bindings. Any differences in behaviour with the native ZMQ library is considered a bug.
 
 * **Arguments** <br/>
-  <[string]> | <[Buffer]> | <[Array]<[string] | [Buffer]> Single message or multipart message to queue for sending.
+  `message` <[string]> | <[Buffer]> | <[Array]<[string] | [Buffer]> Single message or multipart message to queue for sending.
 
 * **Returns** <br/>
   <[Promise]> Resolved when the message was successfully queued.
@@ -496,7 +496,7 @@ A ØMQ context.
 Creates a new ØMQ context. It is usually not necessary to instantiate a new context – the global context `zmq.global` is used for new sockets by default.
 
 * **Arguments** <br/>
-  <[Object]> An optional object with options that will be set on the context. Any option setter can be used.
+  `options` <[Object]> An optional object with options that will be set on the context. Any option setter can be used.
 
 * **Returns** <br/>
   <[Context]> New context.
@@ -576,7 +576,7 @@ An event observer for ØMQ sockets. The event observer can be used in one of two
 Creates a new ØMQ observer. It is usually not necessary to instantiate a new observer. Access an existing observer for a socket with `socket.events`.
 
 * **Arguments** <br/>
-  <[Socket]> The socket to observe.
+  `socket` <[Socket]> The socket to observe.
 
 * **Returns** <br/>
   <[Observer]> New observer for the given socket.
@@ -602,9 +602,9 @@ Converts this observer into event emitter mode and attaches the event listener.
 Conversion to an event emitter means that this observer will now start to wait on events internally. Because only one call to `receive()` can be made simultaneously, **avoid any other calls** to `receive()` when the observer is in event emitter mode.
 
 * **Arguments** <br/>
-  <[string]> The name of the event.
+  `event` <[string]> The name of the event.
 
-  <[Function] (<[Object]>)> The callback function. The function will be invoked with an object with additional details related to this event. Details can include any of:
+  `listener` <[Function] (<[Object]>)> The callback function. The function will be invoked with an object with additional details related to this event. Details can include any of:
 
   * `address` <[string]> – The address that the socket is binding/unbinding/connecting/disconnecting to or from.
   * `reconnectInterval` <[number]> – The reconnect interval in milliseconds.
