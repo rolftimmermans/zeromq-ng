@@ -736,6 +736,7 @@ Creates a new ØMQ proxy.
 
 * **Arguments** <br/>
   `frontEnd` <[Socket]> The front-end socket to proxy.
+
   `backEnd` <[Socket]> The back-end socket to proxy.
 
 * **Returns** <br/>
