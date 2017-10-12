@@ -54,7 +54,8 @@ else
       export ZMQ_BUILD_OPTIONS="--disable-pedantic --without-docs ${ZMQ_BUILD_OPTIONS}"
     fi
 
-    ./configure "--prefix=${ZMQ_PREFIX}" --enable-static --disable-shared ${ZMQ_BUILD_OPTIONS}
+    # Build as static library, don't build curve_keygen binary.
+    ./configure "--prefix=${ZMQ_PREFIX}" --enable-static --disable-shared --disable-curve-keygen ${ZMQ_BUILD_OPTIONS}
 
     make -j 2
     make install
