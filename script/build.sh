@@ -53,13 +53,13 @@ else
       # curve keygen tool, which cannot be excluded before 4.1.
       export ZMQ_BUILD_OPTIONS="--with-relaxed --without-documentation ${ZMQ_BUILD_OPTIONS}"
     elif [ "${ZMQ_VERSION}" \< "4.2.0" ]; then
-      export ZMQ_BUILD_OPTIONS="--disable-shared --with-relaxed --without-documentation ${ZMQ_BUILD_OPTIONS}"
+      export ZMQ_BUILD_OPTIONS="--disable-shared --disable-curve-keygen --with-relaxed --without-documentation ${ZMQ_BUILD_OPTIONS}"
     else
-      export ZMQ_BUILD_OPTIONS="--disable-shared --disable-pedantic --without-docs ${ZMQ_BUILD_OPTIONS}"
+      export ZMQ_BUILD_OPTIONS="--disable-shared --disable-curve-keygen --disable-pedantic --without-docs ${ZMQ_BUILD_OPTIONS}"
     fi
 
     # Build as static library, don't build curve_keygen binary.
-    ./configure "--prefix=${ZMQ_PREFIX}" --enable-static --disable-curve-keygen ${ZMQ_BUILD_OPTIONS}
+    ./configure "--prefix=${ZMQ_PREFIX}" --enable-static ${ZMQ_BUILD_OPTIONS}
 
     make -j 2
     make install
