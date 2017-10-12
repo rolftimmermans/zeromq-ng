@@ -474,6 +474,24 @@ The property names may differ somewhat from the native option names. This is int
 * **connectTimeout** – ZMQ_CONNECT_TIMEOUT <br/>
   <[number]> Sets how long to wait before timing-out a connect() system call. The connect() system call normally takes a long time before it returns a time out error. Setting this option allows the library to time out the call at an earlier interval.
 
+* **conflate** (write only, on `Pull`, `Push`, `Subscriber`, `Publisher` or `Dealer` sockets only) – ZMQ_CONFLATE <br/>
+  <[boolean]> If set to `true`, a socket shall keep only one message in its inbound/outbound queue: the last message to be received/sent. Ignores any high water mark options. Does not support multi-part messages – in particular, only one part of it is kept in the socket internal queue.
+
+* **connectRoutingId** (write only, on `Router` or `Stream` sockets only) – ZMQ_CONNECT_RID <br/>
+  <[string] | [Buffer]> Sets the peer identity of the next host connected via the `connect()` and immediately readies that connection for data transfer with the named identity. This option applies only to the first subsequent call to `connect()`. Connections thereafter use default behaviour.
+
+  Typical use is to set this socket option ahead of each `connect()` attempt to a new host. Each connection MUST be assigned a unique name. Assigning a name that is already in use is not allowed.
+
+  Useful when connecting `Router` to `Router`, or `Stream` to `Stream`, as it allows for immediate sending to peers. Outbound ID framing requirements for `Router` and `Stream` sockets apply.
+
+  The peer identity should be from 1 to 255 bytes long and MAY NOT start with binary zero.
+
+* **correlate** (write only, on `Request` sockets only) – ZMQ_REQ_CORRELATE <br/>
+  <[boolean]> The default behaviour of `Request` sockets is to rely on the ordering of messages to match requests and responses and that is usually sufficient. When this option is set to `true` the socket will prefix outgoing messages with an extra frame containing a request id. That means the full message is `[<request id>, `null`, user frames…]`. The `Request` socket will discard all incoming messages that don't begin with these two frames.
+
+* **handover** (write only, on `Router` sockets only) – ZMQ_ROUTER_HANDOVER <br/>
+  <[boolean]> If two clients use the same identity when connecting to a `Router`, the results shall depend on the this option. If it set to `false` (default), the `Router` socket shall reject clients trying to connect with an already-used identity. If it is set to `true`, the `Router` socket shall hand-over the connection to the new client and disconnect the existing one.
+
 * **handshakeInterval** – ZMQ_HANDSHAKE_IVL <br/>
   <[number]> Handshaking is the exchange of socket configuration information (socket type, identity, security) that occurs when a connection is first opened (only for connection-oriented transports). If handshaking does not complete within the configured time, the connection shall be closed. The value 0 means no handshake time limit.
 
@@ -489,7 +507,7 @@ The property names may differ somewhat from the native option names. This is int
 * **immediate** – ZMQ_IMMEDIATE <br/>
   <[boolean]> By default queues will fill on outgoing connections even if the connection has not completed. This can lead to "lost" messages on sockets with round-robin routing (`Req`, `Push`, `Dealer`). If this option is set to `true`, messages shall be queued only to completed connections. This will cause the socket to block if there are no other connections, but will prevent queues from filling on pipes awaiting connection.
 
-* **invertMatching** (only on `Publisher`, `Subscriber` or `XPublisher` sockets) – ZMQ_INVERT_MATCHING
+* **invertMatching** (on `Publisher`, `Subscriber` or `XPublisher` sockets only) – ZMQ_INVERT_MATCHING
   <[boolean]> On `Publisher` and `XPublisher` sockets, this causes messages to be sent to all connected sockets except those subscribed to a prefix that matches the message. On `Subscriber` sockets, this causes only incoming messages that do not match any of the socket's subscriptions to be received by the user.
 
   Whenever this is set to `true` on a `Publisher` socket, all `Subscriber` sockets connecting to it must also have the option set to `true`. Failure to do so will have the `Subsriber` sockets reject everything the `Publisher` socket sends them. `XSubscriber` sockets do not need to do this because they do not filter incoming messages.
@@ -503,10 +521,10 @@ The property names may differ somewhat from the native option names. This is int
 * **linger** – ZMQ_LINGER <br/>
   <[number]> Determines how long pending messages which have yet to be sent to a peer shall linger in memory after a socket is closed with `close()`.
 
-* **mandatory** (only on `Router` sockets) – ZMQ_ROUTER_MANDATORY <br/>
+* **mandatory** (on `Router` sockets only) – ZMQ_ROUTER_MANDATORY <br/>
   <[boolean]> A value of `false` is the default and discards the message silently when it cannot be routed or the peer's high water mark is reached. A value of `true` causes `send()` to fail if it cannot be routed, or wait asynchronously if the high water mark is reached.
 
-* **manual** (write only, only on `XPublisher` sockets) – ZMQ_XPUB_MANUAL <br/>
+* **manual** (write only, on `XPublisher` sockets only) – ZMQ_XPUB_MANUAL <br/>
   <[boolean]> Sets the `XPublisher` socket subscription handling mode to manual/automatic. A value of `true` will change the subscription requests handling to manual.
 
 * **maxMessageSize** – ZMQ_MAXMSGSIZE <br/>
@@ -518,11 +536,16 @@ The property names may differ somewhat from the native option names. This is int
 * **multicastMaxTransportDataUnit** – ZMQ_MULTICAST_MAXTPDU <br/>
   <[number]> Sets the maximum transport data unit size used for outbound multicast packets. This must be set at or below the minimum Maximum Transmission Unit (MTU) for all network paths over which multicast reception is required.
 
-* **noDrop** (write only, only on `XPublisher` sockets) – ZMQ_XPUB_NODROP <br/>
+* **noDrop** (write only, on `XPublisher` or `Publisher` sockets only) – ZMQ_XPUB_NODROP <br/>
   <[boolean]> Sets the `XPublisher` socket behaviour to return an error if the high water mark is reached and the message could not be send. The default is to drop the message silently when the peer high water mark is reached.
 
-* **notify** (write only, only on `Stream` sockets) – ZMQ_STREAM_NOTIFY <br/>
+* **notify** (write only, on `Stream` sockets only) – ZMQ_STREAM_NOTIFY <br/>
   <[boolean]> Enables connect and disconnect notifications on a `Stream` when set to `true`. When notifications are enabled, the socket delivers a zero-length message when a peer connects or disconnects.
+
+* **probeRouter** (write only, on `Router`, `Dealer` or `Request` sockets only)– ZMQ_PROBE_ROUTER <br/>
+  <[boolean]> When set to `true`, the socket will automatically send an empty message when a new connection is made or accepted. You may set this on sockets connected to a `Router` socket. The application must filter such empty messages. This option provides the `Router` application with an event signaling the arrival of a new peer.
+
+  **Warning:** Do not set this option on a socket that talks to any other socket type except `Router`: the results are undefined.
 
 * **rate** – ZMQ_RATE <br/>
   <[number]> Maximum send or receive data rate for multicast transports such as `pgm`.
@@ -547,7 +570,12 @@ The property names may differ somewhat from the native option names. This is int
 * **recoveryInterval** – ZMQ_RECOVERY_IVL <br/>
   <[number]> Maximum time in milliseconds that a receiver can be absent from a multicast group before unrecoverable data loss will occur.
 
-* **routingId** – ZMQ_IDENTITY <br/>
+* **relaxed** (write only, on `Request` sockets only) – ZMQ_REQ_RELAXED <br/>
+  <[boolean]> By default, a `Request` socket does not allow initiating a new request with until the reply to the previous one has been received. When set to `true`, sending another message is allowed and previous replies will be discarded. The request-reply state machine is reset and a new request is sent to the next available peer.
+
+  **Note:** If set to `true`, also enable `correlate` to ensure correct matching of requests and replies. Otherwise a late reply to an aborted request can be reported as the reply to the superseding request.
+
+* **routingId** (on `Request`, `Response`, `Router` or `Dealer` sockets only)– ZMQ_IDENTITY <br/>
   <[string] | [Buffer]> The identity of the specified socket when connecting to a `Router` socket.
 
 * **sendBufferSize** – ZMQ_SNDBUF <br/>
@@ -585,10 +613,13 @@ The property names may differ somewhat from the native option names. This is int
 * **type** (read only) – ZMQ_TYPE <br/>
   <[number]> Retrieve the socket type. This is fairly useless because you can inspect the JavaScript constructor with `socket.constructor`.
 
-* **verbose** (write only, only on `XPublisher` sockets) – ZMQ_XPUB_VERBOSE <br/>
+* **typeOfService** – ZMQ_TOS <br/>
+  <[number]> Sets the ToS fields (the *Differentiated Services* (DS) and *Explicit Congestion Notification* (ECN) field) of the IP header. The ToS field is typically used to specify a packet's priority. The availability of this option is dependent on intermediate network equipment that inspect the ToS field and provide a path for low-delay, high-throughput, highly-reliable service, etc.
+
+* **verbose** (write only, on `XPublisher` sockets only) – ZMQ_XPUB_VERBOSE <br/>
   <[boolean]> If set to `true` the socket passes all subscribe messages to the caller. If set to `false` (default) these are not visible to the caller.
 
-* **verboser** (write only, only on `XPublisher` sockets) – ZMQ_XPUB_VERBOSER <br/>
+* **verboser** (write only, on `XPublisher` sockets only) – ZMQ_XPUB_VERBOSER <br/>
   <[boolean]>If set to `true` the socket passes all subscribe **and** unsubscribe messages to the caller. If set to `false` (default) these are not visible to the caller.
 
 * **vmciBufferSize** – ZMQ_VMCI_BUFFER_SIZE <br/>
@@ -603,8 +634,9 @@ The property names may differ somewhat from the native option names. This is int
 * **vmciConnectTimeout** – ZMQ_VMCI_CONNECT_TIMEOUT <br/>
   <[number]> Connection timeout for the socket.
 
-* **welcomeMessage** (write only, only on `XPublisher` sockets) – ZMQ_XPUB_WELCOME_MSG <br/>
+* **welcomeMessage** (write only, on `XPublisher` sockets only) – ZMQ_XPUB_WELCOME_MSG <br/>
   <[string]> Sets a welcome message that will be recieved by subscriber when connecting. Subscriber must subscribe to the welcome message before connecting. For welcome messages to work well, poll on incoming subscription messages on the `XPublisher` socket and handle them.
+
 
 
 ### socket security options
@@ -638,6 +670,9 @@ Listed below are all socket options that are related to setting and retrieving t
   * `"plain"` – The PLAIN mechanism defines a simple username/password mechanism that lets a server authenticate a client. PLAIN makes no attempt at security or confidentiality.
   * `"curve"` – The CURVE mechanism defines a mechanism for secure authentication and confidentiality for communications between a client and a server. CURVE is intended for use on public networks.
   * `"gssapi"` – The GSSAPI mechanism defines a mechanism for secure authentication and confidentiality for communications between a client and a server using the Generic Security Service Application Program Interface (GSSAPI). The GSSAPI mechanism can be used on both public and private networks.
+
+* **zapDomain** – ZMQ_ZAP_DOMAIN <br/>
+  <[string]> Sets the domain for ZAP (ZMQ RFC 27) authentication. For NULL security (the default on all tcp:// connections), ZAP authentication only happens if you set a non-empty domain. For PLAIN and CURVE security, ZAP requests are always made, if there is a ZAP handler present. See http://rfc.zeromq.org/spec:27 for more details.
 
 
 ## Class: zmq.Context
