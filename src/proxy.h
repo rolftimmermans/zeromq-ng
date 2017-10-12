@@ -4,6 +4,8 @@
 #include "binding.h"
 #include "inline/poller.h"
 
+#ifdef ZMQ_HAS_STEERABLE_PROXY
+
 namespace zmq {
 class Proxy : public Napi::ObjectWrap<Proxy> {
 public:
@@ -34,3 +36,5 @@ private:
     void* control_pub = nullptr;
 };
 }
+
+#endif

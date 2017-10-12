@@ -24,3 +24,7 @@
 #else
 #define force_inline inline __attribute__((always_inline))
 #endif
+
+#if ZMQ_VERSION >= ZMQ_MAKE_VERSION(4, 0, 5)
+#define ZMQ_HAS_STEERABLE_PROXY 1
+#endif

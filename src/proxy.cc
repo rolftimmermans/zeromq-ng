@@ -6,6 +6,8 @@
 #include "inline/v8hacks.h"
 #include "inline/work.h"
 
+#ifdef ZMQ_HAS_STEERABLE_PROXY
+
 namespace zmq {
 Napi::FunctionReference Proxy::Constructor;
 
@@ -184,3 +186,5 @@ void Proxy::Initialize(Napi::Env& env, Napi::Object& exports) {
     exports.Set("Proxy", constructor);
 }
 }
+
+#endif

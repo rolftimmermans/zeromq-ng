@@ -67,7 +67,10 @@ Napi::Object init(Napi::Env env, Napi::Object exports) {
     zmq::Context::Initialize(env, exports);
     zmq::Socket::Initialize(env, exports);
     zmq::Observer::Initialize(env, exports);
+
+#ifdef ZMQ_HAS_STEERABLE_PROXY
     zmq::Proxy::Initialize(env, exports);
+#endif
 
     return exports;
 }

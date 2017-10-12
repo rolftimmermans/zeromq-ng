@@ -1,8 +1,14 @@
 const zmq = require("../..")
+const semver = require("semver")
 const {assert} = require("chai")
 const {EventEmitter} = require("events")
 
 describe("proxy construction", function() {
+  beforeEach(function() {
+    /* ZMQ < 4.0.5 has no steerable proxy support. */
+    if (semver.satisfies(zmq.version, "< 4.0.5")) this.skip()
+  })
+
   afterEach(function() {
     gc()
   })

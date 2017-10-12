@@ -1,27 +1,32 @@
 const zmq = require("../..")
+const semver = require("semver")
 const {assert} = require("chai")
 
 describe("zmq", function() {
   describe("exports", function() {
     it("should include functions and constructors", function() {
-      assert.deepEqual(
-        Object.keys(zmq),
-        [
-          /* Utility functions. */
-          "version", "capability", "curveKeypair",
+      const expected = [
+        /* Utility functions. */
+        "version", "capability", "curveKeypair",
 
-          /* The global/default context. */
-          "global",
+        /* The global/default context. */
+        "global",
 
-          /* Generic constructors. */
-          "Context", "Socket", "Observer", "Proxy",
+        /* Generic constructors. */
+        "Context", "Socket", "Observer", "Proxy",
 
-          /* Specific socket constructors. */
-          "Pair", "Publisher", "Subscriber", "Request", "Response",
-          "Dealer", "Router", "Pull", "Push", "XPublisher", "XSubscriber",
-          "Stream",
-        ]
-      )
+        /* Specific socket constructors. */
+        "Pair", "Publisher", "Subscriber", "Request", "Response",
+        "Dealer", "Router", "Pull", "Push", "XPublisher", "XSubscriber",
+        "Stream",
+      ]
+
+      /* ZMQ < 4.0.5 has no steerable proxy support. */
+      if (semver.satisfies(zmq.version, "< 4.0.5")) {
+        expected.splice(expected.indexOf("Proxy"), 1)
+      }
+
+      assert.sameMembers(Object.keys(zmq), expected)
     })
   })
 
