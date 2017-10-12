@@ -22,6 +22,7 @@ suite.add(`queue proto=${proto} msgsize=${msgsize} zmq=ng`, Object.assign({
   fn: async deferred => {
     const client = new zmq.ng.Dealer
     client.linger = 0
+    client.sendHighWaterMark = n * 2
     client.connect(address)
 
     gc()
