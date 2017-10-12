@@ -211,8 +211,7 @@ void Socket::Close() {
     }
 }
 
-void Socket::Send(
-    const Napi::Promise::Resolver& resolver, const Napi::Array& msg) {
+void Socket::Send(const Napi::Promise::Resolver& res, const Napi::Array& msg) {
     auto last = msg.Length() - 1;
     for (uint32_t i = 0; i <= last; i++) {
         Outgoing part(msg[i]);
@@ -220,16 +219,16 @@ void Socket::Send(
         uint32_t flags = i < last ? ZMQ_DONTWAIT | ZMQ_SNDMORE : ZMQ_DONTWAIT;
         while (zmq_msg_send(part, socket, flags) < 0) {
             if (zmq_errno() != EINTR) {
-                resolver.Reject(ErrnoException(Env(), zmq_errno()).Value());
+                res.Reject(ErrnoException(Env(), zmq_errno()).Value());
                 return;
             }
         }
     }
 
-    resolver.Resolve(Env().Undefined());
+    res.Resolve(Env().Undefined());
 }
 
-void Socket::Receive(const Napi::Promise::Resolver& resolver) {
+void Socket::Receive(const Napi::Promise::Resolver& res) {
     auto msg = Napi::Array::New(Env(), 1);
 
     uint32_t i = 0;
@@ -237,7 +236,7 @@ void Socket::Receive(const Napi::Promise::Resolver& resolver) {
         Incoming part;
         while (zmq_msg_recv(part, socket, ZMQ_DONTWAIT) < 0) {
             if (zmq_errno() != EINTR) {
-                resolver.Reject(ErrnoException(Env(), zmq_errno()).Value());
+                res.Reject(ErrnoException(Env(), zmq_errno()).Value());
                 return;
             }
         }
@@ -246,7 +245,7 @@ void Socket::Receive(const Napi::Promise::Resolver& resolver) {
         if (!zmq_msg_more(part)) break;
     }
 
-    resolver.Resolve(msg);
+    res.Resolve(msg);
 }
 
 Napi::Value Socket::Bind(const Napi::CallbackInfo& info) {
@@ -258,7 +257,7 @@ Napi::Value Socket::Bind(const Napi::CallbackInfo& info) {
     if (!ValidateOpen()) return Env().Undefined();
 
     state = Socket::State::Blocked;
-    auto resolver = Napi::Promise::Resolver::New(Env());
+    auto res = Napi::Promise::Resolver::New(Env());
     auto run_ctx =
         std::make_shared<AddressContext>(info[0].As<Napi::String>().Utf8Value());
 
@@ -277,9 +276,8 @@ Napi::Value Socket::Bind(const Napi::CallbackInfo& info) {
             state = Socket::State::Open;
 
             if (run_ctx->error != 0) {
-                resolver.Reject(
-                    ErrnoException(Env(), run_ctx->error, run_ctx->address)
-                        .Value());
+                res.Reject(ErrnoException(Env(), run_ctx->error, run_ctx->address)
+                               .Value());
                 return;
             }
 
@@ -287,10 +285,10 @@ Napi::Value Socket::Bind(const Napi::CallbackInfo& info) {
                 Ref();
             }
 
-            resolver.Resolve(Env().Undefined());
+            res.Resolve(Env().Undefined());
         });
 
-    return resolver.Promise();
+    return res.Promise();
 }
 
 Napi::Value Socket::Unbind(const Napi::CallbackInfo& info) {
@@ -302,7 +300,7 @@ Napi::Value Socket::Unbind(const Napi::CallbackInfo& info) {
     if (!ValidateOpen()) return Env().Undefined();
 
     state = Socket::State::Blocked;
-    auto resolver = Napi::Promise::Resolver::New(Env());
+    auto res = Napi::Promise::Resolver::New(Env());
     auto run_ctx =
         std::make_shared<AddressContext>(info[0].As<Napi::String>().Utf8Value());
 
@@ -321,9 +319,8 @@ Napi::Value Socket::Unbind(const Napi::CallbackInfo& info) {
             state = Socket::State::Open;
 
             if (run_ctx->error != 0) {
-                resolver.Reject(
-                    ErrnoException(Env(), run_ctx->error, run_ctx->address)
-                        .Value());
+                res.Reject(ErrnoException(Env(), run_ctx->error, run_ctx->address)
+                               .Value());
                 return;
             }
 
@@ -331,10 +328,10 @@ Napi::Value Socket::Unbind(const Napi::CallbackInfo& info) {
                 Unref();
             }
 
-            resolver.Resolve(Env().Undefined());
+            res.Resolve(Env().Undefined());
         });
 
-    return resolver.Promise();
+    return res.Promise();
 }
 
 void Socket::Connect(const Napi::CallbackInfo& info) {
@@ -389,25 +386,25 @@ Napi::Value Socket::Send(const Napi::CallbackInfo& info) {
     if (!ValidateArguments(info, args)) return Env().Undefined();
     if (!ValidateOpen()) return Env().Undefined();
 
-    Napi::Array msg;
+    Napi::Array parts;
     if (info[0].IsArray()) {
-        msg = info[0].As<Napi::Array>();
+        parts = info[0].As<Napi::Array>();
     } else {
-        msg = Napi::Array::New(Env(), 1);
-        msg.Set(0u, info[0]);
+        parts = Napi::Array::New(Env(), 1);
+        parts.Set(0u, info[0]);
     }
 
     if (send_timeout == 0 || HasEvents(ZMQ_POLLOUT)) {
         /* We can send on the socket immediately. This is a separate code
            path so we can avoid creating a lambda. */
-        auto resolver = Napi::Promise::Resolver::New(Env());
-        Send(resolver, msg);
+        auto res = Napi::Promise::Resolver::New(Env());
+        Send(res, parts);
 
         /* This operation may have caused a state change, so we must update
            the poller state manually! */
         poller.Trigger();
 
-        return resolver.Promise();
+        return res.Promise();
     } else {
         /* Check if we are already polling for writes. If so that means
            two async read operations are started; which we do not allow.
@@ -421,15 +418,16 @@ Napi::Value Socket::Send(const Napi::CallbackInfo& info) {
         /* Async send. Capture any references by value because the lambda
            outlives the scope of this method. We wrap the message reference
            in a shared pointer, because references cannot be copied. :( */
-        auto resolver = Napi::Promise::Resolver::New(Env());
-        auto msgp =
-            std::make_shared<Napi::Reference<Napi::Array>>(Napi::Persistent(msg));
+        auto res = Napi::Promise::Resolver::New(Env());
+        auto parts_ref = std::make_shared<Napi::Reference<Napi::Array>>(
+            Napi::Persistent(parts));
+
         poller.PollWritable(send_timeout, [=]() {
             V8CallbackScope scope;
-            Send(resolver, msgp->Value());
+            Send(res, parts_ref->Value());
         });
 
-        return resolver.Promise();
+        return res.Promise();
     }
 }
 
@@ -440,14 +438,14 @@ Napi::Value Socket::Receive(const Napi::CallbackInfo& info) {
     if (receive_timeout == 0 || HasEvents(ZMQ_POLLIN)) {
         /* We can read from the socket immediately. This is a separate code
            path so we can avoid creating a lambda. */
-        auto resolver = Napi::Promise::Resolver::New(Env());
-        Receive(resolver);
+        auto res = Napi::Promise::Resolver::New(Env());
+        Receive(res);
 
         /* This operation may have caused a state change, so we must update
            the poller state manually! */
         poller.Trigger();
 
-        return resolver.Promise();
+        return res.Promise();
     } else {
         /* Check if we are already polling for reads. Only one promise may
            receive the next message, so we must ensure that receive
@@ -459,13 +457,13 @@ Napi::Value Socket::Receive(const Napi::CallbackInfo& info) {
 
         /* Async receive. Capture any references by value because the lambda
            outlives the scope of this method. */
-        auto resolver = Napi::Promise::Resolver::New(Env());
+        auto res = Napi::Promise::Resolver::New(Env());
         poller.PollReadable(receive_timeout, [=]() {
             V8CallbackScope scope;
-            Receive(resolver);
+            Receive(res);
         });
 
-        return resolver.Promise();
+        return res.Promise();
     }
 }
 

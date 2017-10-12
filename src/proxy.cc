@@ -88,7 +88,7 @@ Napi::Value Proxy::Run(const Napi::CallbackInfo& info) {
     front->state = Socket::State::Blocked;
     back->state = Socket::State::Blocked;
 
-    auto resolver = Napi::Promise::Resolver::New(Env());
+    auto res = Napi::Promise::Resolver::New(Env());
     auto run_ctx = std::make_shared<ProxyContext>(std::move(address));
 
     auto front_ptr = front->socket;
@@ -124,14 +124,14 @@ Napi::Value Proxy::Run(const Napi::CallbackInfo& info) {
             control_sub = nullptr;
 
             if (run_ctx->error != 0) {
-                resolver.Reject(ErrnoException(Env(), run_ctx->error).Value());
+                res.Reject(ErrnoException(Env(), run_ctx->error).Value());
                 return;
             }
 
-            resolver.Resolve(Env().Undefined());
+            res.Resolve(Env().Undefined());
         });
 
-    return resolver.Promise();
+    return res.Promise();
 }
 
 void Proxy::SendCommand(const char* command) {

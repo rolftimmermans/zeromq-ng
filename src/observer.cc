@@ -153,14 +153,14 @@ void Observer::Close() {
     }
 }
 
-void Observer::Receive(const Napi::Promise::Resolver& resolver) {
+void Observer::Receive(const Napi::Promise::Resolver& res) {
     zmq_msg_t msg1;
     zmq_msg_t msg2;
 
     zmq_msg_init(&msg1);
     while (zmq_msg_recv(&msg1, socket, ZMQ_DONTWAIT) < 0) {
         if (zmq_errno() != EINTR) {
-            resolver.Reject(ErrnoException(Env(), zmq_errno()).Value());
+            res.Reject(ErrnoException(Env(), zmq_errno()).Value());
             zmq_msg_close(&msg1);
             return;
         }
@@ -174,7 +174,7 @@ void Observer::Receive(const Napi::Promise::Resolver& resolver) {
     zmq_msg_init(&msg2);
     while (zmq_msg_recv(&msg2, socket, ZMQ_DONTWAIT) < 0) {
         if (zmq_errno() != EINTR) {
-            resolver.Reject(ErrnoException(Env(), zmq_errno()).Value());
+            res.Reject(ErrnoException(Env(), zmq_errno()).Value());
             zmq_msg_close(&msg2);
             return;
         }
@@ -208,7 +208,7 @@ void Observer::Receive(const Napi::Promise::Resolver& resolver) {
     auto msg = Napi::Array::New(Env(), 1);
     msg[0u] = Napi::String::New(Env(), EventName(event_id));
     msg[1u] = details;
-    resolver.Resolve(msg);
+    res.Resolve(msg);
 }
 
 Napi::Value Observer::Receive(const Napi::CallbackInfo& info) {
@@ -218,9 +218,9 @@ Napi::Value Observer::Receive(const Napi::CallbackInfo& info) {
     if (HasEvents()) {
         /* We can read from the socket immediately. This is a separate code
            path so we can avoid creating a lambda. */
-        auto resolver = Napi::Promise::Resolver::New(Env());
-        Receive(resolver);
-        return resolver.Promise();
+        auto res = Napi::Promise::Resolver::New(Env());
+        Receive(res);
+        return res.Promise();
     } else {
         /* Check if we are already polling for reads. Only one promise may
            receive the next message, so we must ensure that receive
@@ -232,13 +232,13 @@ Napi::Value Observer::Receive(const Napi::CallbackInfo& info) {
 
         /* Async receive. Capture any references by value because the lambda
            outlives the scope of this method. */
-        auto resolver = Napi::Promise::Resolver::New(Env());
+        auto res = Napi::Promise::Resolver::New(Env());
         poller.PollReadable(0, [=]() {
             V8CallbackScope scope;
-            Receive(resolver);
+            Receive(res);
         });
 
-        return resolver.Promise();
+        return res.Promise();
     }
 }
 

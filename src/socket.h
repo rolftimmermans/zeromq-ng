@@ -57,8 +57,8 @@ private:
        from being inlined. They are used in more than one location and are
        not necessarily automatically inlined by all compilers. */
     force_inline void Send(
-        const Napi::Promise::Resolver& resolver, const Napi::Array& msg);
-    force_inline void Receive(const Napi::Promise::Resolver& resolver);
+        const Napi::Promise::Resolver& res, const Napi::Array& msg);
+    force_inline void Receive(const Napi::Promise::Resolver& res);
 
     Napi::ObjectReference context_ref;
     Napi::ObjectReference observer_ref;
