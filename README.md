@@ -5,7 +5,7 @@
 Next generation ØMQ bindings for Node.js. The goals of this library are:
 * Semantically as similar as possible to the native ØMQ library.
 * High performance.
-* Use modern JavaScript and Node.js semantics: promises for consumption with `async`/`await`, async iterators (if available at runtime).
+* Use modern JavaScript and Node.js features: promises for consumption with `async`/`await`, async iterators (if available at runtime).
 
 # Table of contents
 
@@ -355,6 +355,7 @@ After this method is called, it is no longer possible to call any other methods 
 socket.close()
 ```
 
+
 ### socket\[Symbol.asyncIterator\]()
 
 Asynchronously iterate over messages becoming available on the socket. When the socket is closed with `close()`, the iterator will return. Returning early from the iterator will **not** close the socket.
@@ -374,6 +375,44 @@ The well-known symbol `Symbol.asyncIterator` must be present for this method to 
 for await (const [msg] of socket) {
   // ...
 }
+```
+
+
+### subscriber.subscribe()
+
+Available on `Subscriber` subclasses only.
+
+Establish a new message filter on a `Subscriber` socket. Newly created `Subscriber` sockets shall filter out all incoming messages, therefore you should call this method to establish an initial message filter.
+
+* **Arguments** <br/>
+  `filter` <[string]>... Any number of filters. Multiple filters may be attached to a single socket, in which case a message shall be accepted if it matches at least one filter. Subscribing without any filters shall subscribe to all incoming messages.
+
+* **Returns** <br/>
+  <[undefined]>
+
+
+```js
+subscriber.subscribe()
+subscriber.subscribe("foo", "bar")
+```
+
+
+### subscriber.unsubscribe()
+
+Available on `Subscriber` subclasses only.
+
+Remove an existing message filter on a `Subscriber` socket. Any filters specified must match an existing filter previously established with `subscribe()`.
+
+* **Arguments** <br/>
+  `filter` <[string]>... Any number of filters to remove. Unsubscribing without any filters shall unsubscribe from the "subscribe all" filter that is added by calling `subscribe()` without arguments.
+
+* **Returns** <br/>
+  <[undefined]>
+
+
+```js
+subscriber.unsubscribe()
+subscriber.unsubscribe("foo", "bar")
 ```
 
 
@@ -432,8 +471,28 @@ The property names may differ somewhat from the native option names. This is int
 * **backlog** – ZMQ_BACKLOG <br/>
   <[number]> Maximum length of the queue of outstanding peer connections for the specified socket. This only applies to connection-oriented transports.
 
+* **connectTimeout** – ZMQ_CONNECT_TIMEOUT <br/>
+  <[number]> Sets how long to wait before timing-out a connect() system call. The connect() system call normally takes a long time before it returns a time out error. Setting this option allows the library to time out the call at an earlier interval.
+
+* **handshakeInterval** – ZMQ_HANDSHAKE_IVL <br/>
+  <[number]> Handshaking is the exchange of socket configuration information (socket type, identity, security) that occurs when a connection is first opened (only for connection-oriented transports). If handshaking does not complete within the configured time, the connection shall be closed. The value 0 means no handshake time limit.
+
+* **heartbeatInterval** – ZMQ_HEARTBEAT_IVL <br/>
+  <[number]> Interval in milliseconds between sending ZMTP heartbeats for the specified socket. If this option is greater than 0, then a PING ZMTP command will be sent after every interval.
+
+* **heartbeatTimeout** – ZMQ_HEARTBEAT_TIMEOUT <br/>
+  <[number]> How long (in milliseconds) to wait before timing-out a connection after sending a PING ZMTP command and not receiving any traffic. This option is only valid if `heartbeatInterval` is greater than 0. The connection will time out if there is no traffic received after sending the PING command. The received traffic does not have to be a PONG command - any received traffic will cancel the timeout.
+
+* **heartbeatTimeToLive** – ZMQ_HEARTBEAT_TTL <br/>
+  <[number]> The timeout in milliseconds on the remote peer for ZMTP heartbeats. If this option is greater than 0, the remote side shall time out the connection if it does not receive any more traffic within the TTL period. This option does not have any effect if `heartbeatInterval` is 0. Internally, this value is rounded down to the nearest decisecond, any value less than 100 will have no effect.
+
 * **immediate** – ZMQ_IMMEDIATE <br/>
   <[boolean]> By default queues will fill on outgoing connections even if the connection has not completed. This can lead to "lost" messages on sockets with round-robin routing (`Req`, `Push`, `Dealer`). If this option is set to `true`, messages shall be queued only to completed connections. This will cause the socket to block if there are no other connections, but will prevent queues from filling on pipes awaiting connection.
+
+* **invertMatching** (only on `Publisher`, `Subscriber` or `XPublisher` sockets) – ZMQ_INVERT_MATCHING
+  <[boolean]> On `Publisher` and `XPublisher` sockets, this causes messages to be sent to all connected sockets except those subscribed to a prefix that matches the message. On `Subscriber` sockets, this causes only incoming messages that do not match any of the socket's subscriptions to be received by the user.
+
+  Whenever this is set to `true` on a `Publisher` socket, all `Subscriber` sockets connecting to it must also have the option set to `true`. Failure to do so will have the `Subsriber` sockets reject everything the `Publisher` socket sends them. `XSubscriber` sockets do not need to do this because they do not filter incoming messages.
 
 * **ipv6** – ZMQ_IPV6 <br/>
   <[boolean]> Enable or disable IPv6. When IPv6 is enabled, the socket will connect to, or accept connections from, both IPv4 and IPv6 hosts.
@@ -447,11 +506,23 @@ The property names may differ somewhat from the native option names. This is int
 * **mandatory** (only on `Router` sockets) – ZMQ_ROUTER_MANDATORY <br/>
   <[boolean]> A value of `false` is the default and discards the message silently when it cannot be routed or the peer's high water mark is reached. A value of `true` causes `send()` to fail if it cannot be routed, or wait asynchronously if the high water mark is reached.
 
+* **manual** (write only, only on `XPublisher` sockets) – ZMQ_XPUB_MANUAL <br/>
+  <[boolean]> Sets the `XPublisher` socket subscription handling mode to manual/automatic. A value of `true` will change the subscription requests handling to manual.
+
 * **maxMessageSize** – ZMQ_MAXMSGSIZE <br/>
   <[number]> Limits the size of the inbound message. If a peer sends a message larger than the limit it is disconnected. Value of -1 means no limit.
 
 * **multicastHops** – ZMQ_MULTICAST_HOPS <br/>
   <[number]> Sets the time-to-live field in every multicast packet sent from this socket. The default is 1 which means that the multicast packets don't leave the local network.
+
+* **multicastMaxTransportDataUnit** – ZMQ_MULTICAST_MAXTPDU <br/>
+  <[number]> Sets the maximum transport data unit size used for outbound multicast packets. This must be set at or below the minimum Maximum Transmission Unit (MTU) for all network paths over which multicast reception is required.
+
+* **noDrop** (write only, only on `XPublisher` sockets) – ZMQ_XPUB_NODROP <br/>
+  <[boolean]> Sets the `XPublisher` socket behaviour to return an error if the high water mark is reached and the message could not be send. The default is to drop the message silently when the peer high water mark is reached.
+
+* **notify** (write only, only on `Stream` sockets) – ZMQ_STREAM_NOTIFY <br/>
+  <[boolean]> Enables connect and disconnect notifications on a `Stream` when set to `true`. When notifications are enabled, the socket delivers a zero-length message when a peer connects or disconnects.
 
 * **rate** – ZMQ_RATE <br/>
   <[number]> Maximum send or receive data rate for multicast transports such as `pgm`.
@@ -490,6 +561,9 @@ The property names may differ somewhat from the native option names. This is int
 * **sendTimeout** – ZMQ_SNDTIMEO <br/>
   <[number]> Sets the timeout for sending messages on the socket. If the value is 0, `send()` will return a rejected promise immediately if the message cannot be sent. If the value is -1, it will wait asynchronously until the message is sent. For all other values, it will try to send the message for that amount of time before rejecting.
 
+* **socksProxy** – ZMQ_SOCKS_PROXY <br/>
+  <[string]> The SOCKS5 proxy address that shall be used by the socket for the TCP connection(s). Does not support SOCKS5 authentication. If the endpoints are domain names instead of addresses they shall not be resolved and they shall be forwarded unchanged to the SOCKS proxy service in the client connection request message (address type 0x03 domain name).
+
 * **tcpKeepalive** – ZMQ_TCP_KEEPALIVE <br/>
   <[number]> Override SO_KEEPALIVE socket option (if supported by OS). The default value of -1 leaves it to the OS default.
 
@@ -502,11 +576,36 @@ The property names may differ somewhat from the native option names. This is int
 * **tcpKeepaliveInterval** – ZMQ_TCP_KEEPALIVE_INTVL <br/>
   <[number]> Overrides TCP_KEEPINTVL socket option (if supported by the OS). The default value of -1 leaves it to the OS default.
 
+* **tcpMaxRetransmitTimeout** – ZMQ_TCP_MAXRT <br/>
+  <[number]> Sets how long before an unacknowledged TCP retransmit times out (if supported by the OS). The system normally attempts many TCP retransmits following an exponential backoff strategy. This means that after a network outage, it may take a long time before the session can be re-established. Setting this option allows the timeout to happen at a shorter interval.
+
+* **threadSafe** (read only) – ZMQ_THREAD_SAFE <br/>
+  <[boolean]> Whether or not the socket is threadsafe. Currently `Client` and `Server` draft sockets are threadsafe.
+
 * **type** (read only) – ZMQ_TYPE <br/>
   <[number]> Retrieve the socket type. This is fairly useless because you can inspect the JavaScript constructor with `socket.constructor`.
 
-* **verbose** (only on `XPublisher` sockets) – ZMQ_XPUB_VERBOSE <br/>
+* **verbose** (write only, only on `XPublisher` sockets) – ZMQ_XPUB_VERBOSE <br/>
   <[boolean]> If set to `true` the socket passes all subscribe messages to the caller. If set to `false` (default) these are not visible to the caller.
+
+* **verboser** (write only, only on `XPublisher` sockets) – ZMQ_XPUB_VERBOSER <br/>
+  <[boolean]>If set to `true` the socket passes all subscribe **and** unsubscribe messages to the caller. If set to `false` (default) these are not visible to the caller.
+
+* **vmciBufferSize** – ZMQ_VMCI_BUFFER_SIZE <br/>
+  <[number]> The size of the underlying buffer for the socket. Used during negotiation before the connection is established.
+
+* **vmciBufferMinSize** – ZMQ_VMCI_BUFFER_MIN_SIZE <br/>
+  <[number]> Minimum size of the underlying buffer for the socket. Used during negotiation before the connection is established.
+
+* **vmciBufferMaxSize** – ZMQ_VMCI_BUFFER_MAX_SIZE <br/>
+  <[number]> Maximum size of the underlying buffer for the socket. Used during negotiation before the connection is established.
+
+* **vmciConnectTimeout** – ZMQ_VMCI_CONNECT_TIMEOUT <br/>
+  <[number]> Connection timeout for the socket.
+
+* **welcomeMessage** (write only, only on `XPublisher` sockets) – ZMQ_XPUB_WELCOME_MSG <br/>
+  <[string]> Sets a welcome message that will be recieved by subscriber when connecting. Subscriber must subscribe to the welcome message before connecting. For welcome messages to work well, poll on incoming subscription messages on the `XPublisher` socket and handle them.
+
 
 ### socket security options
 
