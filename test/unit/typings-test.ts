@@ -73,5 +73,15 @@ const stuff = async () => {
       console.log(details.errno)
     }
   }
+
+  const proxy = new zmq.Proxy(new zmq.Router, new zmq.Dealer)
+  await proxy.run()
+
+  proxy.pause()
+  proxy.resume()
+  proxy.terminate()
+
+  proxy.frontEnd.close()
+  proxy.backEnd.close()
 }
 

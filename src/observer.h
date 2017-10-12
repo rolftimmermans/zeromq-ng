@@ -17,7 +17,7 @@ protected:
     inline void Close(const Napi::CallbackInfo& info);
     inline Napi::Value Receive(const Napi::CallbackInfo& info);
 
-    Napi::Value GetClosed(const Napi::CallbackInfo& info);
+    inline Napi::Value GetClosed(const Napi::CallbackInfo& info);
 
 private:
     inline bool ValidateOpen() const;

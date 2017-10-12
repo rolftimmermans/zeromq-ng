@@ -14,7 +14,7 @@ describe("zmq", function() {
           "global",
 
           /* Generic constructors. */
-          "Context", "Socket", "Observer",
+          "Context", "Socket", "Observer", "Proxy",
 
           /* Specific socket constructors. */
           "Pair", "Publisher", "Subscriber", "Request", "Response",

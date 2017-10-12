@@ -358,4 +358,18 @@ export class Observer {
   [Symbol.asyncIterator](): AsyncIterator<[Event, EventDetails]>
 }
 
+
+export class Proxy {
+  readonly frontEnd: Socket
+  readonly backEnd: Socket
+
+  constructor(frontEnd: Socket, backEnd: Socket)
+
+  run(): Promise<void>
+  pause(): void
+  resume(): void
+  terminate(): void
+}
+
+
 export const global: Context

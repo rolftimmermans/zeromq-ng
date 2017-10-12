@@ -259,15 +259,15 @@ Napi::Value Socket::Bind(const Napi::CallbackInfo& info) {
 
     state = Socket::State::Blocked;
     auto resolver = Napi::Promise::Resolver::New(Env());
-    auto context =
+    auto run_ctx =
         std::make_shared<AddressContext>(info[0].As<Napi::String>().Utf8Value());
 
     Work::Queue(
         [=]() {
             /* Don't access V8 internals here! Executed in worker thread. */
-            while (zmq_bind(socket, context->address.c_str()) < 0) {
+            while (zmq_bind(socket, run_ctx->address.c_str()) < 0) {
                 if (zmq_errno() != EINTR) {
-                    context->error = zmq_errno();
+                    run_ctx->error = zmq_errno();
                     return;
                 }
             }
@@ -276,9 +276,9 @@ Napi::Value Socket::Bind(const Napi::CallbackInfo& info) {
             V8CallbackScope scope;
             state = Socket::State::Open;
 
-            if (context->error != 0) {
+            if (run_ctx->error != 0) {
                 resolver.Reject(
-                    ErrnoException(Env(), context->error, context->address)
+                    ErrnoException(Env(), run_ctx->error, run_ctx->address)
                         .Value());
                 return;
             }
@@ -303,15 +303,15 @@ Napi::Value Socket::Unbind(const Napi::CallbackInfo& info) {
 
     state = Socket::State::Blocked;
     auto resolver = Napi::Promise::Resolver::New(Env());
-    auto context =
+    auto run_ctx =
         std::make_shared<AddressContext>(info[0].As<Napi::String>().Utf8Value());
 
     Work::Queue(
         [=]() {
             /* Don't access V8 internals here! Executed in worker thread. */
-            while (zmq_unbind(socket, context->address.c_str()) < 0) {
+            while (zmq_unbind(socket, run_ctx->address.c_str()) < 0) {
                 if (zmq_errno() != EINTR) {
-                    context->error = zmq_errno();
+                    run_ctx->error = zmq_errno();
                     return;
                 }
             }
@@ -320,9 +320,9 @@ Napi::Value Socket::Unbind(const Napi::CallbackInfo& info) {
             V8CallbackScope scope;
             state = Socket::State::Open;
 
-            if (context->error != 0) {
+            if (run_ctx->error != 0) {
                 resolver.Reject(
-                    ErrnoException(Env(), context->error, context->address)
+                    ErrnoException(Env(), run_ctx->error, run_ctx->address)
                         .Value());
                 return;
             }

@@ -18,6 +18,7 @@ Next generation ØMQ bindings for Node.js. The goals of this library are:
    * [Class: zmq.Socket](#class-zmqsocket)
    * [Class: zmq.Context](#class-zmqcontext)
    * [Class: zmq.Observer](#class-zmqobserver)
+   * [Class: zmq.Proxy](#class-zmqproxy)
    * [Function: zmq.curveKeypair()](#function-zmqcurvekeypair)
    * [Property: zmq.capability](#property-zmqcapability)
    * [Property: zmq.global](#property-zmqglobal)
@@ -722,6 +723,108 @@ socket.events.close()
 ```
 
 
+## Class: zmq.Proxy
+
+Proxy messages between two ØMQ sockets. The proxy connects a frontend socket to a backend socket. Conceptually, data flows from frontend to backend. Depending on the socket types, replies may flow in the opposite direction. The direction is conceptual only; the proxy is fully symmetric and there is no technical difference between frontend and backend.
+
+[Review the ØMQ documentation](http://api.zeromq.org/4-2:zmq-proxy#toc3) for an overview of example usage.
+
+
+### new Proxy
+
+Creates a new ØMQ proxy.
+
+* **Arguments** <br/>
+  `frontEnd` <[Socket]> The front-end socket to proxy.
+  `backEnd` <[Socket]> The back-end socket to proxy.
+
+* **Returns** <br/>
+  <[Proxy]> New proxy for the given sockets.
+
+
+```js
+const zmq = require("zeromq-ng")
+const proxy = new zmq.Proxy(new zmq.Router, new zmq.Dealer)
+```
+
+
+### proxy.run()
+
+Starts the proxy loop in a worker thread and waits for its termination. Before calling `run()` you must set any socket options, and connect or bind both front-end and back-end sockets.
+
+On termination the front-end and back-end sockets will be closed automatically.
+
+* **Arguments** <br/>
+  (none)
+
+* **Returns** <br/>
+  <[Promise]> Resolved when the proxy terminates.
+
+
+```js
+await proxy.run()
+```
+
+
+### proxy.pause()
+
+Temporarily suspends any proxy activity. Resume activity with `resume()`.
+
+* **Arguments** <br/>
+  (none)
+
+* **Returns** <br/>
+  <[undefined]>
+
+```js
+proxy.pause()
+```
+
+
+### proxy.resume()
+
+Resumes proxy activity after suspending it with `pause()`.
+
+* **Arguments** <br/>
+  (none)
+
+* **Returns** <br/>
+  <[undefined]>
+
+```js
+proxy.resume()
+```
+
+
+### proxy.terminate()
+
+Gracefully shuts down the proxy. The front-end and back-end sockets will be closed automatically. There might be a slight delay between calling `terminate()` and the `run()` method resolving.
+
+* **Arguments** <br/>
+  (none)
+
+* **Returns** <br/>
+  <[undefined]>
+
+```js
+const done = proxy.run()
+proxy.terminate()
+await done
+```
+
+
+### proxy.frontEnd
+
+* **Returns** <br/>
+  <[Socket]> The front-end socket passed to the constructor. Will be closed after the `run()` method resolves.
+
+
+### proxy.backEnd
+
+* **Returns** <br/>
+  <[Socket]> The back-end socket passed to the constructor. Will be closed after the `run()` method resolves.
+
+
 ## Function: zmq.curveKeypair()
 
 Returns a new random key pair to be used with the CURVE security mechanism.
@@ -794,6 +897,7 @@ The version of the ØMQ library the bindings were built with.
 [Object]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object "Object"
 [Observer]: #class-zmqobserver "zmq.Observer"
 [Promise]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise "Promise"
+[Proxy]: #class-zmqproxy "zmq.Proxy"
 [Socket]: #class-zmqsocket "zmq.Socket"
 [string]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#String_type "string"
 [undefined]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined "undefined"

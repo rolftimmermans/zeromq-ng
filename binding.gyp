@@ -10,6 +10,7 @@
         'src/binding.cc',
         'src/context.cc',
         'src/observer.cc',
+        'src/proxy.cc',
         'src/socket.cc',
       ],
 

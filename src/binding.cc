@@ -1,6 +1,7 @@
 /* Copyright (c) 2017 Rolf Timmermans */
 #include "context.h"
 #include "observer.h"
+#include "proxy.h"
 #include "socket.h"
 
 namespace zmq {
@@ -66,6 +67,7 @@ Napi::Object init(Napi::Env env, Napi::Object exports) {
     zmq::Context::Initialize(env, exports);
     zmq::Socket::Initialize(env, exports);
     zmq::Observer::Initialize(env, exports);
+    zmq::Proxy::Initialize(env, exports);
 
     return exports;
 }

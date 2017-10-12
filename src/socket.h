@@ -51,7 +51,7 @@ private:
     inline bool ValidateNotBlocked() const;
     inline bool HasEvents(int32_t events);
 
-    inline void Close();
+    void Close();
 
     /* Send/receive are usually in a hot path and will benefit slightly
        from being inlined. They are used in more than one location and are
