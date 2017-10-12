@@ -763,6 +763,8 @@ On termination the front-end and back-end sockets will be closed automatically.
 
 
 ```js
+await proxy.frontEnd.bind("tcp://*:3001")
+await proxy.backEnd.bind("tcp://*:3002")
 await proxy.run()
 ```
 
