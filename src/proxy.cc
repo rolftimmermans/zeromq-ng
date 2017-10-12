@@ -132,14 +132,29 @@ Napi::Value Proxy::Run(const Napi::CallbackInfo& info) {
     return resolver.Promise();
 }
 
-template <const char* MSG>
-void Proxy::SendCommand(const Napi::CallbackInfo& info) {
-    while (zmq_send_const(control_pub, MSG, strlen(MSG), ZMQ_DONTWAIT) < 0) {
+void Proxy::SendCommand(const char* command) {
+    while (
+        zmq_send_const(control_pub, command, strlen(command), ZMQ_DONTWAIT) < 0) {
         if (zmq_errno() != EINTR) {
             ErrnoException(Env(), zmq_errno()).ThrowAsJavaScriptException();
             return;
         }
     }
+}
+
+void Proxy::Pause(const Napi::CallbackInfo& info) {
+    if (!ValidateArguments(info, {})) return;
+    SendCommand("PAUSE");
+}
+
+void Proxy::Resume(const Napi::CallbackInfo& info) {
+    if (!ValidateArguments(info, {})) return;
+    SendCommand("RESUME");
+}
+
+void Proxy::Terminate(const Napi::CallbackInfo& info) {
+    if (!ValidateArguments(info, {})) return;
+    SendCommand("TERMINATE");
 }
 
 Napi::Value Proxy::GetFrontEnd(const Napi::CallbackInfo& info) {
@@ -150,16 +165,12 @@ Napi::Value Proxy::GetBackEnd(const Napi::CallbackInfo& info) {
     return back_ref.Value();
 }
 
-const char Pause[] = "PAUSE";
-const char Resume[] = "RESUME";
-const char Terminate[] = "TERMINATE";
-
 void Proxy::Initialize(Napi::Env& env, Napi::Object& exports) {
     auto proto = {
         InstanceMethod("run", &Proxy::Run),
-        InstanceMethod("pause", &Proxy::SendCommand<Pause>),
-        InstanceMethod("resume", &Proxy::SendCommand<Resume>),
-        InstanceMethod("terminate", &Proxy::SendCommand<Terminate>),
+        InstanceMethod("pause", &Proxy::Pause),
+        InstanceMethod("resume", &Proxy::Resume),
+        InstanceMethod("terminate", &Proxy::Terminate),
 
         InstanceAccessor("frontEnd", &Proxy::GetFrontEnd, nullptr),
         InstanceAccessor("backEnd", &Proxy::GetBackEnd, nullptr),
