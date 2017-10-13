@@ -31,7 +31,7 @@
   "scripts": {
     "install": "detect-libc prebuild-install || script/build.sh",
     "prebuild": "detect-libc prebuild --verbose --target 8.6.0 --strip --upload ${GH_TOKEN}",
-    "test": "eslint lib && script/fmt.sh && script/build.sh --debug --verbose && ZMQ_BUILD=Debug mocha && tsc --project test/unit",
+    "test": "eslint lib && script/fmt.sh && script/build.sh --verbose && mocha && tsc --project test/unit",
     "bench": "script/build.sh --verbose && node --use_strict --harmony_async_iteration --expose-gc test/bench"
   },
   "keywords": [

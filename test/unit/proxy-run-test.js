@@ -6,6 +6,8 @@ const {uniqAddress} = require("./helpers")
 for (const proto of ["inproc", "ipc", "tcp"]) {
   describe(`proxy with ${proto} run`, function() {
     beforeEach(async function() {
+      if (proto == "ipc" && !zmq.capability.ipc) this.skip()
+
       /* ZMQ < 4.0.5 has no steerable proxy support. */
       if (semver.satisfies(zmq.version, "< 4.0.5")) this.skip()
 

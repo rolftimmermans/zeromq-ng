@@ -6,9 +6,12 @@ const {uniqAddress} = require("./helpers")
 for (const proto of ["inproc", "ipc", "tcp"]) {
   describe(`socket with ${proto} bind/unbind`, function() {
     beforeEach(function() {
+      if (proto == "ipc" && !zmq.capability.ipc) this.skip()
+
       /* ZMQ < 4.2 fails with assertion errors with inproc.
          See: https://github.com/zeromq/libzmq/pull/2123/files */
       if (proto == "inproc" && semver.satisfies(zmq.version, "< 4.2")) this.skip()
+
       this.sock = new zmq.Dealer
     })
 
@@ -58,7 +61,7 @@ for (const proto of ["inproc", "ipc", "tcp"]) {
           assert.instanceOf(err, Error)
           assert.equal(err.message, "Protocol not supported")
           assert.equal(err.code, "EPROTONOSUPPORT")
-          assert.equal(err.errno, process.platform == "linux" ? 93 : 43)
+          assert.typeOf(err.errno, "number")
           assert.equal(err.address, "foo://bar")
         }
       })
@@ -108,7 +111,7 @@ for (const proto of ["inproc", "ipc", "tcp"]) {
           assert.instanceOf(err, Error)
           assert.equal(err.message, "Protocol not supported")
           assert.equal(err.code, "EPROTONOSUPPORT")
-          assert.equal(err.errno, process.platform == "linux" ? 93 : 43)
+          assert.typeOf(err.errno, "number")
           assert.equal(err.address, "foo://bar")
         }
       })

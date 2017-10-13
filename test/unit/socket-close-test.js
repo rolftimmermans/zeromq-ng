@@ -7,6 +7,8 @@ const {uniqAddress} = require("./helpers")
 for (const proto of ["inproc", "ipc", "tcp"]) {
   describe(`socket with ${proto} close`, function() {
     beforeEach(function() {
+      if (proto == "ipc" && !zmq.capability.ipc) this.skip()
+
       this.sock = new zmq.Dealer
     })
 

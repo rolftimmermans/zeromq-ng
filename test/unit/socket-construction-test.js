@@ -148,15 +148,10 @@ describe("socket construction", function() {
         "Cannot add property doesNotExist, object is not extensible"
       )
     })
-  })
-
-  describe("with subclass constructor", function() {
-    it("should create socket", function() {
-      const sock = new zmq.Dealer
-      assert.instanceOf(sock, zmq.Socket)
-    })
 
     it("should throw error on file descriptor limit", async function() {
+      if (process.platform == "win32") this.timeout(5000)
+
       const sockets = []
       const n = 10000
 
@@ -170,8 +165,8 @@ describe("socket construction", function() {
         assert.equal(err.code, "EMFILE")
         assert.typeOf(err.errno, "number")
       } finally {
-        for (let i = 0; i < n; i++) {
-          if (sockets[i]) sockets[i].close()
+        for (let i = 0; i < sockets.length; i++) {
+          sockets[i].close()
         }
       }
     })

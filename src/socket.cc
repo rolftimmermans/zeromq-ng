@@ -40,7 +40,7 @@ uint64_t number_cast<uint64_t>(const Napi::Number& num) {
         return std::numeric_limits<uint64_t>::max();
     }
 
-    return value;
+    return static_cast<uint64_t>(value);
 }
 
 struct AddressContext {
@@ -545,23 +545,24 @@ void Socket::SetSockOpt<char*>(const Napi::CallbackInfo& info) {
     int32_t option = info[0].As<Napi::Number>();
     WarnUnlessImmediateOption(option);
 
-    size_t length = 0;
-    const char* value = nullptr;
-
+    int32_t err;
     if (info[1].IsBuffer()) {
         Napi::Object buf = info[1].As<Napi::Object>();
-        length = buf.As<Napi::Buffer<char>>().Length();
-        value = buf.As<Napi::Buffer<char>>().Data();
+        auto length = buf.As<Napi::Buffer<char>>().Length();
+        auto value = buf.As<Napi::Buffer<char>>().Data();
+        err = zmq_setsockopt(socket, option, value, length);
     } else if (info[1].IsString()) {
         std::string str = info[1].As<Napi::String>();
-        length = str.length();
-        value = str.data();
+        auto length = str.length();
+        auto value = str.data();
+        err = zmq_setsockopt(socket, option, value, length);
     } else {
-        length = 0;
-        value = nullptr;
+        auto length = 0u;
+        auto value = nullptr;
+        err = zmq_setsockopt(socket, option, value, length);
     }
 
-    if (zmq_setsockopt(socket, option, value, length) < 0) {
+    if (err < 0) {
         ErrnoException(Env(), zmq_errno()).ThrowAsJavaScriptException();
         return;
     }
@@ -584,7 +585,7 @@ Napi::Value Socket::GetSockOpt(const Napi::CallbackInfo& info) {
         return Env().Undefined();
     }
 
-    return Napi::Number::New(Env(), value);
+    return Napi::Number::New(Env(), static_cast<double>(value));
 }
 
 template <typename T>

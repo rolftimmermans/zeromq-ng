@@ -5,6 +5,8 @@ const {uniqAddress} = require("./helpers")
 for (const proto of ["inproc", "ipc", "tcp"]) {
   describe(`socket with ${proto} pair/pair`, function() {
     beforeEach(function() {
+      if (proto == "ipc" && !zmq.capability.ipc) this.skip()
+
       this.sockA = new zmq.Dealer
       this.sockB = new zmq.Dealer
     })
@@ -37,7 +39,7 @@ for (const proto of ["inproc", "ipc", "tcp"]) {
 
         const echo = async () => {
           for await (const msg of this.sockB) {
-            await new Promise(resolve => setTimeout(resolve, 0))
+            await new Promise(resolve => setTimeout(resolve, 5))
             await this.sockB.send(msg)
             if (last) break
           }

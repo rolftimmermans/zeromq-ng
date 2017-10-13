@@ -17,7 +17,7 @@ class Outgoing {
             async->data = this;
 
             /* Can fail if we run out of file descriptors. */
-            int32_t err =
+            auto err =
                 uv_async_init(uv_default_loop(), async, [](uv_async_t* async) {
                     delete reinterpret_cast<Reference*>(async->data);
                 });

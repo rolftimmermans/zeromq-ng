@@ -1,0 +1,22 @@
+environment:
+  GH_TOKEN:
+    secure: 6V8UzhSBNiXKcwNF1cTFaqTZaX/YVUWutdbluQVdXPlUn1u9G+cd1XTgyZQDmD+4
+  matrix:
+  - node_js: 8.6
+
+platform:
+- x64
+# Currently cause bad access when initializing module.
+# - x86
+
+build: off
+
+install:
+- ps: Install-Product node $env:node_js $env:platform
+- appveyor-retry call yarn install
+
+test_script:
+- yarn test
+
+deploy_script:
+- IF "%appveyor_repo_tag%"=="true" yarn run prebuild

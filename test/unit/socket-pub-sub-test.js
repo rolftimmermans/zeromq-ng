@@ -5,6 +5,8 @@ const {uniqAddress} = require("./helpers")
 for (const proto of ["inproc", "ipc", "tcp"]) {
   describe(`socket with ${proto} pub/sub`, function() {
     beforeEach(function() {
+      if (proto == "ipc" && !zmq.capability.ipc) this.skip()
+
       this.pub = new zmq.Publisher
       this.sub = new zmq.Subscriber
     })

@@ -1,4 +1,6 @@
-let seq = 1024
+/* Windows cannot bind on a ports just above 1014; start at 2000 to be safe. */
+let seq = 2000
+
 function uniqAddress(proto) {
   const id = seq++
   switch (proto) {

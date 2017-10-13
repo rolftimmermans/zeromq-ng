@@ -14,8 +14,15 @@
         'src/socket.cc',
       ],
 
-      'include_dirs': ["<!@(node -p \"require('node-addon-api').include\")"],
-      'defines': ['NAPI_DISABLE_CPP_EXCEPTIONS'],
+      'include_dirs': [
+        "<!@(node -p \"require('node-addon-api').include\")",
+        '<(PRODUCT_DIR)/../../libzmq/include',
+      ],
+
+      'defines': [
+        'NAPI_DISABLE_CPP_EXCEPTIONS',
+        'ZMQ_STATIC',
+      ],
 
       'conditions': [
         ["zmq_shared == 'true'", {
@@ -24,17 +31,16 @@
           },
         }, {
           'conditions': [
-            ['OS == "mac" or OS == "linux" or OS == "freebsd" or OS == "openbsd" or OS == "solaris"', {
-              'libraries': ['<(PRODUCT_DIR)/../../libzmq/lib/libzmq.a'],
-              'include_dirs': ['<(PRODUCT_DIR)/../../libzmq/include'],
+            ['OS != "win"', {
+              'libraries': [
+                '<(PRODUCT_DIR)/../../libzmq/lib/libzmq.a',
+              ],
             }],
 
             ['OS == "win"', {
               'msbuild_toolset': 'v140',
-              'defines': ['ZMQ_STATIC'],
-              'include_dirs': ['windows/include'],
               'libraries': [
-                '<(PRODUCT_DIR)/../../windows/lib/libzmq',
+                '<(PRODUCT_DIR)/../../libzmq/lib/libzmq',
                 'ws2_32.lib',
                 'iphlpapi',
               ],
@@ -73,6 +79,10 @@
               ],
             },
           }],
+
+          ['OS == "win"', {
+            'msvs_settings': {},
+          }],
         ],
       },
 
@@ -97,6 +107,14 @@
               'MACOSX_DEPLOYMENT_TARGET': '10.9',
               'LLVM_LTO': 'YES',
               'GCC_OPTIMIZATION_LEVEL': '3',
+            },
+          }],
+
+          ['OS == "win"', {
+            'msvs_settings': {
+              'VCLinkerTool': {
+                'AdditionalOptions': ['/ignore:4099'],
+              },
             },
           }],
         ],
