@@ -55,11 +55,11 @@ for (const proto of ["inproc", "ipc", "tcp"]) {
 
         await this.sockA.bind(address)
         await this.sockB.connect(address)
-        await new Promise(resolve => setTimeout(resolve, 5))
+        await new Promise(resolve => setTimeout(resolve, 15))
         this.sockA.close()
         this.sockB.close()
-        await new Promise(resolve => setTimeout(resolve, 5))
         await done
+        await new Promise(resolve => setTimeout(resolve, 15))
 
         if (proto == "inproc") {
           assert.deepEqual(events, [["stop", {}]])
@@ -85,10 +85,11 @@ for (const proto of ["inproc", "ipc", "tcp"]) {
 
         await this.sockA.bind(address)
         await this.sockB.connect(address)
-        await new Promise(resolve => setTimeout(resolve, 5))
+        await new Promise(resolve => setTimeout(resolve, 15))
         this.sockA.close()
         this.sockB.close()
         await done
+        await new Promise(resolve => setTimeout(resolve, 15))
 
         if (proto == "inproc") {
           assert.deepEqual(events, [["stop", {}]])
@@ -121,10 +122,10 @@ for (const proto of ["inproc", "ipc", "tcp"]) {
 
         await this.sockA.bind(address)
         await this.sockB.connect(address)
-        await new Promise(resolve => setTimeout(resolve, 5))
+        await new Promise(resolve => setTimeout(resolve, 15))
         this.sockA.close()
         this.sockB.close()
-        await new Promise(resolve => setTimeout(resolve, 5))
+        await new Promise(resolve => setTimeout(resolve, 15))
 
         if (proto == "inproc") {
           assert.deepEqual(events, [["stop", {}]])

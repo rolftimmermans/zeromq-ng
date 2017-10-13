@@ -37,7 +37,7 @@ for (const proto of ["inproc", "ipc", "tcp"]) {
 
         const send = async () => {
           /* Wait briefly before publishing to avoid slow joiner syndrome. */
-          await new Promise(resolve => setTimeout(resolve, 15))
+          await new Promise(resolve => setTimeout(resolve, 25))
           for (const msg of messages) {
             await this.pub.send(msg)
           }
@@ -76,7 +76,7 @@ for (const proto of ["inproc", "ipc", "tcp"]) {
 
         const send = async () => {
           /* Wait briefly before publishing to avoid slow joiner syndrome. */
-          await new Promise(resolve => setTimeout(resolve, 15))
+          await new Promise(resolve => setTimeout(resolve, 25))
           for (const msg of messages) {
             await this.pub.send(msg)
           }
