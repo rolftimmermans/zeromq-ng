@@ -19,4 +19,4 @@ test_script:
 - yarn test
 
 deploy_script:
-- IF "%appveyor_repo_tag%"=="true" yarn run prebuild
+- IF "%appveyor_repo_tag%"=="true" yarn run release
