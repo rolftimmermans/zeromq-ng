@@ -1,6 +1,6 @@
 # ZeroMQ.js Next Generation
 
-[![Greenkeeper badge](https://badges.greenkeeper.io/rolftimmermans/zeromq-ng.svg)](https://greenkeeper.io/) [![Build status](https://img.shields.io/travis/rolftimmermans/zeromq-ng.svg)](https://travis-ci.org/rolftimmermans/zeromq-ng) [![Build status](https://img.shields.io/appveyor/ci/rolftimmermans/zeromq-ng.svg)](https://ci.appveyor.com/project/RolfTimmermans/zeromq-ng)
+[![Greenkeeper monitoring](https://img.shields.io/badge/dependencies-monitored-brightgreen.svg)](https://greenkeeper.io/) [![Travis build status](https://img.shields.io/travis/rolftimmermans/zeromq-ng.svg)](https://travis-ci.org/rolftimmermans/zeromq-ng) [![AppVeyor build status](https://img.shields.io/appveyor/ci/rolftimmermans/zeromq-ng.svg)](https://ci.appveyor.com/project/RolfTimmermans/zeromq-ng)
 
 
 Next generation ØMQ bindings for Node.js. The goals of this library are:
