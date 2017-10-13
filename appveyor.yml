@@ -24,4 +24,4 @@ test_script:
 - yarn test
 
 deploy_script:
-- IF "%appveyor_repo_tag%"=="true" yarn run release
+- IF "%appveyor_repo_tag%"=="true" yarn run ci:release

@@ -30,9 +30,9 @@
   },
   "scripts": {
     "install": "detect-libc prebuild-install || script/build.sh",
-    "release": "script/release.sh",
     "test": "eslint lib && script/fmt.sh && script/build.sh --verbose && mocha && tsc --project test/unit",
-    "bench": "script/build.sh --verbose && node --use_strict --harmony_async_iteration --expose-gc test/bench"
+    "bench": "script/build.sh --verbose && node --use_strict --harmony_async_iteration --expose-gc test/bench",
+    "ci:release": "script/release.sh"
   },
   "keywords": [
     "zeromq",

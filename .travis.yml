@@ -38,10 +38,18 @@ jobs:
 
   # Publish all binaries for Linux and macOS.
   - stage: publish binaries
-    script: yarn run release
+    script: yarn run ci:release
     os: linux
   - stage: publish binaries
-    script: yarn run release
+    script: yarn run ci:release
+    env: ARCH=armv7
+    os: linux
+  - stage: publish binaries
+    script: yarn run ci:release
+    env: ARCH=armv8
+    os: linux
+  - stage: publish binaries
+    script: yarn run ci:release
     os: osx
 
   # Publish package to NPM.

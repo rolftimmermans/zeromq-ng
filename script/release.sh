@@ -7,4 +7,10 @@ if [ -n "${WINDIR}" ]; then
   export PYTHON="/c/Python27/python"
 fi
 
-detect-libc prebuild --verbose --target 8.6.0 --strip --upload ${GH_TOKEN}
+if [ -n "$ARCH" ]; then
+  ARGS="--arch=${ARCH}"
+else
+  ARGS=""
+fi
+
+detect-libc prebuild --verbose --target 8.6.0 --strip --upload ${GH_TOKEN} ${ARGS}

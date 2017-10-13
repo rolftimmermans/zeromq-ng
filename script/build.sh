@@ -1,24 +1,24 @@
 #!/bin/sh
 set -e
 
-export ZMQ_VERSION=${ZMQ_VERSION:-"4.2.2"}
+ZMQ_VERSION=${ZMQ_VERSION:-"4.2.2"}
 
 if [ "${ZMQ_VERSION}" \< "4.1.0" ]; then
-  export ZMQ_GH_REPO="zeromq4-x"
+  ZMQ_GH_REPO="zeromq4-x"
 elif [ "${ZMQ_VERSION}" \< "4.2.0" ]; then
-  export ZMQ_GH_REPO="zeromq4-1"
+  ZMQ_GH_REPO="zeromq4-1"
 else
-  export ZMQ_GH_REPO="libzmq"
+  ZMQ_GH_REPO="libzmq"
 fi
 
 if [ -n "${WINDIR}" ]; then
   # We're on Windows. Download a prebuilt library.
-  export ARCH=$(node -p 'process.arch')
-  export ZMQ_PREFIX="libzmq"
-  export ZMQ_BINARY="https://github.com/nteract/libzmq-win/releases/download/v2.1.0/libzmq-${ZMQ_VERSION}-${ARCH}.lib"
-  export ZMQ_HEADER="https://raw.githubusercontent.com/zeromq/${ZMQ_GH_REPO}/v${ZMQ_VERSION}/include/zmq.h"
-  export ZMQ_LIB="libzmq.lib"
-  export ZMQ_H="zmq.h"
+  ARCH=$(node -p 'process.arch')
+  ZMQ_PREFIX="libzmq"
+  ZMQ_BINARY="https://github.com/nteract/libzmq-win/releases/download/v2.1.0/libzmq-${ZMQ_VERSION}-${ARCH}.lib"
+  ZMQ_HEADER="https://raw.githubusercontent.com/zeromq/${ZMQ_GH_REPO}/v${ZMQ_VERSION}/include/zmq.h"
+  ZMQ_LIB="libzmq.lib"
+  ZMQ_H="zmq.h"
 
   # Give preference to all MSYS64 binaries. This solves issues with mkdir and
   # other commands not working properly.
@@ -35,12 +35,12 @@ else
   # We're not on Windows.
   if [ "${npm_config_zmq_shared}" = "true" ] || [ "${ZMQ_SHARED}" = "true" ]; then
     echo "Requesting to use dynamically linked libzmq; skipping build..."
-    export ARGS="--zmq-shared"
+    ARGS="--zmq-shared"
   else
-    export ZMQ_PREFIX="${PWD}/libzmq"
-    export ZMQ_SOURCE="https://github.com/zeromq/${ZMQ_GH_REPO}/releases/download/v${ZMQ_VERSION}/zeromq-${ZMQ_VERSION}.tar.gz"
-    export ZMQ_SRC_DIR="zeromq-${ZMQ_VERSION}"
-    export ZMQ_TARBALL="zeromq-${ZMQ_VERSION}.tar.gz"
+    ZMQ_PREFIX="${PWD}/libzmq"
+    ZMQ_SOURCE="https://github.com/zeromq/${ZMQ_GH_REPO}/releases/download/v${ZMQ_VERSION}/zeromq-${ZMQ_VERSION}.tar.gz"
+    ZMQ_SRC_DIR="zeromq-${ZMQ_VERSION}"
+    ZMQ_TARBALL="zeromq-${ZMQ_VERSION}.tar.gz"
     export MACOSX_DEPLOYMENT_TARGET=10.9
 
     mkdir -p "${ZMQ_PREFIX}"
@@ -67,17 +67,17 @@ else
       test -f configure || ./autogen.sh
 
       if [ "${npm_config_zmq_draft}" = "true" ] || [ "${ZMQ_DRAFT}" = "true" ]; then
-        export ZMQ_BUILD_OPTIONS=--enable-drafts ${ZMQ_BUILD_OPTIONS}
+        ZMQ_BUILD_OPTIONS=--enable-drafts ${ZMQ_BUILD_OPTIONS}
       fi
 
       if [ "${ZMQ_VERSION}" \< "4.1.0" ]; then
         # Do not disable shared library because it will fail to build the
         # curve keygen tool, which cannot be excluded before 4.1.
-        export ZMQ_BUILD_OPTIONS="--with-relaxed --without-documentation ${ZMQ_BUILD_OPTIONS}"
+        ZMQ_BUILD_OPTIONS="--with-relaxed --without-documentation ${ZMQ_BUILD_OPTIONS}"
       elif [ "${ZMQ_VERSION}" \< "4.2.0" ]; then
-        export ZMQ_BUILD_OPTIONS="--disable-shared --disable-curve-keygen --with-relaxed --without-documentation ${ZMQ_BUILD_OPTIONS}"
+        ZMQ_BUILD_OPTIONS="--disable-shared --disable-curve-keygen --with-relaxed --without-documentation ${ZMQ_BUILD_OPTIONS}"
       else
-        export ZMQ_BUILD_OPTIONS="--disable-shared --disable-curve-keygen --disable-pedantic --without-docs ${ZMQ_BUILD_OPTIONS}"
+        ZMQ_BUILD_OPTIONS="--disable-shared --disable-curve-keygen --disable-pedantic --without-docs ${ZMQ_BUILD_OPTIONS}"
       fi
 
       # Build as static library, don't build curve_keygen binary.
@@ -91,11 +91,11 @@ else
     fi
 
     cd ".."
-    export ARGS=""
+    ARGS=""
   fi
 fi
 
 echo "Building libzmq bindings..."
-node-gyp rebuild "$@" $ARGS
+node-gyp rebuild "$@" ${ARGS}
 
 echo "Build complete."
