@@ -32,7 +32,11 @@ describe("zmq", function() {
 
   describe("version", function() {
     it("should return version string", function() {
-      assert.match(zmq.version, /^\d+\.\d+\.\d+$/)
+      if (process.env.ZMQ_VERSION) {
+        assert.equal(zmq.version, process.env.ZMQ_VERSION)
+      } else {
+        assert.match(zmq.version, /^\d+\.\d+\.\d+$/)
+      }
     })
   })
 
