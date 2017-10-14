@@ -9,7 +9,7 @@ if [ -n "${WINDIR}" ]; then
 fi
 
 echo "Releasing binary..."
-node-pre-gyp configure build package
+node_modules/.bin/node_modules/node-pre-gyp configure build package
 
 export NODE_PRE_GYP_GITHUB_TOKEN="${GH_TOKEN}"
-node-pre-gyp-github publish --release
+node_modules/.bin/node-pre-gyp-github publish --release
