@@ -134,6 +134,9 @@
               'MACOSX_DEPLOYMENT_TARGET': '10.9',
               'LLVM_LTO': 'YES',
               'GCC_OPTIMIZATION_LEVEL': '3',
+              'DEPLOYMENT_POSTPROCESSING': 'YES',
+              'GCC_SYMBOLS_PRIVATE_EXTERN': 'YES',
+              'DEAD_CODE_STRIPPING': 'YES',
             },
           }],
 
