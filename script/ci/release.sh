@@ -12,4 +12,4 @@ echo "Releasing binary..."
 node-pre-gyp configure build package
 
 export NODE_PRE_GYP_GITHUB_TOKEN="${GH_TOKEN}"
-node-pre-gyp-github package publish --release
+node-pre-gyp-github publish --release
