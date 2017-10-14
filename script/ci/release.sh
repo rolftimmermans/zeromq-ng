@@ -1,4 +1,5 @@
 #!/bin/sh
+set -e
 
 if [ -n "${WINDIR}" ]; then
   # Give preference to all MSYS64 binaries. This solves issues with mkdir and
@@ -7,10 +8,8 @@ if [ -n "${WINDIR}" ]; then
   export PYTHON="/c/Python27/python"
 fi
 
-if [ -n "$ARCH" ]; then
-  ARGS="--arch=${ARCH}"
-else
-  ARGS=""
-fi
+echo "Releasing binary..."
+node-pre-gyp configure build package
 
-detect-libc prebuild --verbose --target 8.6.0 --strip --upload ${GH_TOKEN} ${ARGS}
+export NODE_PRE_GYP_GITHUB_TOKEN="${GH_TOKEN}"
+node-pre-gyp-github package publish --release

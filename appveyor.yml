@@ -18,10 +18,10 @@ build: off
 
 install:
 - ps: Install-Product node $env:node_js $env:platform
-- appveyor-retry call yarn install
+- appveyor-retry call sh script/ci/install.sh
 
 test_script:
-- yarn test
+- appveyor-retry call yarn test
 
 deploy_script:
-- IF "%appveyor_repo_tag%"=="true" yarn run ci:release
+- IF "%appveyor_repo_tag%"=="true" script/ci/release.sh

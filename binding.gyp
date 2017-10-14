@@ -5,7 +5,24 @@
 
   'targets': [
     {
-      'target_name': 'zeromq',
+      'target_name': 'libzmq',
+      'type': 'none',
+
+      'conditions': [
+        ["zmq_shared == 'false'", {
+          'actions': [{
+            'action_name': 'build_libzmq',
+            'inputs': ['package.json'],
+            'outputs': ['libzmq/lib'],
+            'action': ['sh', 'script/prebuild.sh'],
+          }],
+        }],
+      ],
+    },
+
+    {
+      'target_name': 'zeromq-ng',
+      'dependencies': ['libzmq'],
       'sources': [
         'src/binding.cc',
         'src/context.cc',
@@ -16,7 +33,7 @@
 
       'include_dirs': [
         "<!@(node -p \"require('node-addon-api').include\")",
-        '<(PRODUCT_DIR)/../../libzmq/include',
+        '<(PRODUCT_DIR)/../libzmq/include',
       ],
 
       'defines': [
@@ -33,14 +50,14 @@
           'conditions': [
             ['OS != "win"', {
               'libraries': [
-                '<(PRODUCT_DIR)/../../libzmq/lib/libzmq.a',
+                '<(PRODUCT_DIR)/../libzmq/lib/libzmq.a',
               ],
             }],
 
             ['OS == "win"', {
               'msbuild_toolset': 'v140',
               'libraries': [
-                '<(PRODUCT_DIR)/../../libzmq/lib/libzmq',
+                '<(PRODUCT_DIR)/../libzmq/lib/libzmq',
                 'ws2_32.lib',
                 'iphlpapi',
               ],
@@ -48,7 +65,17 @@
           ],
         }],
       ],
-    }
+    },
+
+    {
+      'target_name': 'install',
+      'type': 'none',
+      'dependencies': ['<(module_name)'],
+      'copies': [{
+        'files': ['<(PRODUCT_DIR)/<(module_name).node'],
+        'destination': '<(module_path)',
+      }],
+    },
   ],
 
   'target_defaults': {

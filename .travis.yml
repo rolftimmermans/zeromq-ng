@@ -9,14 +9,6 @@ env:
     secure: wtBX98vubHC+/5aXLUB3fNZKmnrpLnpgZkbUrfWuq01fEKk/CmL64ArkoqrGOffUhFKRemjgXVPGLF118AZuyS/dW4o05v7KOuBHt7SehhdgO8AVlQ5DVrEQm3gVFNYcusaMRP1eJpSwekHqF7grHk1VTr/uNj01OyAExKynmn6rHJNa/KijRuHsTBEQL7drLOyAHUvodq0c2fclW71H85cTaHXC+NPzydWCWn3k4Z6sGEkQCOIG+v0skWEnN1uyt5MJ89a9WPF8qz/LqVolXKmWHVowpagV2KUQpeZs8Kkao93reWs/MocTXm82gcffBdhqozv6xN55bC1BoJ0oB/S7RHk1dWRgTcPj1hkX5H4X5S8COT9/5FE2tw74jN6mLSKdRy3nNOQZPZuXOn2jlkl2n+b0IwwXBXLfn3ks18AX1Y4kAQBsfPGPM7zPX742Z8cR2rW41aVwWFDVhqI4ITBWOzUC6Cvlm8JT+eADYG5R9sodxS9jEDOH/9Gjx4xRPQK7+Q909x1XmGnVOSFlsCLHT8f7y1mPWTzPT5x57rhkD4BmX4bb0+RAVvDSiVIcko9QznK9lGSNgSX4+Y/sZHW2DHdbo2SdDmLxwUDGAgHXJ3mQNsI0ojAIb/b0d9Ybw4OuWgdMu8aaB+vZuqm1AD57oNomEXnHeMkFlVT42ho=
 
 jobs:
-  allow_failures:
-  - os: linux
-    env: ALPINE=true
-    sudo: required
-  - os: linux
-    env: ZMQ_SHARED=true ALPINE=true
-    sudo: required
-
   include:
   # Test latest versions on Linux and macOS.
   - os: linux
@@ -25,6 +17,7 @@ jobs:
   # Test shared libraries on Linux and macOS.
   - os: linux
     env: ZMQ_SHARED=true
+    addons: {apt: {packages: libzmq3-dev}}
   - os: osx
     env: ZMQ_SHARED=true
 
@@ -38,19 +31,26 @@ jobs:
 
   # Publish all binaries for Linux and macOS.
   - stage: publish binaries
-    script: yarn run ci:release
+    script: script/ci/release.sh
     os: linux
   - stage: publish binaries
-    script: yarn run ci:release
-    env: ARCH=armv7
-    os: linux
-  - stage: publish binaries
-    script: yarn run ci:release
-    env: ARCH=armv8
-    os: linux
-  - stage: publish binaries
-    script: yarn run ci:release
+    script: script/ci/release.sh
     os: osx
+
+  # Publish cross-compiled binaries for arm & arm64.
+  - stage: publish binaries
+    os: linux
+    env: ARCH=arm TRIPLE=arm-linux-gnueabihf GCC=4.8
+    install: script/ci/cross-install.sh
+    script: script/ci/cross-release.sh
+    addons: {apt: {packages: [gcc-4.8-arm-linux-gnueabihf, g++-4.8-arm-linux-gnueabihf]}}
+  - stage: publish binaries
+    os: linux
+    env: ARCH=arm64 TRIPLE=aarch64-linux-gnu GCC=4.8
+    install: script/ci/cross-install.sh
+    script: script/ci/cross-release.sh
+    addons: {apt: {packages: [gcc-4.8-aarch64-linux-gnu, g++-4.8-aarch64-linux-gnu]}}
+    sudo: required
 
   # Publish package to NPM.
   - stage: publish package
@@ -71,19 +71,8 @@ stages:
 - name: publish package
   if: tag IS present
 
-addons:
-  apt:
-    packages:
-    - libzmq3-dev
-
-before_install:
-- if [ "$TRAVIS_OS_NAME" == "osx" ]; then travis_retry brew update && travis_retry brew install zeromq yarn; fi
-- if [ -n "$ALPINE" ]; then wget https://raw.githubusercontent.com/alpinelinux/alpine-chroot-install/v0.6.0/alpine-chroot-install && echo 'a827a4ba3d0817e7c88bae17fe34e50204983d1e  alpine-chroot-install' | sha1sum -c; fi
-
 install:
-- if [ -z "$ALPINE" ]; then travis_retry yarn install; fi
-- if [ -n "$ALPINE" ]; then sudo ./alpine-chroot-install -b v3.6 -r 'https://nl.alpinelinux.org/alpine/edge/testing' -p 'nodejs yarn zeromq-dev build-base python2' -k 'CI TRAVIS_.* ZMQ_.*' && /alpine/enter-chroot -u $USER yarn install; fi
+- travis_retry script/ci/install.sh
 
 script:
-- if [ -z "$ALPINE" ]; then yarn test; fi
-- if [ -n "$ALPINE" ]; then /alpine/enter-chroot yarn test; fi
+- travis_retry yarn test
