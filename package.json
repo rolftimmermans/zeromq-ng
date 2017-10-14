@@ -16,7 +16,6 @@
     "remote_path": "{version}"
   },
   "dependencies": {
-    "detect-libc": ">= 0.2.0",
     "node-addon-api": "rolftimmermans/node-addon-api#master",
     "node-pre-gyp": "0.6.x"
   },
