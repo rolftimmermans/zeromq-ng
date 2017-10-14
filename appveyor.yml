@@ -24,4 +24,4 @@ test_script:
 - appveyor-retry call yarn test
 
 deploy_script:
-- IF "%appveyor_repo_tag%"=="true" script/ci/release.sh
+- IF "%appveyor_repo_tag%"=="true" sh script/ci/release.sh
