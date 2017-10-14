@@ -50,7 +50,6 @@ jobs:
     install: script/ci/cross-install.sh
     script: script/ci/cross-release.sh
     addons: {apt: {packages: [gcc-4.8-aarch64-linux-gnu, g++-4.8-aarch64-linux-gnu]}}
-    sudo: required
 
   # Publish package to NPM.
   - stage: publish package
