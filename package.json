@@ -13,7 +13,7 @@
     "module_name": "zeromq-ng",
     "module_path": "./lib/binary/",
     "host": "https://github.com/rolftimmermans/zeromq-ng/releases/download/",
-    "remote_path": "{version}"
+    "remote_path": "v{version}"
   },
   "dependencies": {
     "node-addon-api": "rolftimmermans/node-addon-api#master",
