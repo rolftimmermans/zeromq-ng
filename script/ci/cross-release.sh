@@ -7,6 +7,7 @@ export ZMQ_BUILD_OPTIONS="--host=${TRIPLE}"
 
 echo "Releasing binary for ${TRIPLE}..."
 node_modules/.bin/node-pre-gyp configure build --target_arch=${ARCH}
+
 ${TRIPLE}-strip -Sx lib/binary/*.node
 node_modules/.bin/node-pre-gyp package --target_arch=${ARCH}
 

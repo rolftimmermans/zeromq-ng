@@ -10,7 +10,8 @@ fi
 
 echo "Releasing binary..."
 node_modules/.bin/node-pre-gyp configure build --verbose
-strip -Sx lib/binary/*.node
+
+if [ -z "${WINDIR}" ]; then strip -Sx lib/binary/*.node fi
 node_modules/.bin/node-pre-gyp package
 
 export NODE_PRE_GYP_GITHUB_TOKEN="${GH_TOKEN}"
