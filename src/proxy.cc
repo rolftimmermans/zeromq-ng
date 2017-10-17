@@ -21,8 +21,8 @@ public:
 
 Proxy::Proxy(const Napi::CallbackInfo& info) : Napi::ObjectWrap<Proxy>(info) {
     auto args = {
-        Argument{"Front-end must be a socket object", {&Napi::Value::IsObject}},
-        Argument{"Back-end must be a socket object", {&Napi::Value::IsObject}},
+        Argument{"Front-end must be a socket object", &Napi::Value::IsObject},
+        Argument{"Back-end must be a socket object", &Napi::Value::IsObject},
     };
 
     if (!ValidateArguments(info, args)) return;

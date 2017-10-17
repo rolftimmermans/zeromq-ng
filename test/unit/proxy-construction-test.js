@@ -39,11 +39,16 @@ describe("proxy construction", function() {
     })
 
     it("should throw with invalid socket", function() {
-      assert.throws(
-        () => new zmq.Proxy({}, {}),
-        Error,
-        "Invalid pointer passed as argument",
-      )
+      try {
+        new zmq.Proxy({}, {})
+        assert.ok(false)
+      } catch (err) {
+        assert.instanceOf(err, Error)
+        assert.oneOf(err.message, [
+          "Invalid pointer passed as argument", /* before 8.7 */
+          "Invalid argument", /* as of 8.7 */
+        ])
+      }
     })
   })
 })

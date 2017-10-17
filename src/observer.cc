@@ -67,7 +67,7 @@ static inline const char* EventName(uint32_t val) {
 Observer::Observer(const Napi::CallbackInfo& info)
     : Napi::ObjectWrap<Observer>(info) {
     auto args = {
-        Argument{"Socket must be a socket object", {&Napi::Value::IsObject}},
+        Argument{"Socket must be a socket object", &Napi::Value::IsObject},
     };
 
     if (!ValidateArguments(info, args)) return;

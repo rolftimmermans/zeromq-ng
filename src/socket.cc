@@ -55,9 +55,9 @@ Napi::FunctionReference Socket::Constructor;
 
 Socket::Socket(const Napi::CallbackInfo& info) : Napi::ObjectWrap<Socket>(info) {
     auto args = {
-        Argument{"Socket type must be a number", {&Napi::Value::IsNumber}},
+        Argument{"Socket type must be a number", &Napi::Value::IsNumber},
         Argument{"Options must be an object",
-            {&Napi::Value::IsObject, &Napi::Value::IsUndefined}},
+            &Napi::Value::IsObject, &Napi::Value::IsUndefined},
     };
 
     if (!ValidateArguments(info, args)) return;
@@ -250,7 +250,7 @@ void Socket::Receive(const Napi::Promise::Resolver& res) {
 
 Napi::Value Socket::Bind(const Napi::CallbackInfo& info) {
     auto args = {
-        Argument{"Address must be a string", {&Napi::Value::IsString}},
+        Argument{"Address must be a string", &Napi::Value::IsString},
     };
 
     if (!ValidateArguments(info, args)) return Env().Undefined();
@@ -293,7 +293,7 @@ Napi::Value Socket::Bind(const Napi::CallbackInfo& info) {
 
 Napi::Value Socket::Unbind(const Napi::CallbackInfo& info) {
     auto args = {
-        Argument{"Address must be a string", {&Napi::Value::IsString}},
+        Argument{"Address must be a string", &Napi::Value::IsString},
     };
 
     if (!ValidateArguments(info, args)) return Env().Undefined();
@@ -336,7 +336,7 @@ Napi::Value Socket::Unbind(const Napi::CallbackInfo& info) {
 
 void Socket::Connect(const Napi::CallbackInfo& info) {
     auto args = {
-        Argument{"Address must be a string", {&Napi::Value::IsString}},
+        Argument{"Address must be a string", &Napi::Value::IsString},
     };
 
     if (!ValidateArguments(info, args)) return;
@@ -355,7 +355,7 @@ void Socket::Connect(const Napi::CallbackInfo& info) {
 
 void Socket::Disconnect(const Napi::CallbackInfo& info) {
     auto args = {
-        Argument{"Address must be a string", {&Napi::Value::IsString}},
+        Argument{"Address must be a string", &Napi::Value::IsString},
     };
 
     if (!ValidateArguments(info, args)) return;
@@ -470,7 +470,7 @@ Napi::Value Socket::Receive(const Napi::CallbackInfo& info) {
 template <>
 Napi::Value Socket::GetSockOpt<bool>(const Napi::CallbackInfo& info) {
     auto args = {
-        Argument{"Identifier must be a number", {&Napi::Value::IsNumber}},
+        Argument{"Identifier must be a number", &Napi::Value::IsNumber},
     };
 
     if (!ValidateArguments(info, args)) return Env().Undefined();
@@ -490,8 +490,8 @@ Napi::Value Socket::GetSockOpt<bool>(const Napi::CallbackInfo& info) {
 template <>
 void Socket::SetSockOpt<bool>(const Napi::CallbackInfo& info) {
     auto args = {
-        Argument{"Identifier must be a number", {&Napi::Value::IsNumber}},
-        Argument{"Option value must be a boolean", {&Napi::Value::IsBoolean}},
+        Argument{"Identifier must be a number", &Napi::Value::IsNumber},
+        Argument{"Option value must be a boolean", &Napi::Value::IsBoolean},
     };
 
     if (!ValidateArguments(info, args)) return;
@@ -509,7 +509,7 @@ void Socket::SetSockOpt<bool>(const Napi::CallbackInfo& info) {
 template <>
 Napi::Value Socket::GetSockOpt<char*>(const Napi::CallbackInfo& info) {
     auto args = {
-        Argument{"Identifier must be a number", {&Napi::Value::IsNumber}},
+        Argument{"Identifier must be a number", &Napi::Value::IsNumber},
     };
 
     if (!ValidateArguments(info, args)) return Env().Undefined();
@@ -534,10 +534,10 @@ Napi::Value Socket::GetSockOpt<char*>(const Napi::CallbackInfo& info) {
 template <>
 void Socket::SetSockOpt<char*>(const Napi::CallbackInfo& info) {
     auto args = {
-        Argument{"Identifier must be a number", {&Napi::Value::IsNumber}},
+        Argument{"Identifier must be a number", &Napi::Value::IsNumber},
         Argument{"Option value must be a string or buffer",
-            {&Napi::Value::IsString, &Napi::Value::IsBuffer,
-                &Napi::Value::IsNull}},
+            &Napi::Value::IsString, &Napi::Value::IsBuffer,
+                &Napi::Value::IsNull},
     };
 
     if (!ValidateArguments(info, args)) return;
@@ -571,7 +571,7 @@ void Socket::SetSockOpt<char*>(const Napi::CallbackInfo& info) {
 template <typename T>
 Napi::Value Socket::GetSockOpt(const Napi::CallbackInfo& info) {
     auto args = {
-        Argument{"Identifier must be a number", {&Napi::Value::IsNumber}},
+        Argument{"Identifier must be a number", &Napi::Value::IsNumber},
     };
 
     if (!ValidateArguments(info, args)) return Env().Undefined();
@@ -591,8 +591,8 @@ Napi::Value Socket::GetSockOpt(const Napi::CallbackInfo& info) {
 template <typename T>
 void Socket::SetSockOpt(const Napi::CallbackInfo& info) {
     auto args = {
-        Argument{"Identifier must be a number", {&Napi::Value::IsNumber}},
-        Argument{"Option value must be a number", {&Napi::Value::IsNumber}},
+        Argument{"Identifier must be a number", &Napi::Value::IsNumber},
+        Argument{"Option value must be a number", &Napi::Value::IsNumber},
     };
 
     if (!ValidateArguments(info, args)) return;

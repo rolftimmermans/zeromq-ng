@@ -12,7 +12,7 @@ Context::Context(const Napi::CallbackInfo& info)
     : Napi::ObjectWrap<Context>(info) {
     auto args = {
         Argument{"Options must be an object",
-            {&Napi::Value::IsObject, &Napi::Value::IsUndefined}},
+            &Napi::Value::IsObject, &Napi::Value::IsUndefined},
     };
 
     if (!ValidateArguments(info, args)) return;
@@ -62,7 +62,7 @@ void Context::Close(const Napi::CallbackInfo& info) {
 template <>
 Napi::Value Context::GetCtxOpt<bool>(const Napi::CallbackInfo& info) {
     auto args = {
-        Argument{"Identifier must be a number", {&Napi::Value::IsNumber}},
+        Argument{"Identifier must be a number", &Napi::Value::IsNumber},
     };
 
     if (!ValidateArguments(info, args)) return Env().Undefined();
@@ -81,8 +81,8 @@ Napi::Value Context::GetCtxOpt<bool>(const Napi::CallbackInfo& info) {
 template <>
 void Context::SetCtxOpt<bool>(const Napi::CallbackInfo& info) {
     auto args = {
-        Argument{"Identifier must be a number", {&Napi::Value::IsNumber}},
-        Argument{"Option value must be a boolean", {&Napi::Value::IsBoolean}},
+        Argument{"Identifier must be a number", &Napi::Value::IsNumber},
+        Argument{"Option value must be a boolean", &Napi::Value::IsBoolean},
     };
 
     if (!ValidateArguments(info, args)) return;
@@ -99,7 +99,7 @@ void Context::SetCtxOpt<bool>(const Napi::CallbackInfo& info) {
 template <typename T>
 Napi::Value Context::GetCtxOpt(const Napi::CallbackInfo& info) {
     auto args = {
-        Argument{"Identifier must be a number", {&Napi::Value::IsNumber}},
+        Argument{"Identifier must be a number", &Napi::Value::IsNumber},
     };
 
     if (!ValidateArguments(info, args)) return Env().Undefined();
@@ -118,8 +118,8 @@ Napi::Value Context::GetCtxOpt(const Napi::CallbackInfo& info) {
 template <typename T>
 void Context::SetCtxOpt(const Napi::CallbackInfo& info) {
     auto args = {
-        Argument{"Identifier must be a number", {&Napi::Value::IsNumber}},
-        Argument{"Option value must be a number", {&Napi::Value::IsNumber}},
+        Argument{"Identifier must be a number", &Napi::Value::IsNumber},
+        Argument{"Option value must be a number", &Napi::Value::IsNumber},
     };
 
     if (!ValidateArguments(info, args)) return;

@@ -4,15 +4,9 @@ environment:
   matrix:
   - node_js: 8.6
 
-
 platform:
 - x64
 - x86
-
-matrix:
-  allow_failures:
-  # Problem: bad access when initializing module.
-  - platform: x86
 
 build: off
 

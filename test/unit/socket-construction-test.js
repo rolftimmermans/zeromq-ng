@@ -60,12 +60,17 @@ describe("socket construction", function() {
       }
     })
 
-    it("should throw with invalid context", function() {
-      assert.throws(
-        () => new zmq.Socket(1, {context: {}}),
-        Error,
-        "Invalid pointer passed as argument",
-      )
+    it.only("should throw with invalid context", function() {
+      try {
+        new zmq.Socket(1, {context: {}})
+        assert.ok(false)
+      } catch (err) {
+        assert.instanceOf(err, Error)
+        assert.oneOf(err.message, [
+          "Invalid pointer passed as argument", /* before 8.7 */
+          "Invalid argument", /* as of 8.7 */
+        ])
+      }
     })
 
     it("should throw with closed context", function() {
@@ -150,14 +155,13 @@ describe("socket construction", function() {
     })
 
     it("should throw error on file descriptor limit", async function() {
-      if (process.platform == "win32") this.timeout(5000)
-
+      const context = new zmq.Context({maxSockets: 10})
       const sockets = []
-      const n = 10000
+      const n = 10
 
       try {
         for (let i = 0; i < n; i++) {
-          sockets.push(new zmq.Dealer)
+          sockets.push(new zmq.Dealer({context}))
         }
       } catch (err) {
         assert.instanceOf(err, Error)

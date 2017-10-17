@@ -3,7 +3,7 @@
 
 namespace zmq {
 class Argument {
-    typedef bool (Napi::Value::*ArgumentValidationCallback)() const;
+    typedef bool (Napi::Value::*ArgValCb)() const;
 
     std::function<bool(const Napi::Value&)> fn;
     const std::string msg;
@@ -13,13 +13,21 @@ public:
         const std::string& msg, std::function<bool(const Napi::Value&)> fn)
         : fn(fn), msg(msg) {}
 
-    inline Argument(const std::string& msg,
-        std::initializer_list<ArgumentValidationCallback> fns)
-        : fn([fns](const Napi::Value& value) {
-              for (const auto& fn : fns) {
-                  if ((value.*fn)()) return true;
-              }
-              return false;
+    inline Argument(const std::string& msg, ArgValCb f1)
+        : fn([=](const Napi::Value& value) {
+              return (value.*f1)();
+          }),
+          msg(msg) {}
+
+    inline Argument(const std::string& msg, ArgValCb f1, ArgValCb f2)
+        : fn([=](const Napi::Value& value) {
+              return (value.*f1)() || (value.*f2)();
+          }),
+          msg(msg) {}
+
+    inline Argument(const std::string& msg, ArgValCb f1, ArgValCb f2, ArgValCb f3)
+        : fn([=](const Napi::Value& value) {
+              return (value.*f1)() || (value.*f2)() || (value.*f3)();
           }),
           msg(msg) {}
 
