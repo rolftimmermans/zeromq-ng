@@ -60,7 +60,7 @@ describe("socket construction", function() {
       }
     })
 
-    it.only("should throw with invalid context", function() {
+    it("should throw with invalid context", function() {
       try {
         new zmq.Socket(1, {context: {}})
         assert.ok(false)
