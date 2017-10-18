@@ -56,8 +56,8 @@ Napi::FunctionReference Socket::Constructor;
 Socket::Socket(const Napi::CallbackInfo& info) : Napi::ObjectWrap<Socket>(info) {
     auto args = {
         Argument{"Socket type must be a number", &Napi::Value::IsNumber},
-        Argument{"Options must be an object",
-            &Napi::Value::IsObject, &Napi::Value::IsUndefined},
+        Argument{"Options must be an object", &Napi::Value::IsObject,
+            &Napi::Value::IsUndefined},
     };
 
     if (!ValidateArguments(info, args)) return;
@@ -536,8 +536,7 @@ void Socket::SetSockOpt<char*>(const Napi::CallbackInfo& info) {
     auto args = {
         Argument{"Identifier must be a number", &Napi::Value::IsNumber},
         Argument{"Option value must be a string or buffer",
-            &Napi::Value::IsString, &Napi::Value::IsBuffer,
-                &Napi::Value::IsNull},
+            &Napi::Value::IsString, &Napi::Value::IsBuffer, &Napi::Value::IsNull},
     };
 
     if (!ValidateArguments(info, args)) return;

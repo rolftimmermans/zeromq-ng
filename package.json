@@ -39,8 +39,8 @@
   },
   "scripts": {
     "install": "node-pre-gyp install --fallback-to-build",
-    "test": "node-pre-gyp build && eslint lib && script/format.sh && mocha && tsc --project test/unit",
-    "bench": "node-pre-gyp build && node --use_strict --harmony_async_iteration --expose-gc test/bench"
+    "test": "node-pre-gyp configure build && eslint lib && script/format.sh && mocha && tsc --project test/unit",
+    "bench": "node-pre-gyp configure build && node --use_strict --harmony_async_iteration --expose-gc test/bench"
   },
   "keywords": [
     "zeromq",

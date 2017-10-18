@@ -14,10 +14,7 @@ public:
         : fn(fn), msg(msg) {}
 
     inline Argument(const std::string& msg, ArgValCb f1)
-        : fn([=](const Napi::Value& value) {
-              return (value.*f1)();
-          }),
-          msg(msg) {}
+        : fn([=](const Napi::Value& value) { return (value.*f1)(); }), msg(msg) {}
 
     inline Argument(const std::string& msg, ArgValCb f1, ArgValCb f2)
         : fn([=](const Napi::Value& value) {
