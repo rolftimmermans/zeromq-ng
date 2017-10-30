@@ -88,7 +88,7 @@ Napi::Value Proxy::Run(const Napi::CallbackInfo& info) {
     front->state = Socket::State::Blocked;
     back->state = Socket::State::Blocked;
 
-    auto res = Napi::Promise::Resolver::New(Env());
+    auto res = Napi::Promise::Deferred::New(Env());
     auto run_ctx = std::make_shared<ProxyContext>(std::move(address));
 
     auto front_ptr = front->socket;

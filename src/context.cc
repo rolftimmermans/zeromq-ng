@@ -11,8 +11,8 @@ Napi::FunctionReference Context::Constructor;
 Context::Context(const Napi::CallbackInfo& info)
     : Napi::ObjectWrap<Context>(info) {
     auto args = {
-        Argument{"Options must be an object",
-            &Napi::Value::IsObject, &Napi::Value::IsUndefined},
+        Argument{"Options must be an object", &Napi::Value::IsObject,
+            &Napi::Value::IsUndefined},
     };
 
     if (!ValidateArguments(info, args)) return;

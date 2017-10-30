@@ -24,7 +24,7 @@ private:
     inline bool HasEvents();
     void Close();
 
-    force_inline void Receive(const Napi::Promise::Resolver& res);
+    force_inline void Receive(const Napi::Promise::Deferred& res);
 
     Poller poller;
     void* socket = nullptr;

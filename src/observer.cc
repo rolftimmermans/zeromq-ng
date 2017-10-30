@@ -153,7 +153,7 @@ void Observer::Close() {
     }
 }
 
-void Observer::Receive(const Napi::Promise::Resolver& res) {
+void Observer::Receive(const Napi::Promise::Deferred& res) {
     zmq_msg_t msg1;
     zmq_msg_t msg2;
 
@@ -218,7 +218,7 @@ Napi::Value Observer::Receive(const Napi::CallbackInfo& info) {
     if (HasEvents()) {
         /* We can read from the socket immediately. This is a separate code
            path so we can avoid creating a lambda. */
-        auto res = Napi::Promise::Resolver::New(Env());
+        auto res = Napi::Promise::Deferred::New(Env());
         Receive(res);
         return res.Promise();
     } else {
@@ -232,7 +232,7 @@ Napi::Value Observer::Receive(const Napi::CallbackInfo& info) {
 
         /* Async receive. Capture any references by value because the lambda
            outlives the scope of this method. */
-        auto res = Napi::Promise::Resolver::New(Env());
+        auto res = Napi::Promise::Deferred::New(Env());
         poller.PollReadable(0, [=]() {
             V8CallbackScope scope;
             Receive(res);

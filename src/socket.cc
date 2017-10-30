@@ -56,8 +56,8 @@ Napi::FunctionReference Socket::Constructor;
 Socket::Socket(const Napi::CallbackInfo& info) : Napi::ObjectWrap<Socket>(info) {
     auto args = {
         Argument{"Socket type must be a number", &Napi::Value::IsNumber},
-        Argument{"Options must be an object",
-            &Napi::Value::IsObject, &Napi::Value::IsUndefined},
+        Argument{"Options must be an object", &Napi::Value::IsObject,
+            &Napi::Value::IsUndefined},
     };
 
     if (!ValidateArguments(info, args)) return;
@@ -211,7 +211,7 @@ void Socket::Close() {
     }
 }
 
-void Socket::Send(const Napi::Promise::Resolver& res, const Napi::Array& msg) {
+void Socket::Send(const Napi::Promise::Deferred& res, const Napi::Array& msg) {
     auto last = msg.Length() - 1;
     for (uint32_t i = 0; i <= last; i++) {
         Outgoing part(msg[i]);
@@ -228,7 +228,7 @@ void Socket::Send(const Napi::Promise::Resolver& res, const Napi::Array& msg) {
     res.Resolve(Env().Undefined());
 }
 
-void Socket::Receive(const Napi::Promise::Resolver& res) {
+void Socket::Receive(const Napi::Promise::Deferred& res) {
     auto msg = Napi::Array::New(Env(), 1);
 
     uint32_t i = 0;
@@ -257,7 +257,7 @@ Napi::Value Socket::Bind(const Napi::CallbackInfo& info) {
     if (!ValidateOpen()) return Env().Undefined();
 
     state = Socket::State::Blocked;
-    auto res = Napi::Promise::Resolver::New(Env());
+    auto res = Napi::Promise::Deferred::New(Env());
     auto run_ctx =
         std::make_shared<AddressContext>(info[0].As<Napi::String>().Utf8Value());
 
@@ -300,7 +300,7 @@ Napi::Value Socket::Unbind(const Napi::CallbackInfo& info) {
     if (!ValidateOpen()) return Env().Undefined();
 
     state = Socket::State::Blocked;
-    auto res = Napi::Promise::Resolver::New(Env());
+    auto res = Napi::Promise::Deferred::New(Env());
     auto run_ctx =
         std::make_shared<AddressContext>(info[0].As<Napi::String>().Utf8Value());
 
@@ -397,7 +397,7 @@ Napi::Value Socket::Send(const Napi::CallbackInfo& info) {
     if (send_timeout == 0 || HasEvents(ZMQ_POLLOUT)) {
         /* We can send on the socket immediately. This is a separate code
            path so we can avoid creating a lambda. */
-        auto res = Napi::Promise::Resolver::New(Env());
+        auto res = Napi::Promise::Deferred::New(Env());
         Send(res, parts);
 
         /* This operation may have caused a state change, so we must update
@@ -418,7 +418,7 @@ Napi::Value Socket::Send(const Napi::CallbackInfo& info) {
         /* Async send. Capture any references by value because the lambda
            outlives the scope of this method. We wrap the message reference
            in a shared pointer, because references cannot be copied. :( */
-        auto res = Napi::Promise::Resolver::New(Env());
+        auto res = Napi::Promise::Deferred::New(Env());
         auto parts_ref = std::make_shared<Napi::Reference<Napi::Array>>(
             Napi::Persistent(parts));
 
@@ -438,7 +438,7 @@ Napi::Value Socket::Receive(const Napi::CallbackInfo& info) {
     if (receive_timeout == 0 || HasEvents(ZMQ_POLLIN)) {
         /* We can read from the socket immediately. This is a separate code
            path so we can avoid creating a lambda. */
-        auto res = Napi::Promise::Resolver::New(Env());
+        auto res = Napi::Promise::Deferred::New(Env());
         Receive(res);
 
         /* This operation may have caused a state change, so we must update
@@ -457,7 +457,7 @@ Napi::Value Socket::Receive(const Napi::CallbackInfo& info) {
 
         /* Async receive. Capture any references by value because the lambda
            outlives the scope of this method. */
-        auto res = Napi::Promise::Resolver::New(Env());
+        auto res = Napi::Promise::Deferred::New(Env());
         poller.PollReadable(receive_timeout, [=]() {
             V8CallbackScope scope;
             Receive(res);
@@ -536,8 +536,7 @@ void Socket::SetSockOpt<char*>(const Napi::CallbackInfo& info) {
     auto args = {
         Argument{"Identifier must be a number", &Napi::Value::IsNumber},
         Argument{"Option value must be a string or buffer",
-            &Napi::Value::IsString, &Napi::Value::IsBuffer,
-                &Napi::Value::IsNull},
+            &Napi::Value::IsString, &Napi::Value::IsBuffer, &Napi::Value::IsNull},
     };
 
     if (!ValidateArguments(info, args)) return;
