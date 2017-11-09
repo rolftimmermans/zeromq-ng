@@ -63,14 +63,14 @@ const stuff = async () => {
   socket.events.on("listening", details => {
     console.log(details.address)
     console.log(details.reconnectInterval)
-    console.log(details.errno)
+    console.log(details.error)
   })
 
   for await (const [event, details] of socket.events) {
     if (event == "listening") {
       console.log(details.address)
       console.log(details.reconnectInterval)
-      console.log(details.errno)
+      console.log(details.error)
     }
   }
 

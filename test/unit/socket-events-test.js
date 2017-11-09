@@ -94,10 +94,58 @@ for (const proto of ["inproc", "ipc", "tcp"]) {
         if (proto == "inproc") {
           assert.deepEqual(events, [["stop", {}]])
         } else {
-          if (proto == "tcp") assert.deepInclude(events, ["connectDelay", {address}])
+          if (proto == "tcp") {
+            assert.deepInclude(events, ["connectDelay", {address}])
+          }
+
           assert.deepInclude(events, ["connect", {address}])
           assert.deepInclude(events, ["stop", {}])
         }
+      })
+
+      it("should receive error events", async function() {
+        const address = uniqAddress(proto)
+        const events = []
+
+        const read = async () => {
+          for await (const event of this.sockB.events) {
+            events.push(event)
+          }
+        }
+
+        const done = read()
+
+        await this.sockA.bind(address)
+        try {
+          await this.sockB.bind(address)
+        } catch (err) {
+          /* Ignore error here */
+        }
+
+        await new Promise(resolve => setTimeout(resolve, 15))
+        this.sockA.close()
+        this.sockB.close()
+        await done
+
+        if (proto == "tcp") {
+          const [, data] = events.find(([ev]) => ev == "bindError")
+          assert.equal("tcp://" + data.address, address)
+          assert.instanceOf(data.error, Error)
+          assert.equal(data.error.message, "Address already in use")
+          assert.equal(data.error.code, "EADDRINUSE")
+          assert.typeOf(data.error.errno, "number")
+        }
+
+        if (proto == "ipc") {
+          const [, data] = events.find(([ev]) => ev == "closeError")
+          assert.equal(data.address, address)
+          assert.instanceOf(data.error, Error)
+          assert.equal(data.error.message, "No such endpoint")
+          assert.equal(data.error.code, "ENOENT")
+          assert.typeOf(data.error.errno, "number")
+        }
+
+        assert.deepInclude(events, ["stop", {}])
       })
 
       it("should receive events with emitter", async function() {

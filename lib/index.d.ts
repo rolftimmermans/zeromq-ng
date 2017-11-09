@@ -343,7 +343,7 @@ type Event = "connect" | "connectDelay" | "connectRetry" | "listening" |
 interface EventDetails {
   address?: string,
   reconnectInterval?: number,
-  errno?: number,
+  error?: Error,
 }
 
 export class Observer {

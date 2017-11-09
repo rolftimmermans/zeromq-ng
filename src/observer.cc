@@ -197,7 +197,7 @@ void Observer::Receive(const Napi::Promise::Deferred& res) {
         case ZMQ_EVENT_BIND_FAILED:
         case ZMQ_EVENT_ACCEPT_FAILED:
         case ZMQ_EVENT_CLOSE_FAILED:
-            details["errno"] = Napi::Number::New(Env(), event_value);
+            details["error"] = ErrnoException(Env(), event_value).Value();
             break;
         case ZMQ_EVENT_MONITOR_STOPPED:
             /* Also close the monitoring socket. */
@@ -209,6 +209,13 @@ void Observer::Receive(const Napi::Promise::Deferred& res) {
     msg[0u] = Napi::String::New(Env(), EventName(event_id));
     msg[1u] = details;
     res.Resolve(msg);
+}
+
+void Observer::Close(const Napi::CallbackInfo& info) {
+    if (!ValidateArguments(info, {})) return;
+    if (!ValidateOpen()) return;
+
+    Close();
 }
 
 Napi::Value Observer::Receive(const Napi::CallbackInfo& info) {
@@ -248,6 +255,7 @@ Napi::Value Observer::GetClosed(const Napi::CallbackInfo& info) {
 
 void Observer::Initialize(Napi::Env& env, Napi::Object& exports) {
     auto proto = {
+        InstanceMethod("close", &Observer::Close),
         InstanceMethod("receive", &Observer::Receive),
         InstanceAccessor("closed", &Observer::GetClosed, nullptr),
     };
