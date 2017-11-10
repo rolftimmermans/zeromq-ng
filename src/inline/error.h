@@ -49,6 +49,9 @@ static inline const char* ErrnoMessage(int32_t errorno) {
             return "Socket is blocked by async operation (e.g. bind/unbind)";
         case EBADF:
             return "Socket is closed";
+        case EADDRINUSE:
+            /* Make sure this description is the same on all platforms. */
+            return "Address already in use";
         default:
             return zmq_strerror(errorno);
     }
