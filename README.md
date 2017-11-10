@@ -593,6 +593,9 @@ The property names may differ somewhat from the native option names. This is int
 * **socksProxy** – ZMQ_SOCKS_PROXY <br/>
   <[string]> The SOCKS5 proxy address that shall be used by the socket for the TCP connection(s). Does not support SOCKS5 authentication. If the endpoints are domain names instead of addresses they shall not be resolved and they shall be forwarded unchanged to the SOCKS proxy service in the client connection request message (address type 0x03 domain name).
 
+* **tcpAcceptFilter** – ZMQ_TCP_ACCEPT_FILTER <br/>
+  <[string]> Assign a filter that will be applied for each new TCP transport connection on a listening socket. If no filters are applied, then the TCP transport allows connections from any IP address. If at least one filter is applied then new connection source IP should be matched. To clear all filters set to `null`. Filter is a string with IPv6 or IPv4 CIDR.
+
 * **tcpKeepalive** – ZMQ_TCP_KEEPALIVE <br/>
   <[number]> Override SO_KEEPALIVE socket option (if supported by OS). The default value of -1 leaves it to the OS default.
 

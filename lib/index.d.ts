@@ -74,6 +74,7 @@ interface SocketOptions {
   tcpKeepaliveCount?: number
   tcpKeepaliveIdle?: number
   tcpKeepaliveInterval?: number
+  tcpAcceptFilter?: string
   immediate?: boolean
   ipv6?: boolean
   plainServer?: boolean
