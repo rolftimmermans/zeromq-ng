@@ -6,8 +6,8 @@ const {uniqAddress} = require("../helpers")
 for (const proto of ["ipc", "tcp"]) {
   describe(`compat socket with ${proto} monitor`, function() {
     beforeEach(function() {
-      /* ZMQ < 4.1 occasionally fails with assertion errors. */
-      if (semver.satisfies(zmq.version, "< 4.1")) this.skip()
+      /* ZMQ < 4.2 occasionally fails with assertion errors. */
+      if (semver.satisfies(zmq.version, "< 4.2")) this.skip()
 
       if (proto == "ipc" && !zmq.capability.ipc) this.skip()
 
