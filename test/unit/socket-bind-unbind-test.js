@@ -83,7 +83,7 @@ for (const proto of ["inproc", "ipc", "tcp"]) {
     })
 
     describe("unbind", function() {
-      it("should resolve", async function() {
+      it("should unbind", async function() {
         const address = uniqAddress(proto)
         await this.sock.bind(address)
         await this.sock.unbind(address)

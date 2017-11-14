@@ -213,7 +213,6 @@ void Observer::Receive(const Napi::Promise::Deferred& res) {
 
 void Observer::Close(const Napi::CallbackInfo& info) {
     if (!ValidateArguments(info, {})) return;
-    if (!ValidateOpen()) return;
 
     Close();
 }

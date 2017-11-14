@@ -16,6 +16,7 @@ Next generation [ØMQ](http://zeromq.org) bindings for Node.js. The goals of thi
    * [Pub/Sub](#pubsub)
 * [Contribution](#contribution)
 * [API Documentation](#api-documentation)
+   * [Compatibility layer for ZeroMQ.js 4](#compatibility-layer-for-zeromqjs-4)
    * [Class: zmq.Socket](#class-zmqsocket)
    * [Class: zmq.Context](#class-zmqcontext)
    * [Class: zmq.Observer](#class-zmqobserver)
@@ -188,6 +189,32 @@ After continuous integration successfully finishes running the tests, the prebui
 
 
 # API Documentation
+
+
+## Compatibility layer for ZeroMQ.js 4
+
+The next generation version of the library features an experimental compatibility layer for ZeroMQ.js 4. This is recommended for users upgrading from existing versions.
+
+Example:
+
+```js
+const zmq = require("zeromq-ng/compat")
+
+const pub = zmq.socket("pub")
+const sub = zmq.socket("sub")
+
+pub.bind("tcp://*:3456", err => {
+  if (err) throw err
+
+  sub.connect("tcp://127.0.0.1:3456")
+
+  pub.send("message")
+
+  sub.on("message", msg => {
+    // Handle received message...
+  })
+})
+```
 
 
 ## Class: zmq.Socket

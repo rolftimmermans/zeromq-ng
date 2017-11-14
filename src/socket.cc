@@ -165,15 +165,6 @@ bool Socket::ValidateOpen() const {
     return true;
 }
 
-bool Socket::ValidateNotBlocked() const {
-    if (state == State::Blocked) {
-        ErrnoException(Env(), EAGAIN).ThrowAsJavaScriptException();
-        return false;
-    }
-
-    return true;
-}
-
 bool Socket::HasEvents(int32_t requested) {
     int32_t events;
     size_t events_size = sizeof(events);
@@ -275,6 +266,10 @@ Napi::Value Socket::Bind(const Napi::CallbackInfo& info) {
             V8CallbackScope scope;
             state = Socket::State::Open;
 
+            if (request_close) {
+                Close();
+            }
+
             if (run_ctx->error != 0) {
                 res.Reject(ErrnoException(Env(), run_ctx->error, run_ctx->address)
                                .Value());
@@ -317,6 +312,10 @@ Napi::Value Socket::Unbind(const Napi::CallbackInfo& info) {
         [=]() {
             V8CallbackScope scope;
             state = Socket::State::Open;
+
+            if (request_close) {
+                Close();
+            }
 
             if (run_ctx->error != 0) {
                 res.Reject(ErrnoException(Env(), run_ctx->error, run_ctx->address)
@@ -374,9 +373,13 @@ void Socket::Disconnect(const Napi::CallbackInfo& info) {
 
 void Socket::Close(const Napi::CallbackInfo& info) {
     if (!ValidateArguments(info, {})) return;
-    if (!ValidateNotBlocked()) return;
 
-    Close();
+    if (state == State::Blocked) {
+        request_close = true;
+    } else {
+        request_close = false;
+        Close();
+    }
 }
 
 Napi::Value Socket::Send(const Napi::CallbackInfo& info) {

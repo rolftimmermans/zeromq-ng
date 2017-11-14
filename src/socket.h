@@ -48,7 +48,6 @@ protected:
 private:
     inline void WarnUnlessImmediateOption(int32_t option) const;
     inline bool ValidateOpen() const;
-    inline bool ValidateNotBlocked() const;
     inline bool HasEvents(int32_t events);
 
     void Close();
@@ -70,6 +69,7 @@ private:
     uint32_t endpoints = 0;
 
     State state = State::Open;
+    bool request_close = false;
 
     friend class Observer;
     friend class Proxy;

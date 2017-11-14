@@ -9,6 +9,10 @@ for (const proto of ["inproc", "ipc", "tcp"]) {
     beforeEach(function() {
       if (proto == "ipc" && !zmq.capability.ipc) this.skip()
 
+     /* ZMQ < 4.2 fails with assertion errors with inproc.
+        See: https://github.com/zeromq/libzmq/pull/2123/files */
+     if (proto == "inproc" && semver.satisfies(zmq.version, "< 4.2")) this.skip()
+
       this.sock = new zmq.Dealer
     })
 
@@ -54,19 +58,47 @@ for (const proto of ["inproc", "ipc", "tcp"]) {
         }
       })
 
-      it("should fail during bind", async function() {
-        let promise
-        try {
-          promise = this.sock.bind(uniqAddress(proto))
-          this.sock.close()
-          assert.ok(false)
-        } catch (err) {
-          assert.instanceOf(err, Error)
-          assert.equal(err.message, "Socket temporarily unavailable")
-          assert.equal(err.code, "EAGAIN")
-          assert.typeOf(err.errno, "number")
-        }
+      it("should close after successful bind", async function() {
+        const promise = this.sock.bind(uniqAddress(proto))
+        this.sock.close()
+        assert.equal(this.sock.closed, false)
         await promise
+        assert.equal(this.sock.closed, true)
+      })
+
+      it("should close after unsuccessful bind", async function() {
+        const address = uniqAddress(proto)
+        await this.sock.bind(address)
+        const promise = this.sock.bind(address)
+        this.sock.close()
+        assert.equal(this.sock.closed, false)
+        try {
+          await promise
+          assert.ok(false)
+        } catch (err) { /* Ignore */ }
+        assert.equal(this.sock.closed, true)
+      })
+
+      it("should close after successful unbind", async function() {
+        const address = uniqAddress(proto)
+        await this.sock.bind(address)
+        const promise = this.sock.unbind(address)
+        this.sock.close()
+        assert.equal(this.sock.closed, false)
+        await promise
+        assert.equal(this.sock.closed, true)
+      })
+
+      it("should close after unsuccessful unbind", async function() {
+        const address = uniqAddress(proto)
+        const promise = this.sock.unbind(address)
+        this.sock.close()
+        assert.equal(this.sock.closed, false)
+        try {
+          await promise
+          assert.ok(false)
+        } catch (err) { /* Ignore */ }
+        assert.equal(this.sock.closed, true)
       })
 
       it("should release reference to context", async function() {

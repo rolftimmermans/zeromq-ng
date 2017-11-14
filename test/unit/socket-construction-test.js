@@ -169,8 +169,8 @@ describe("socket construction", function() {
         assert.equal(err.code, "EMFILE")
         assert.typeOf(err.errno, "number")
       } finally {
-        for (let i = 0; i < sockets.length; i++) {
-          sockets[i].close()
+        for (const socket of sockets) {
+          socket.close()
         }
       }
     })

@@ -38,16 +38,20 @@ Context::~Context() {
 
 void Context::Close() {
     if (context != nullptr) {
-        if (zmq_ctx_shutdown(context) < 0) {
-            ErrnoException(Env(), zmq_errno()).ThrowAsJavaScriptException();
-            return;
+        while (zmq_ctx_shutdown(context) < 0) {
+            if (zmq_errno() != EINTR) {
+                ErrnoException(Env(), zmq_errno()).ThrowAsJavaScriptException();
+                return;
+            }
         }
 
         /* Can block if there are sockets that aren't closed, but that
            should not happen because the objects keep the context alive. */
-        if (zmq_ctx_term(context) < 0) {
-            ErrnoException(Env(), zmq_errno()).ThrowAsJavaScriptException();
-            return;
+        while (zmq_ctx_term(context) < 0) {
+            if (zmq_errno() != EINTR) {
+                ErrnoException(Env(), zmq_errno()).ThrowAsJavaScriptException();
+                return;
+            }
         }
 
         context = nullptr;
