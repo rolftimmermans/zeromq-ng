@@ -3,7 +3,8 @@ const semver = require("semver")
 const {assert} = require("chai")
 const {uniqAddress} = require("../helpers")
 
-for (const proto of ["ipc", "tcp"]) {
+/* This test case only seems to work reliably with TCP. */
+for (const proto of ["tcp"]) {
   describe(`compat socket with ${proto} monitor`, function() {
     beforeEach(function() {
       /* ZMQ < 4.2 occasionally fails with assertion errors. */
@@ -61,7 +62,6 @@ for (const proto of ["ipc", "tcp"]) {
           assert.instanceOf(msg, Buffer)
           assert.equal(msg.toString(), "world")
           req.close()
-          doubleRep.close()
         })
 
         // Test that bind errors pass an Error both to the callback
@@ -70,42 +70,13 @@ for (const proto of ["ipc", "tcp"]) {
         doubleRep.monitor()
         doubleRep.on("bind_error", function(errno, bindAddr, ex) {
           assert.instanceOf(ex, Error)
+          doubleRep.close()
         })
 
         doubleRep.bind(address, err => {
           assert.instanceOf(err, Error)
         })
       })
-    })
-
-    it("should read multiple events on monitor interval", function(done) {
-      this.slow(150)
-      process.removeAllListeners("warning")
-
-      const req = zmq.socket("req")
-      const address = uniqAddress(proto)
-
-      req.setsockopt(zmq.ZMQ_RECONNECT_IVL, 1)
-
-      if (semver.satisfies(zmq.version, ">= 4.2")) {
-        req.setsockopt(zmq.ZMQ_CONNECT_TIMEOUT, 10)
-      }
-
-      let closeTime
-      req.on("close", function() {
-        closeTime = Date.now()
-      })
-
-      req.on("connect_retry", function() {
-        const diff = Date.now() - closeTime
-        req.unmonitor()
-        req.close()
-        assert.isAtMost(diff, 25)
-        done()
-      })
-
-      req.monitor(10, 0)
-      req.connect(address)
     })
   })
 }
