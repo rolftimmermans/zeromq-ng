@@ -10,8 +10,6 @@ for (const proto of ["tcp"]) {
       /* ZMQ < 4.2 occasionally fails with assertion errors. */
       if (semver.satisfies(zmq.version, "< 4.2")) this.skip()
 
-      if (proto == "ipc" && !zmq.capability.ipc) this.skip()
-
       this.warningListeners = process.listeners("warning")
     })
 

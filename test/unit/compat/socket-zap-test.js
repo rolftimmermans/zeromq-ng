@@ -50,7 +50,7 @@ function start() {
   })
 }
 
-for (const proto of ["inproc", "ipc", "tcp"]) {
+for (const proto of ["inproc", "tcp"]) {
   describe(`compat socket with ${proto} zap`, function() {
     let zapSocket, rep, req
 
@@ -66,8 +66,6 @@ for (const proto of ["inproc", "ipc", "tcp"]) {
     beforeEach(function() {
       /* Since ZAP uses inproc transport, it does not work reliably. */
       if (semver.satisfies(zmq.version, "< 4.2")) this.skip()
-
-      if (proto == "ipc" && !zmq.capability.ipc) this.skip()
 
       rep = zmq.socket("rep")
       req = zmq.socket("req")

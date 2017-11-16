@@ -3,12 +3,8 @@ const {assert} = require("chai")
 const {uniqAddress} = require("../helpers")
 
 /* TODO: Unbind with inproc is broken? */
-for (const proto of ["ipc", "tcp"]) {
+for (const proto of ["tcp"]) {
   describe(`compat socket with ${proto} unbind`, function() {
-    beforeEach(async function() {
-      if (proto == "ipc" && !zmq.capability.ipc) this.skip()
-    })
-
     it("should be able to unbind", function(done) {
       const sockA = zmq.socket("dealer")
       const sockB = zmq.socket("dealer")

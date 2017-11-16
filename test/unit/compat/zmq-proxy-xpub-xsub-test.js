@@ -3,13 +3,9 @@ const semver = require("semver")
 const {assert} = require("chai")
 const {uniqAddress} = require("../helpers")
 
-for (const proto of ["ipc", "tcp"]) {
+for (const proto of ["tcp"]) {
   describe(`compat proxy with ${proto} xpub-xsub`, function() {
     const sockets = []
-
-    beforeEach(async function() {
-      if (proto == "ipc" && !zmq.capability.ipc) this.skip()
-    })
 
     afterEach(function() {
       while (sockets.length) {

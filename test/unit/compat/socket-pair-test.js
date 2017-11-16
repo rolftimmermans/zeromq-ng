@@ -2,12 +2,8 @@ const zmq = require("./load")
 const {assert} = require("chai")
 const {uniqAddress} = require("../helpers")
 
-for (const proto of ["inproc", "ipc", "tcp"]) {
+for (const proto of ["inproc", "tcp"]) {
   describe(`compat socket with ${proto} pair`, function() {
-    beforeEach(async function() {
-      if (proto == "ipc" && !zmq.capability.ipc) this.skip()
-    })
-
     it("should support pair-pair", function(done) {
       const pairB = zmq.socket("pair")
       const pairC = zmq.socket("pair")

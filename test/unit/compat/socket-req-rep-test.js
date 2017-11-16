@@ -2,12 +2,8 @@ const zmq = require("./load")
 const {assert} = require("chai")
 const {uniqAddress} = require("../helpers")
 
-for (const proto of ["inproc", "ipc", "tcp"]) {
+for (const proto of ["inproc", "tcp"]) {
   describe(`compat socket with ${proto} req-rep`, function() {
-    beforeEach(async function() {
-      if (proto == "ipc" && !zmq.capability.ipc) this.skip()
-    })
-
     it("should support req-rep", function(done) {
       const rep = zmq.socket("rep")
       const req = zmq.socket("req")

@@ -2,13 +2,11 @@ const zmq = require("./load")
 const {assert} = require("chai")
 const {uniqAddress} = require("../helpers")
 
-for (const proto of ["inproc", "ipc", "tcp"]) {
+for (const proto of ["inproc", "tcp"]) {
   describe(`compat socket with ${proto} pub-sub`, function() {
     let pub, sub
 
     beforeEach(function() {
-      if (proto == "ipc" && !zmq.capability.ipc) this.skip()
-
       pub = zmq.socket("pub")
       sub = zmq.socket("sub")
     })
