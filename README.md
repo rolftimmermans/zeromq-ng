@@ -8,7 +8,7 @@ Next generation [ØMQ](http://zeromq.org) bindings for Node.js. The goals of thi
 * High performance.
 * Use modern JavaScript and Node.js features: promises for consumption with `async`/`await`, async iterators (if available at runtime).
 
-The eventual goal of this library is to be merged back into [ZeroMQ.js](https://github.com/zeromq/zeromq.js).
+**The eventual goal of this library is to be merged back into [ZeroMQ.js](https://github.com/zeromq/zeromq.js).**
 
 # Table of contents
 
