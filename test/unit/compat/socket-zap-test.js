@@ -50,7 +50,7 @@ function start() {
   })
 }
 
-for (const proto of ["inproc", "tcp"]) {
+for (const proto of ["tcp"]) {
   describe(`compat socket with ${proto} zap`, function() {
     let zapSocket, rep, req
 
