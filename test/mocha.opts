@@ -2,5 +2,5 @@ test/unit test/unit/compat
 --harmony_async_iteration
 --use_strict
 --expose-gc
---no-exit
+--exit
 --reporter list
