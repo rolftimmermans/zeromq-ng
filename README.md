@@ -32,7 +32,7 @@ Next generation [ØMQ](http://zeromq.org) bindings for Node.js. The goals of thi
 Install ZeroMQ.js NG with prebuilt binaries:
 
 ```sh
-npm install zeromq-nq
+npm install zeromq-ng
 ```
 
 Requirements for prebuilt binaries:
@@ -43,7 +43,7 @@ Requirements for prebuilt binaries:
 To link against a shared library on your system:
 
 ```sh
-npm install zeromq-nq --zmq-shared
+npm install zeromq-ng --zmq-shared
 ```
 
 Make sure you have the following installed before attempting to build against a shared library:
