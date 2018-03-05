@@ -1,11 +1,11 @@
 /* Copyright (c) 2017 Rolf Timmermans */
 #include "socket.h"
 #include "context.h"
+#include "inline/hacks.h"
 #include "observer.h"
 
 #include "inline/incoming.h"
 #include "inline/outgoing.h"
-#include "inline/v8hacks.h"
 #include "inline/work.h"
 
 #include <cmath>
@@ -263,7 +263,7 @@ Napi::Value Socket::Bind(const Napi::CallbackInfo& info) {
             }
         },
         [=]() {
-            V8CallbackScope scope;
+            CallbackScope scope(Env());
             state = Socket::State::Open;
 
             if (request_close) {
@@ -310,7 +310,7 @@ Napi::Value Socket::Unbind(const Napi::CallbackInfo& info) {
             }
         },
         [=]() {
-            V8CallbackScope scope;
+            CallbackScope scope(Env());
             state = Socket::State::Open;
 
             if (request_close) {
@@ -426,7 +426,7 @@ Napi::Value Socket::Send(const Napi::CallbackInfo& info) {
             Napi::Persistent(parts));
 
         poller.PollWritable(send_timeout, [=]() {
-            V8CallbackScope scope;
+            CallbackScope scope(Env());
             Send(res, parts_ref->Value());
         });
 
@@ -462,7 +462,7 @@ Napi::Value Socket::Receive(const Napi::CallbackInfo& info) {
            outlives the scope of this method. */
         auto res = Napi::Promise::Deferred::New(Env());
         poller.PollReadable(receive_timeout, [=]() {
-            V8CallbackScope scope;
+            CallbackScope scope(Env());
             Receive(res);
         });
 

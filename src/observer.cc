@@ -1,10 +1,10 @@
 /* Copyright (c) 2017 Rolf Timmermans */
 #include "observer.h"
 #include "context.h"
+#include "inline/hacks.h"
 #include "socket.h"
 
 #include "inline/incoming.h"
-#include "inline/v8hacks.h"
 
 #include <array>
 
@@ -240,7 +240,7 @@ Napi::Value Observer::Receive(const Napi::CallbackInfo& info) {
            outlives the scope of this method. */
         auto res = Napi::Promise::Deferred::New(Env());
         poller.PollReadable(0, [=]() {
-            V8CallbackScope scope;
+            CallbackScope scope(Env());
             Receive(res);
         });
 

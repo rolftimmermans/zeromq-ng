@@ -16,7 +16,7 @@
     "remote_path": "v{version}"
   },
   "dependencies": {
-    "node-addon-api": "nodejs/node-addon-api",
+    "node-addon-api": "1.x",
     "node-pre-gyp": "0.6.x"
   },
   "bundledDependencies": [

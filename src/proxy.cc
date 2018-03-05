@@ -3,7 +3,7 @@
 #include "context.h"
 #include "socket.h"
 
-#include "inline/v8hacks.h"
+#include "inline/hacks.h"
 #include "inline/work.h"
 
 #ifdef ZMQ_HAS_STEERABLE_PROXY
@@ -109,7 +109,7 @@ Napi::Value Proxy::Run(const Napi::CallbackInfo& info) {
             }
         },
         [=]() {
-            V8CallbackScope scope;
+            CallbackScope scope(Env());
 
             front->Close();
             back->Close();
