@@ -2,7 +2,7 @@ language: node_js
 cache: yarn
 
 node_js:
-- 9.7
+- 9.6
 
 env:
   global:
