@@ -507,7 +507,7 @@ The property names may differ somewhat from the native option names. This is int
 * **conflate** (write only, on `Pull`, `Push`, `Subscriber`, `Publisher` or `Dealer` sockets only) – ZMQ_CONFLATE <br/>
   <[boolean]> If set to `true`, a socket shall keep only one message in its inbound/outbound queue: the last message to be received/sent. Ignores any high water mark options. Does not support multi-part messages – in particular, only one part of it is kept in the socket internal queue.
 
-* **connectRoutingId** (write only, on `Router` or `Stream` sockets only) – ZMQ_CONNECT_RID <br/>
+* **connectRoutingId** (write only, on `Router` or `Stream` sockets only) – ZMQ_CONNTECT_ROUTING_ID <br/>
   <[string] | [Buffer]> Sets the peer identity of the next host connected via the `connect()` and immediately readies that connection for data transfer with the named identity. This option applies only to the first subsequent call to `connect()`. Connections thereafter use default behaviour.
 
   Typical use is to set this socket option ahead of each `connect()` attempt to a new host. Each connection MUST be assigned a unique name. Assigning a name that is already in use is not allowed.
@@ -605,7 +605,7 @@ The property names may differ somewhat from the native option names. This is int
 
   **Note:** If set to `true`, also enable `correlate` to ensure correct matching of requests and replies. Otherwise a late reply to an aborted request can be reported as the reply to the superseding request.
 
-* **routingId** (on `Request`, `Response`, `Router` or `Dealer` sockets only)– ZMQ_IDENTITY <br/>
+* **routingId** (on `Request`, `Response`, `Router` or `Dealer` sockets only)– ZMQ_ROUTING_ID <br/>
   <[string] | [Buffer]> The identity of the specified socket when connecting to a `Router` socket.
 
 * **sendBufferSize** – ZMQ_SNDBUF <br/>
