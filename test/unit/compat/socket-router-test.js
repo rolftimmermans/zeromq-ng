@@ -30,6 +30,7 @@ for (const proto of ["inproc", "tcp"]) {
       })
 
       sockA.setsockopt(zmq.ZMQ_ROUTER_MANDATORY, 1)
+      sockA.setsockopt(zmq.ZMQ_SNDTIMEO, 10)
 
       sockA.send([envelope, ""])
 
@@ -38,6 +39,7 @@ for (const proto of ["inproc", "tcp"]) {
       const sockB = zmq.socket("router")
 
       sockB.setsockopt(zmq.ZMQ_ROUTER_MANDATORY, 1)
+      sockA.setsockopt(zmq.ZMQ_SNDTIMEO, 10)
 
       sockB.send([envelope, ""], null, err => {
         assertRouteError(err)

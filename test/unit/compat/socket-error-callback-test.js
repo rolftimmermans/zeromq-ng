@@ -7,6 +7,7 @@ describe("compat socket error callback", function() {
   it("should create a socket with mandatory", function() {
     sock = zmq.socket("router")
     sock.setsockopt(zmq.ZMQ_ROUTER_MANDATORY, 1)
+    sock.setsockopt(zmq.ZMQ_SNDTIMEO, 10)
   })
 
   it("should callback with error when not connected", function(done) {

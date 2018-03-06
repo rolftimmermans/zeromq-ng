@@ -23,6 +23,9 @@ jobs:
 
   # Test older version branches of ZMQ.
   - os: linux
+    # Previous stable version on 4.2 branch.
+    env: ZMQ_VERSION=4.2.2
+  - os: linux
     # Latest stable version on 4.1 branch.
     env: ZMQ_VERSION=4.1.6
   - os: linux

@@ -136,15 +136,6 @@ for (const proto of ["inproc", "ipc", "tcp"]) {
           assert.typeOf(data.error.errno, "number")
         }
 
-        if (proto == "ipc") {
-          const [, data] = events.find(([ev]) => ev == "closeError")
-          assert.equal(data.address, address)
-          assert.instanceOf(data.error, Error)
-          assert.equal(data.error.message, "No such endpoint")
-          assert.equal(data.error.code, "ENOENT")
-          assert.typeOf(data.error.errno, "number")
-        }
-
         assert.deepInclude(events, ["stop", {}])
       })
 
