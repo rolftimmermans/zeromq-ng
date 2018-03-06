@@ -1,4 +1,4 @@
-/* Copyright (c) 2017 Rolf Timmermans */
+/* Copyright (c) 2017-2018 Rolf Timmermans */
 #include "proxy.h"
 #include "context.h"
 #include "socket.h"

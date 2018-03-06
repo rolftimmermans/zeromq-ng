@@ -1,4 +1,4 @@
-/* Copyright (c) 2017 Rolf Timmermans */
+/* Copyright (c) 2017-2018 Rolf Timmermans */
 #include "socket.h"
 #include "context.h"
 #include "inline/hacks.h"
