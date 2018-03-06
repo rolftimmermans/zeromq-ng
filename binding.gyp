@@ -67,6 +67,15 @@
       ],
     },
 
+    {
+      'target_name': 'install',
+      'type': 'none',
+      'dependencies': ['<(module_name)'],
+      'copies': [{
+        'files': ['<(PRODUCT_DIR)/<(module_name).node'],
+        'destination': '<(module_path)',
+      }],
+    },
   ],
 
   'target_defaults': {
