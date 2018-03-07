@@ -1,11 +1,10 @@
 const zmq = require("../..")
 const {assert} = require("chai")
-const {uniqAddress} = require("./helpers")
+const {testProtos, uniqAddress} = require("./helpers")
 
-for (const proto of ["inproc", "ipc", "tcp"]) {
+for (const proto of testProtos) {
   describe(`socket with ${proto} curve send/receive`, function() {
     beforeEach(function() {
-      if (proto == "ipc" && !zmq.capability.ipc) this.skip()
       if (!zmq.capability.curve) this.skip()
 
       const serverKeypair = zmq.curveKeypair()
@@ -34,7 +33,6 @@ for (const proto of ["inproc", "ipc", "tcp"]) {
 
     describe("when connected", function() {
       beforeEach(async function() {
-        if (proto == "ipc" && !zmq.capability.ipc) this.skip()
         if (!zmq.capability.curve) this.skip()
 
         const address = uniqAddress(proto)

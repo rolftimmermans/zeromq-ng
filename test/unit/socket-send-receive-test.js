@@ -2,13 +2,11 @@ const zmq = require("../..")
 const semver = require("semver")
 const weak = require("weak")
 const {assert} = require("chai")
-const {uniqAddress} = require("./helpers")
+const {testProtos, uniqAddress} = require("./helpers")
 
-for (const proto of ["inproc", "ipc", "tcp"]) {
+for (const proto of testProtos) {
   describe(`socket with ${proto} send/receive`, function() {
     beforeEach(function() {
-      if (proto == "ipc" && !zmq.capability.ipc) this.skip()
-
       this.sockA = new zmq.Pair({linger: 0})
       this.sockB = new zmq.Pair({linger: 0})
     })
@@ -21,12 +19,6 @@ for (const proto of ["inproc", "ipc", "tcp"]) {
 
     describe("when not connected", function() {
       beforeEach(async function() {
-        if (proto == "ipc" && !zmq.capability.ipc) this.skip()
-
-        /* ZMQ < 4.2 fails with assertion errors with inproc.
-           See: https://github.com/zeromq/libzmq/pull/2123/files */
-        if (proto == "inproc" && semver.satisfies(zmq.version, "< 4.2")) this.skip()
-
         this.sockA.sendHighWaterMark = 1
         await this.sockA.connect(uniqAddress(proto))
       })
@@ -88,9 +80,7 @@ for (const proto of ["inproc", "ipc", "tcp"]) {
 
     describe("when connected", function() {
       beforeEach(async function() {
-        if (proto == "ipc" && !zmq.capability.ipc) this.skip()
-
-        const address = uniqAddress(proto)
+          const address = uniqAddress(proto)
         await this.sockB.bind(address)
         await this.sockA.connect(address)
       })
@@ -279,9 +269,7 @@ for (const proto of ["inproc", "ipc", "tcp"]) {
 
     describe("when closed", function() {
       beforeEach(function() {
-        if (proto == "ipc" && !zmq.capability.ipc) this.skip()
-
-        this.sockA.close()
+          this.sockA.close()
         this.sockB.close()
       })
 

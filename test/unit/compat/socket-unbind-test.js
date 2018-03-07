@@ -38,7 +38,7 @@ for (const proto of ["tcp"]) {
         }
       })
 
-      sockA.on("message", function(msg) {
+      sockA.on("message", async function(msg) {
         msgCount++
         if (msg.toString() === "Hello from sockB.") {
           sockA.unbind(address1, err => {
@@ -49,6 +49,7 @@ for (const proto of ["tcp"]) {
           sockA.close()
           sockB.close()
           sockC.close()
+          await new Promise(resolve => setTimeout(resolve, 15))
           done()
         } else if (msg.toString() === "Error from sockB.") {
           throw Error("sockB should have been unbound")

@@ -1,19 +1,13 @@
 const zmq = require("../..")
 const semver = require("semver")
 const {assert} = require("chai")
-const {uniqAddress} = require("./helpers")
+const {testProtos, uniqAddress} = require("./helpers")
 
-for (const proto of ["inproc", "ipc", "tcp"]) {
+for (const proto of testProtos) {
   describe(`proxy with ${proto} router/dealer`, function() {
     beforeEach(async function() {
-      if (proto == "ipc" && !zmq.capability.ipc) this.skip()
-
       /* ZMQ < 4.0.5 has no steerable proxy support. */
       if (semver.satisfies(zmq.version, "< 4.0.5")) this.skip()
-
-      /* ZMQ < 4.2 fails with assertion errors with inproc.
-         See: https://github.com/zeromq/libzmq/pull/2123/files */
-      if (proto == "inproc" && semver.satisfies(zmq.version, "< 4.2")) this.skip()
 
       this.proxy = new zmq.Proxy(new zmq.Router, new zmq.Dealer)
 

@@ -1,12 +1,10 @@
 const zmq = require("../..")
 const {assert} = require("chai")
-const {uniqAddress} = require("./helpers")
+const {testProtos, uniqAddress} = require("./helpers")
 
-for (const proto of ["inproc", "ipc", "tcp"]) {
+for (const proto of testProtos) {
   describe(`socket with ${proto} req/rep`, function() {
     beforeEach(function() {
-      if (proto == "ipc" && !zmq.capability.ipc) this.skip()
-
       this.req = new zmq.Request
       this.rep = new zmq.Response
     })

@@ -2,17 +2,11 @@ const zmq = require("../..")
 const semver = require("semver")
 const weak = require("weak")
 const {assert} = require("chai")
-const {uniqAddress} = require("./helpers")
+const {testProtos, uniqAddress} = require("./helpers")
 
-for (const proto of ["inproc", "ipc", "tcp"]) {
+for (const proto of testProtos) {
   describe(`socket with ${proto} close`, function() {
     beforeEach(function() {
-      if (proto == "ipc" && !zmq.capability.ipc) this.skip()
-
-     /* ZMQ < 4.2 fails with assertion errors with inproc.
-        See: https://github.com/zeromq/libzmq/pull/2123/files */
-     if (proto == "inproc" && semver.satisfies(zmq.version, "< 4.2")) this.skip()
-
       this.sock = new zmq.Dealer
     })
 
@@ -102,10 +96,6 @@ for (const proto of ["inproc", "ipc", "tcp"]) {
       })
 
       it("should release reference to context", async function() {
-        /* ZMQ < 4.2 fails with assertion errors with inproc.
-           See: https://github.com/zeromq/libzmq/pull/2123/files */
-        if (proto == "inproc" && semver.satisfies(zmq.version, "< 4.2")) this.skip()
-
         let released = false
         let completed = false
         const release = () => {

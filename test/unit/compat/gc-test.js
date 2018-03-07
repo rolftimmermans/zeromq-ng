@@ -1,6 +1,6 @@
 if (process.versions["electron"] === undefined) {
   const zmq = require("./load")
-    const {assert} = require("chai")
+  const {assert} = require("chai")
   const {uniqAddress} = require("../helpers")
 
   for (const proto of ["inproc", "tcp"]) {
