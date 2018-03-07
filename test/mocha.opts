@@ -1,4 +1,5 @@
 test/unit test/unit/compat
+--require choma
 --harmony_async_iteration
 --use_strict
 --expose-gc

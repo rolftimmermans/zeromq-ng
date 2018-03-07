@@ -4,8 +4,15 @@ const {assert} = require("chai")
 describe("compat socket error callback", function() {
   let sock
 
-  it("should create a socket with mandatory", function() {
+  beforeEach(function() {
     sock = zmq.socket("router")
+  })
+
+  afterEach(function() {
+    sock.close()
+  })
+
+  it("should create a socket with mandatory", function() {
     sock.setsockopt(zmq.ZMQ_ROUTER_MANDATORY, 1)
     sock.setsockopt(zmq.ZMQ_SNDTIMEO, 10)
   })

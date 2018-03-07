@@ -4,12 +4,19 @@ const {assert} = require("chai")
 describe("compat socket", function() {
   let sock
 
+  beforeEach(function() {
+    sock = zmq.socket("req")
+  })
+
+  afterEach(function() {
+    sock.close()
+  })
+
   it("should alias socket", function() {
     assert.equal(zmq.createSocket, zmq.socket)
   })
 
   it("should include type and close", function() {
-    sock = zmq.socket("req")
     assert.equal(sock.type, "req")
     assert.typeOf(sock.close, "function")
   })
@@ -38,8 +45,8 @@ describe("compat socket", function() {
   })
 
   it("should support options", function() {
+    sock.close()
     sock = zmq.socket("req", {backlog: 30})
     assert.equal(sock.getsockopt("backlog"), 30)
-    sock.close()
   })
 })
