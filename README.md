@@ -449,7 +449,7 @@ subscriber.unsubscribe("foo", "bar")
 ### socket.events
 
 * **Returns** <br/>
-  <[Observer]> Event observer for this socket.
+  <[Observer]> Event observer for this socket. This starts up a ZMQ monitoring socket internally that receives all socket events.
 
 
 ### socket.context
@@ -787,7 +787,7 @@ The property names may differ somewhat from the native option names. This is int
 
 ## Class: zmq.Observer
 
-An event observer for ØMQ sockets. The event observer can be used in one of two ways, which are **mutually exclusive**:
+An event observer for ØMQ sockets. This starts up a ZMQ monitoring socket internally that receives all socket events. The event observer can be used in one of two ways, which are **mutually exclusive**:
 
 * By consuming events with `receive()`.
 * By attaching event handlers (like a classic Node.js event emitter).
