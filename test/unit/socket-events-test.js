@@ -159,6 +159,12 @@ for (const proto of ["inproc", "ipc", "tcp"]) {
           events.push(["stop", data])
         })
 
+        assert.throws(
+          () => this.sockA.events.receive(),
+          Error,
+          "Observer is in event emitter mode. After a call to events.on() it is not possible to read events with events.receive()."
+        )
+
         await this.sockA.bind(address)
         await this.sockB.connect(address)
         await new Promise(resolve => setTimeout(resolve, 15))
