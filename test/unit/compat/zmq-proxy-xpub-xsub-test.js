@@ -2,7 +2,7 @@ const zmq = require("./load")
 const {assert} = require("chai")
 const {testProtos, uniqAddress} = require("../helpers")
 
-for (const proto of testProtos.filter(p => p != "ipc")) {
+for (const proto of testProtos.filter(p => !["ipc", "inproc"].includes(p))) {
   describe(`compat proxy with ${proto} xpub-xsub`, function() {
     const sockets = []
 
@@ -103,7 +103,7 @@ for (const proto of testProtos.filter(p => p != "ipc")) {
 
       try {
         zmq.proxy(backend, frontend)
-      } catch(err) {
+      } catch (err) {
         assert.include([
           "wrong socket order to proxy",
           "This socket type order is not supported in compatibility mode",

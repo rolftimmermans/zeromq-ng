@@ -173,7 +173,7 @@ describe("socket options", function() {
       sock.close()
     })
 
-    it.skip("should be emitted for set during bind", async function() {
+    it("should be emitted for set during bind", async function() {
       const warnings = []
       process.removeAllListeners("warning")
       process.on("warning", warning => warnings.push(warning))
@@ -192,7 +192,7 @@ describe("socket options", function() {
       sock.close()
     })
 
-    it.skip("should be emitted for set after bind", async function() {
+    it("should be emitted for set after bind", async function() {
       const warnings = []
       process.removeAllListeners("warning")
       process.on("warning", warning => warnings.push(warning))
@@ -210,7 +210,7 @@ describe("socket options", function() {
       sock.close()
     })
 
-    it.skip("should be emitted when setting large uint64 socket option", async function() {
+    it("should be emitted when setting large uint64 socket option", async function() {
       const warnings = []
       process.removeAllListeners("warning")
       process.on("warning", warning => warnings.push(warning))

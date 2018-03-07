@@ -4,7 +4,7 @@ const {assert} = require("chai")
 const {testProtos, uniqAddress} = require("../helpers")
 
 /* This test case only seems to work reliably with TCP. */
-for (const proto of testProtos.filter(p => p != "ipc")) {
+for (const proto of testProtos.filter(p => !["ipc", "inproc"].includes(p))) {
   describe(`compat socket with ${proto} monitor`, function() {
     beforeEach(function() {
       /* ZMQ < 4.2 occasionally fails with assertion errors. */

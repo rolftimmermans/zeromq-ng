@@ -2,7 +2,7 @@ const zmq = require("./load")
 const {assert} = require("chai")
 const {testProtos, uniqAddress} = require("../helpers")
 
-for (const proto of testProtos.filter(p => p != "ipc")) {
+for (const proto of testProtos.filter(p => !["ipc"].includes(p))) {
   describe(`compat socket with ${proto} pair`, function() {
     it("should support pair-pair", function(done) {
       const pairA = zmq.socket("pair")
