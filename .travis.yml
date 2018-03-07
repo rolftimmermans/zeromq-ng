@@ -1,5 +1,6 @@
 language: node_js
 cache: yarn
+osx_image: xcode9.3beta
 
 node_js:
 - 9.7
