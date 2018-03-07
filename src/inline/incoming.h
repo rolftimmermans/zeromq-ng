@@ -42,12 +42,8 @@ public:
     inline Napi::Value ToBuffer(const Napi::Env& env) {
         if (buf.IsEmpty()) {
             Napi::Object msg = Napi::Buffer<uint8_t>::New(env,
-                reinterpret_cast<uint8_t*>(zmq_msg_data(*ref)),
-                zmq_msg_size(*ref),
-                [](const Napi::Env& env, uint8_t*, Reference* ref) {
-                    delete ref;
-                },
-                ref);
+                reinterpret_cast<uint8_t*>(zmq_msg_data(*ref)), zmq_msg_size(*ref),
+                [](const Napi::Env& env, uint8_t*, Reference* ref) { delete ref; }, ref);
 
             if (msg.IsEmpty()) {
                 return env.Null();

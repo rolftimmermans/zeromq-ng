@@ -19,8 +19,7 @@ public:
     }
 
     inline Work(std::function<void()>&& execute, std::function<void()>&& complete)
-        : execute_callback(std::move(execute)),
-          complete_callback(std::move(complete)) {
+        : execute_callback(std::move(execute)), complete_callback(std::move(complete)) {
         work->data = this;
     }
 

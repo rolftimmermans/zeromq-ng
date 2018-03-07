@@ -10,10 +10,8 @@ static inline const char* ErrnoCode(int32_t errorno);
 /* Generates a process warning message. */
 static inline void Warn(const Napi::Env& env, const std::string& msg) {
     auto global = env.Global();
-    auto fn = global.Get("process")
-                  .As<Napi::Object>()
-                  .Get("emitWarning")
-                  .As<Napi::Function>();
+    auto fn =
+        global.Get("process").As<Napi::Object>().Get("emitWarning").As<Napi::Function>();
     fn.Call({Napi::String::New(env, msg)});
 }
 
@@ -60,8 +58,8 @@ static inline const char* ErrnoMessage(int32_t errorno) {
 /* This is copied from Node.js; the mapping is not in a public API. */
 /* Copyright Node.js contributors. All rights reserved. */
 static inline const char* ErrnoCode(int32_t errorno) {
-#define ERRNO_CASE(e)                                                            \
-    case e:                                                                      \
+#define ERRNO_CASE(e)                                                                    \
+    case e:                                                                              \
         return #e;
 
     switch (errorno) {

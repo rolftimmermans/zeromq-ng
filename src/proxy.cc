@@ -48,8 +48,7 @@ Napi::Value Proxy::Run(const Napi::CallbackInfo& info) {
     if (Env().IsExceptionPending()) return Env().Undefined();
 
     if (front->endpoints == 0) {
-        Napi::Error::New(
-            info.Env(), "Front-end socket must be bound or connected")
+        Napi::Error::New(info.Env(), "Front-end socket must be bound or connected")
             .ThrowAsJavaScriptException();
         return Env().Undefined();
     }
@@ -102,8 +101,7 @@ Napi::Value Proxy::Run(const Napi::CallbackInfo& info) {
                 return;
             }
 
-            if (zmq_proxy_steerable(front_ptr, back_ptr, nullptr, control_sub)
-                < 0) {
+            if (zmq_proxy_steerable(front_ptr, back_ptr, nullptr, control_sub) < 0) {
                 run_ctx->error = zmq_errno();
                 return;
             }
@@ -135,8 +133,7 @@ Napi::Value Proxy::Run(const Napi::CallbackInfo& info) {
 }
 
 void Proxy::SendCommand(const char* command) {
-    while (
-        zmq_send_const(control_pub, command, strlen(command), ZMQ_DONTWAIT) < 0) {
+    while (zmq_send_const(control_pub, command, strlen(command), ZMQ_DONTWAIT) < 0) {
         if (zmq_errno() != EINTR) {
             ErrnoException(Env(), zmq_errno()).ThrowAsJavaScriptException();
             return;
@@ -169,8 +166,7 @@ Napi::Value Proxy::GetBackEnd(const Napi::CallbackInfo& info) {
 
 void Proxy::Initialize(Napi::Env& env, Napi::Object& exports) {
     auto proto = {
-        InstanceMethod("run", &Proxy::Run),
-        InstanceMethod("pause", &Proxy::Pause),
+        InstanceMethod("run", &Proxy::Run), InstanceMethod("pause", &Proxy::Pause),
         InstanceMethod("resume", &Proxy::Resume),
         InstanceMethod("terminate", &Proxy::Terminate),
 

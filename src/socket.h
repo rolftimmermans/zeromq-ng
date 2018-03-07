@@ -17,8 +17,7 @@ protected:
     enum class State : uint8_t {
         Open, /* Socket is open. */
         Closed, /* Socket is closed. */
-        Blocked, /* Async operation in progress that disallows socket
-                    access. */
+        Blocked, /* Async operation in progress that disallows socket access. */
     };
 
     inline void Close(const Napi::CallbackInfo& info);
@@ -55,8 +54,7 @@ private:
     /* Send/receive are usually in a hot path and will benefit slightly
        from being inlined. They are used in more than one location and are
        not necessarily automatically inlined by all compilers. */
-    force_inline void Send(
-        const Napi::Promise::Deferred& res, const Napi::Array& msg);
+    force_inline void Send(const Napi::Promise::Deferred& res, const Napi::Array& msg);
     force_inline void Receive(const Napi::Promise::Deferred& res);
 
     Napi::ObjectReference context_ref;

@@ -4,10 +4,10 @@
 #include "node_api.h"
 #include "node_api_types.h"
 
-#define NAPI_THROW_IF_FAILED(env, status, ...)                                   \
-    if ((status) != napi_ok) {                                                   \
-        Napi::Error::New(env).ThrowAsJavaScriptException();                      \
-        return;                                                                  \
+#define NAPI_THROW_IF_FAILED(env, status, ...)                                           \
+    if ((status) != napi_ok) {                                                           \
+        Napi::Error::New(env).ThrowAsJavaScriptException();                              \
+        return;                                                                          \
     }
 
 namespace zmq {
@@ -25,8 +25,7 @@ struct CallbackScope {
         status = napi_open_handle_scope(env, &handle_scope);
         NAPI_THROW_IF_FAILED(env, status);
 
-        status =
-            napi_create_string_utf8(env, "zmq", NAPI_AUTO_LENGTH, &resource_name);
+        status = napi_create_string_utf8(env, "zmq", NAPI_AUTO_LENGTH, &resource_name);
         NAPI_THROW_IF_FAILED(env, status);
 
         status = napi_create_object(env, &resource_object);
@@ -35,8 +34,7 @@ struct CallbackScope {
         status = napi_async_init(env, resource_object, resource_name, &context);
         NAPI_THROW_IF_FAILED(env, status);
 
-        status = napi_open_callback_scope(
-            env, resource_object, context, &callback_scope);
+        status = napi_open_callback_scope(env, resource_object, context, &callback_scope);
         NAPI_THROW_IF_FAILED(env, status);
     }
 

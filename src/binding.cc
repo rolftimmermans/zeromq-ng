@@ -18,8 +18,7 @@ static inline Napi::Object Capabilities(Napi::Env& env) {
     auto result = Napi::Object::New(env);
 
 #ifdef ZMQ_HAS_CAPABILITIES
-    static auto options = {
-        "ipc", "pgm", "tipc", "norm", "curve", "gssapi", "draft"};
+    static auto options = {"ipc", "pgm", "tipc", "norm", "curve", "gssapi", "draft"};
     for (auto& option : options) {
         result.Set(option, static_cast<bool>(zmq_has(option)));
     }

@@ -9,17 +9,14 @@ class Argument {
     const std::string msg;
 
 public:
-    inline Argument(
-        const std::string& msg, std::function<bool(const Napi::Value&)> fn)
+    inline Argument(const std::string& msg, std::function<bool(const Napi::Value&)> fn)
         : fn(fn), msg(msg) {}
 
     inline Argument(const std::string& msg, ArgValCb f1)
         : fn([=](const Napi::Value& value) { return (value.*f1)(); }), msg(msg) {}
 
     inline Argument(const std::string& msg, ArgValCb f1, ArgValCb f2)
-        : fn([=](const Napi::Value& value) {
-              return (value.*f1)() || (value.*f2)();
-          }),
+        : fn([=](const Napi::Value& value) { return (value.*f1)() || (value.*f2)(); }),
           msg(msg) {}
 
     inline Argument(const std::string& msg, ArgValCb f1, ArgValCb f2, ArgValCb f3)
@@ -43,8 +40,7 @@ inline bool ValidateArguments(
         auto i = &arg - args.begin();
 
         if (!arg.Valid(info[i])) {
-            Napi::TypeError::New(info.Env(), arg.Message())
-                .ThrowAsJavaScriptException();
+            Napi::TypeError::New(info.Env(), arg.Message()).ThrowAsJavaScriptException();
             return false;
         }
     }

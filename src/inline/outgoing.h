@@ -12,15 +12,13 @@ class Outgoing {
         UvHandle<uv_async_t> async;
 
     public:
-        inline Reference(Napi::Value value)
-            : persistent(Napi::Persistent(value)) {
+        inline Reference(Napi::Value value) : persistent(Napi::Persistent(value)) {
             async->data = this;
 
             /* Can fail if we run out of file descriptors. */
-            auto err =
-                uv_async_init(uv_default_loop(), async, [](uv_async_t* async) {
-                    delete reinterpret_cast<Reference*>(async->data);
-                });
+            auto err = uv_async_init(uv_default_loop(), async, [](uv_async_t* async) {
+                delete reinterpret_cast<Reference*>(async->data);
+            });
 
             if (err != 0) {
                 ErrnoException(value.Env(), err).ThrowAsJavaScriptException();
@@ -55,22 +53,18 @@ public:
                than releasing the initial buffer asynchronously. */
             if (length > zeroCopyThreshold) {
                 auto ref = new Reference(value);
-                if (zmq_msg_init_data(&msg, data, length, ref->Release, ref)
-                    < 0) {
+                if (zmq_msg_init_data(&msg, data, length, ref->Release, ref) < 0) {
                     delete ref;
-                    ErrnoException(value.Env(), zmq_errno())
-                        .ThrowAsJavaScriptException();
+                    ErrnoException(value.Env(), zmq_errno()).ThrowAsJavaScriptException();
                     return;
                 }
             } else {
                 if (zmq_msg_init_size(&msg, length) < 0) {
-                    ErrnoException(value.Env(), zmq_errno())
-                        .ThrowAsJavaScriptException();
+                    ErrnoException(value.Env(), zmq_errno()).ThrowAsJavaScriptException();
                     return;
                 }
 
-                std::copy(
-                    data, data + length, static_cast<char*>(zmq_msg_data(&msg)));
+                std::copy(data, data + length, static_cast<char*>(zmq_msg_data(&msg)));
             }
         } else {
             /* String data should first be converted to UTF-8 before we
@@ -86,8 +80,7 @@ public:
             };
 
             if (zmq_msg_init_data(&msg, data, length, release, str) < 0) {
-                ErrnoException(value.Env(), zmq_errno())
-                    .ThrowAsJavaScriptException();
+                ErrnoException(value.Env(), zmq_errno()).ThrowAsJavaScriptException();
                 return;
             }
         }

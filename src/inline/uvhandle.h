@@ -11,22 +11,20 @@ using handle_ptr = std::unique_ptr<T, std::function<void(T*)>>;
 template <typename T>
 struct UvHandle : public handle_ptr<T> {
     inline UvHandle()
-        : handle_ptr<T>{new T{}, [](T* handle) {
-                            /* If uninitialized, simply delete the memory. We
-                               may not call uv_close() on uninitialized
-                               handles. */
-                            if (handle->type == 0) {
-                                delete reinterpret_cast<T*>(handle);
-                                return;
-                            }
+        : handle_ptr<T>{
+              new T{}, [](T* handle) {
+                  /* If uninitialized, simply delete the memory. We
+                     may not call uv_close() on uninitialized
+                     handles. */
+                  if (handle->type == 0) {
+                      delete reinterpret_cast<T*>(handle);
+                      return;
+                  }
 
-                            /* Otherwise close the UV handle and delete in the
-                             * callback. */
-                            uv_close(reinterpret_cast<uv_handle_t*>(handle),
-                                [](uv_handle_t* handle) {
-                                    delete reinterpret_cast<T*>(handle);
-                                });
-                        }} {};
+                  /* Otherwise close the UV handle and delete in the callback. */
+                  uv_close(reinterpret_cast<uv_handle_t*>(handle),
+                      [](uv_handle_t* handle) { delete reinterpret_cast<T*>(handle); });
+              }} {};
 
     inline operator bool() {
         return handle_ptr<T>::operator bool() && handle_ptr<T>::get()->type != 0;

@@ -271,8 +271,8 @@ Napi::Value Socket::Bind(const Napi::CallbackInfo& info) {
             }
 
             if (run_ctx->error != 0) {
-                res.Reject(ErrnoException(Env(), run_ctx->error, run_ctx->address)
-                               .Value());
+                res.Reject(
+                    ErrnoException(Env(), run_ctx->error, run_ctx->address).Value());
                 return;
             }
 
@@ -318,8 +318,8 @@ Napi::Value Socket::Unbind(const Napi::CallbackInfo& info) {
             }
 
             if (run_ctx->error != 0) {
-                res.Reject(ErrnoException(Env(), run_ctx->error, run_ctx->address)
-                               .Value());
+                res.Reject(
+                    ErrnoException(Env(), run_ctx->error, run_ctx->address).Value());
                 return;
             }
 
@@ -422,8 +422,8 @@ Napi::Value Socket::Send(const Napi::CallbackInfo& info) {
            outlives the scope of this method. We wrap the message reference
            in a shared pointer, because references cannot be copied. :( */
         auto res = Napi::Promise::Deferred::New(Env());
-        auto parts_ref = std::make_shared<Napi::Reference<Napi::Array>>(
-            Napi::Persistent(parts));
+        auto parts_ref =
+            std::make_shared<Napi::Reference<Napi::Array>>(Napi::Persistent(parts));
 
         poller.PollWritable(send_timeout, [=]() {
             CallbackScope scope(Env());
@@ -538,8 +538,8 @@ template <>
 void Socket::SetSockOpt<char*>(const Napi::CallbackInfo& info) {
     auto args = {
         Argument{"Identifier must be a number", &Napi::Value::IsNumber},
-        Argument{"Option value must be a string or buffer",
-            &Napi::Value::IsString, &Napi::Value::IsBuffer, &Napi::Value::IsNull},
+        Argument{"Option value must be a string or buffer", &Napi::Value::IsString,
+            &Napi::Value::IsBuffer, &Napi::Value::IsNull},
     };
 
     if (!ValidateArguments(info, args)) return;
@@ -646,8 +646,7 @@ Napi::Value Socket::GetWritable(const Napi::CallbackInfo& info) {
 
 void Socket::Initialize(Napi::Env& env, Napi::Object& exports) {
     auto proto = {
-        InstanceMethod("bind", &Socket::Bind),
-        InstanceMethod("unbind", &Socket::Unbind),
+        InstanceMethod("bind", &Socket::Bind), InstanceMethod("unbind", &Socket::Unbind),
 
         InstanceMethod("connect", &Socket::Connect),
         InstanceMethod("disconnect", &Socket::Disconnect),
