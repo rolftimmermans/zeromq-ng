@@ -32,20 +32,18 @@ for (const proto of testProtos.filter(p => p != "ipc")) {
         })
       })
 
-      sockA.on("unbind", function(addr) {
-        console.log(addr)
+      sockA.on("unbind", async function(addr) {
         if (addr === address1) {
+          await new Promise(resolve => setTimeout(resolve, 15))
           sockB.send("Error from sockB.")
           sockC.send("Messsage from sockC.")
-          setTimeout(() => {
-            sockC.send("Final message from sockC.")
-          }, 15)
+          await new Promise(resolve => setTimeout(resolve, 15))
+          sockC.send("Final message from sockC.")
         }
       })
 
       sockA.on("message", async function(msg) {
         msgCount++
-        console.log(msg.toString())
         if (msg.toString() === "Hello from sockB.") {
           sockA.unbind(address1, err => {
             if (err) throw err
