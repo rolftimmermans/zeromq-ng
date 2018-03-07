@@ -92,42 +92,53 @@ for (const proto of ["inproc", "tcp"]) {
       })
     })
 
-    it("should continue to deliver messages after error in message handler", function(done) {
-      const address = uniqAddress(proto)
-      let n = 0
-
-      sub.subscribe("")
-      let errorHandlerCalled = 0
-
-      sub.on("error", err => {
-        errorHandlerCalled++
+    describe("with errors", function() {
+      before(function() {
+        this.uncaughtExceptionListeners = process.listeners("uncaughtException")
+        process.removeAllListeners("uncaughtException")
       })
 
-      sub.on("message", function(msg) {
-        assert.instanceOf(msg, Buffer)
-        switch (n++) {
-          case 0:
-            assert.equal(msg.toString(), "foo")
-            throw Error("test error")
-            break
-          case 1:
-            assert.equal(msg.toString(), "bar")
-            sub.close()
-            pub.close()
-            assert.equal(errorHandlerCalled, 1)
-            done()
-            break
+      after(function() {
+        process.removeAllListeners("uncaughtException")
+        for (const listener of this.uncaughtExceptionListeners) {
+          process.on("uncaughtException", listener)
         }
       })
 
-      sub.bind(address, err => {
-        if (err) throw err
-        pub.connect(address)
+      it("should continue to deliver messages in message handler", function(done) {
+        let error
+        process.once("uncaughtException", err => {error = err})
 
-        setTimeout(() => {
-          pub.send("foo")
-          pub.send("bar")
-        }, 15)
+        const address = uniqAddress(proto)
+        let n = 0
+
+        sub.subscribe("")
+        sub.on("message", function(msg) {
+          assert.instanceOf(msg, Buffer)
+          switch (n++) {
+            case 0:
+              assert.equal(msg.toString(), "foo")
+              throw Error("test error")
+              break
+            case 1:
+              assert.equal(msg.toString(), "bar")
+              sub.close()
+              pub.close()
+              assert.equal(error.message, "test error")
+              done()
+              break
+          }
+        })
+
+        sub.bind(address, err => {
+          if (err) throw err
+          pub.connect(address)
+
+          setTimeout(() => {
+            pub.send("foo")
+            pub.send("bar")
+          }, 15)
+        })
       })
     })
   })
