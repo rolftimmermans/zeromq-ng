@@ -1,6 +1,5 @@
 language: node_js
 cache: yarn
-osx_image: xcode9.3beta
 
 node_js:
 - 9.7
@@ -14,12 +13,14 @@ jobs:
   # Test latest versions on Linux and macOS.
   - os: linux
   - os: osx
+    osx_image: xcode9.3beta
 
   # Test shared libraries on Linux and macOS.
   - os: linux
     env: ZMQ_SHARED=true
     addons: {apt: {packages: libzmq3-dev}}
   - os: osx
+    osx_image: xcode9.3beta
     env: ZMQ_SHARED=true
 
   # Test older version branches of ZMQ.
@@ -40,6 +41,7 @@ jobs:
   - stage: publish binaries
     script: script/ci/release.sh
     os: osx
+    osx_image: xcode9.3beta
 
   # Publish cross-compiled binaries for arm & arm64.
   - stage: publish binaries
