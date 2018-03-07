@@ -1,10 +1,10 @@
 const zmq = require("./load")
 const semver = require("semver")
 const {assert} = require("chai")
-const {uniqAddress} = require("../helpers")
+const {testProtos, uniqAddress} = require("../helpers")
 
 /* This test case only seems to work reliably with TCP. */
-for (const proto of ["tcp"]) {
+for (const proto of testProtos.filter(p => p != "ipc")) {
   describe(`compat socket with ${proto} monitor`, function() {
     beforeEach(function() {
       /* ZMQ < 4.2 occasionally fails with assertion errors. */

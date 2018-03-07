@@ -1,7 +1,7 @@
 const zmq = require("./load")
 const semver = require("semver")
 const {assert} = require("chai")
-const {uniqAddress} = require("../helpers")
+const {testProtos, uniqAddress} = require("../helpers")
 
 function start() {
   const zap = zmq.socket("router")
@@ -50,7 +50,7 @@ function start() {
   })
 }
 
-for (const proto of ["tcp"]) {
+for (const proto of testProtos.filter(p => p != "ipc")) {
   describe(`compat socket with ${proto} zap`, function() {
     let zapSocket, rep, req
 

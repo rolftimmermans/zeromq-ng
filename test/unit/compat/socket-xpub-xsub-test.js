@@ -1,8 +1,8 @@
 const zmq = require("./load")
 const {assert} = require("chai")
-const {uniqAddress} = require("../helpers")
+const {testProtos, uniqAddress} = require("../helpers")
 
-for (const proto of ["inproc", "tcp"]) {
+for (const proto of testProtos.filter(p => p != "ipc")) {
   describe(`compat socket with ${proto} xpub-xsub`, function() {
     it("should support pub-sub tracing and filtering", function(done) {
       let n = 0

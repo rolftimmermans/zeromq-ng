@@ -1,9 +1,8 @@
 const zmq = require("./load")
-const semver = require("semver")
 const {assert} = require("chai")
-const {uniqAddress} = require("../helpers")
+const {testProtos, uniqAddress} = require("../helpers")
 
-for (const proto of ["tcp"]) {
+for (const proto of testProtos.filter(p => p != "ipc")) {
   describe(`compat proxy with ${proto} router-dealer`, function() {
     const sockets = []
 

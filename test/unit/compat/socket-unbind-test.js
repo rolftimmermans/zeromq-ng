@@ -1,10 +1,16 @@
 const zmq = require("./load")
+const semver = require("semver")
 const {assert} = require("chai")
-const {uniqAddress} = require("../helpers")
+const {testProtos, uniqAddress} = require("../helpers")
 
 /* TODO: Unbind with inproc is broken? */
-for (const proto of ["tcp"]) {
+for (const proto of testProtos.filter(p => p != "ipc")) {
   describe(`compat socket with ${proto} unbind`, function() {
+    beforeEach(function() {
+      /* Seems < 4.2 is affected by https://github.com/zeromq/libzmq/issues/1583 */
+      if (semver.satisfies(zmq.version, "< 4.2")) this.skip()
+    })
+
     it("should be able to unbind", function(done) {
       const sockA = zmq.socket("dealer")
       const sockB = zmq.socket("dealer")
@@ -27,19 +33,19 @@ for (const proto of ["tcp"]) {
       })
 
       sockA.on("unbind", function(addr) {
+        console.log(addr)
         if (addr === address1) {
-          process.nextTick(() => {
-            sockB.send("Error from sockB.")
-            sockC.send("Messsage from sockC.")
-            setTimeout(() => {
-              sockC.send("Final message from sockC.")
-            }, 15)
-          })
+          sockB.send("Error from sockB.")
+          sockC.send("Messsage from sockC.")
+          setTimeout(() => {
+            sockC.send("Final message from sockC.")
+          }, 15)
         }
       })
 
       sockA.on("message", async function(msg) {
         msgCount++
+        console.log(msg.toString())
         if (msg.toString() === "Hello from sockB.") {
           sockA.unbind(address1, err => {
             if (err) throw err

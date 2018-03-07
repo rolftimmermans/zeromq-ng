@@ -1,6 +1,6 @@
 const zmq = require("./load")
 const {assert} = require("chai")
-const {uniqAddress} = require("../helpers")
+const {testProtos, uniqAddress} = require("../helpers")
 const http = require("http")
 
 describe("compat socket stream", function() {

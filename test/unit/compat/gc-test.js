@@ -1,9 +1,9 @@
 if (process.versions["electron"] === undefined) {
   const zmq = require("./load")
   const {assert} = require("chai")
-  const {uniqAddress} = require("../helpers")
+  const {testProtos, uniqAddress} = require("../helpers")
 
-  for (const proto of ["inproc", "tcp"]) {
+  for (const proto of testProtos.filter(p => p != "ipc")) {
     describe(`compat socket with ${proto}`, function() {
       it("should cooperate with gc", function(done) {
         const sockA = zmq.socket("dealer")
