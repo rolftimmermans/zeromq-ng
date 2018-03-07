@@ -2,7 +2,6 @@ language: node_js
 cache: yarn
 
 node_js:
-- 6.13
 - 9.7
 
 env:
