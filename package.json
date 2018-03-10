@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "node-addon-api": "1.x",
-    "node-pre-gyp": "0.6.x"
+    "node-pre-gyp": "~0.7.0"
   },
   "bundledDependencies": [
     "node-pre-gyp"
