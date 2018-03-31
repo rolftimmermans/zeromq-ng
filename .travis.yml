@@ -71,6 +71,7 @@ jobs:
     node_js: 9.7
     os: linux
     env: ALPINE_CHROOT=true
+    sudo: required
     script: script/ci/release.sh
 
   # Publish cross-compiled binaries for arm & arm64.
