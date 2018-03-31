@@ -11,13 +11,15 @@
   },
   "binary": {
     "module_name": "zeromq-ng",
-    "module_path": "./lib/binary/",
+    "module_path": "./lib/binary/napi-v{napi_build_version}",
+    "remote_path": "v{version}",
+    "package_name": "{module_name}-{version}-{platform}-{arch}-{libc}-napi-v{napi_build_version}.tar.gz",
     "host": "https://github.com/rolftimmermans/zeromq-ng/releases/download/",
-    "remote_path": "v{version}"
+    "napi_versions": [1, 2]
   },
   "dependencies": {
-    "node-addon-api": "1.x",
-    "node-pre-gyp": "0.6.x"
+    "node-addon-api": "^1.2",
+    "node-pre-gyp": "^0.9.0"
   },
   "bundledDependencies": [
     "node-pre-gyp"
@@ -26,7 +28,7 @@
     "@types/node": ">= 8.0",
     "benchmark": ">= 0",
     "chai": ">= 4.1",
-    "choma": "rolftimmermans/choma",
+    "choma": ">= 1.2",
     "eslint": ">= 4.0",
     "mocha": ">= 4.0",
     "node-pre-gyp-github": ">= 1.3.1",
@@ -36,10 +38,10 @@
     "weak": ">= 1.0"
   },
   "engines": {
-    "node": ">= 8.6"
+    "node": ">= 8.8"
   },
   "scripts": {
-    "install": "node-pre-gyp install --fallback-to-build",
+    "install": "node-pre-gyp configure",
     "test": "node-pre-gyp build && eslint lib && script/format.sh && mocha && tsc --project test/unit",
     "bench": "node-pre-gyp build && node --use_strict --harmony_async_iteration --expose-gc test/bench"
   },

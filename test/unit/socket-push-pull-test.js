@@ -2,7 +2,7 @@ const zmq = require("../..")
 const {assert} = require("chai")
 const {testProtos, uniqAddress} = require("./helpers")
 
-for (const proto of testProtos) {
+for (const proto of testProtos("tcp", "ipc", "inproc")) {
   describe(`socket with ${proto} push/pull`, function() {
     beforeEach(function() {
       this.push = new zmq.Push

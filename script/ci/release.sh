@@ -9,10 +9,29 @@ if [ -n "${WINDIR}" ]; then
 fi
 
 echo "Releasing binary..."
-node_modules/.bin/node-pre-gyp configure build --verbose
+if [ -n "${ALPINE_CHROOT}" ]; then
+  /alpine/enter-chroot node_modules/.bin/node-pre-gyp configure build --verbose
+else
+  node_modules/.bin/node-pre-gyp configure build --verbose
+fi
 
-if [ -z "${WINDIR}" ]; then strip -Sx lib/binary/*.node; fi
-node_modules/.bin/node-pre-gyp package
+if [ -z "${WINDIR}" ]; then
+  if [ -n "${ALPINE_CHROOT}" ]; then
+    /alpine/enter-chroot strip -Sx lib/binary/*.node
+  else
+    strip -Sx lib/binary/*.node
+  fi
+fi
+
+if [ -n "${ALPINE_CHROOT}" ]; then
+  /alpine/enter-chroot node_modules/.bin/node-pre-gyp package
+else
+  node_modules/.bin/node-pre-gyp package
+fi
 
 export NODE_PRE_GYP_GITHUB_TOKEN="${GH_TOKEN}"
-node_modules/.bin/node-pre-gyp-github publish --release
+if [ -n "${ALPINE_CHROOT}" ]; then
+  /alpine/enter-chroot node_modules/.bin/node-pre-gyp-github publish --release
+else
+  node_modules/.bin/node-pre-gyp-github publish --release
+fi

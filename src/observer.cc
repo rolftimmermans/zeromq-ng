@@ -1,7 +1,7 @@
 /* Copyright (c) 2017-2018 Rolf Timmermans */
 #include "observer.h"
 #include "context.h"
-#include "inline/hacks.h"
+#include "inline/callback_scope.h"
 #include "socket.h"
 
 #include "inline/incoming.h"
@@ -76,7 +76,7 @@ Observer::Observer(const Napi::CallbackInfo& info) : Napi::ObjectWrap<Observer>(
 
     /* Use `this` pointer as unique identifier for monitoring socket. */
     auto address = std::string("inproc://zmq.monitor.")
-        + std::to_string(reinterpret_cast<uintptr_t>(this));
+        + to_string(reinterpret_cast<uintptr_t>(this));
 
     if (zmq_socket_monitor(target->socket, address.c_str(), ZMQ_EVENT_ALL) < 0) {
         ErrnoException(Env(), zmq_errno()).ThrowAsJavaScriptException();

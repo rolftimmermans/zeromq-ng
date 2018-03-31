@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-ZMQ_VERSION=${ZMQ_VERSION:-"4.2.3"}
+ZMQ_VERSION=${ZMQ_VERSION:-"4.2.5"}
 
 if [ "${ZMQ_VERSION}" \< "4.1.0" ]; then
   ZMQ_GH_REPO="zeromq4-x"

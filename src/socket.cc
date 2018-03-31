@@ -1,7 +1,7 @@
 /* Copyright (c) 2017-2018 Rolf Timmermans */
 #include "socket.h"
 #include "context.h"
-#include "inline/hacks.h"
+#include "inline/callback_scope.h"
 #include "observer.h"
 
 #include "inline/incoming.h"

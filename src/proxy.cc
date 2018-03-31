@@ -3,7 +3,7 @@
 #include "context.h"
 #include "socket.h"
 
-#include "inline/hacks.h"
+#include "inline/callback_scope.h"
 #include "inline/work.h"
 
 #ifdef ZMQ_HAS_STEERABLE_PROXY
@@ -76,7 +76,7 @@ Napi::Value Proxy::Run(const Napi::CallbackInfo& info) {
 
     /* Use `this` pointer as unique identifier for control socket. */
     auto address = std::string("inproc://zmq.proxycontrol.")
-        + std::to_string(reinterpret_cast<uintptr_t>(this));
+        + to_string(reinterpret_cast<uintptr_t>(this));
 
     /* Connect publisher so we can start queueing control messages. */
     if (zmq_connect(control_pub, address.c_str()) < 0) {

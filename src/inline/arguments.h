@@ -1,6 +1,8 @@
 /* Copyright (c) 2017-2018 Rolf Timmermans */
 #pragma once
 
+#include "to_string.h"
+
 namespace zmq {
 class Argument {
     typedef bool (Napi::Value::*ArgValCb)() const;
@@ -46,7 +48,7 @@ inline bool ValidateArguments(
     }
 
     if (info.Length() > args.size()) {
-        auto msg = "Expected " + std::to_string(args.size()) + " argument"
+        auto msg = "Expected " + to_string(args.size()) + " argument"
             + (args.size() != 0 ? "s" : "");
         Napi::TypeError::New(info.Env(), msg).ThrowAsJavaScriptException();
         return false;

@@ -9,9 +9,8 @@ static inline Napi::String Version(Napi::Env& env) {
     int32_t major, minor, patch;
     zmq_version(&major, &minor, &patch);
 
-    return Napi::String::New(env,
-        std::to_string(major) + "." + std::to_string(minor) + "."
-            + std::to_string(patch));
+    return Napi::String::New(
+        env, to_string(major) + "." + to_string(minor) + "." + to_string(patch));
 }
 
 static inline Napi::Object Capabilities(Napi::Env& env) {

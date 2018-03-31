@@ -1,4 +1,7 @@
 environment:
+  # Version 4.2.2 has a prebuilt binary available. TODO: Build Windows binary
+  # in this project.
+  ZMQ_VERSION: 4.2.2
   GH_TOKEN:
     secure: 6V8UzhSBNiXKcwNF1cTFaqTZaX/YVUWutdbluQVdXPlUn1u9G+cd1XTgyZQDmD+4
   matrix:

@@ -37,6 +37,7 @@
       ],
 
       'defines': [
+        'NAPI_BUILD_VERSION=<(napi_build_version)',
         'NAPI_DISABLE_CPP_EXCEPTIONS',
         'ZMQ_STATIC',
       ],

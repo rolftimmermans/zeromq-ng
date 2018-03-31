@@ -1,27 +1,29 @@
-const zmq = require("./load")
-const {assert} = require("chai")
+if (!process.env["NO_COMPAT_TEST"]) {
+  const zmq = require("./load")
+  const {assert} = require("chai")
 
-describe("compat socket error callback", function() {
-  let sock
+  describe("compat socket error callback", function() {
+    let sock
 
-  beforeEach(function() {
-    sock = zmq.socket("router")
-  })
+    beforeEach(function() {
+      sock = zmq.socket("router")
+    })
 
-  afterEach(function() {
-    sock.close()
-  })
-
-  it("should create a socket with mandatory", function() {
-    sock.setsockopt(zmq.ZMQ_ROUTER_MANDATORY, 1)
-    sock.setsockopt(zmq.ZMQ_SNDTIMEO, 10)
-  })
-
-  it("should callback with error when not connected", function(done) {
-    sock.send(["foo", "bar"], null, err => {
-      assert.instanceOf(err, Error)
+    afterEach(function() {
       sock.close()
-      done()
+    })
+
+    it("should create a socket with mandatory", function() {
+      sock.setsockopt(zmq.ZMQ_ROUTER_MANDATORY, 1)
+      sock.setsockopt(zmq.ZMQ_SNDTIMEO, 10)
+    })
+
+    it("should callback with error when not connected", function(done) {
+      sock.send(["foo", "bar"], null, err => {
+        assert.instanceOf(err, Error)
+        sock.close()
+        done()
+      })
     })
   })
-})
+}

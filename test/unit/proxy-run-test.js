@@ -3,7 +3,7 @@ const semver = require("semver")
 const {assert} = require("chai")
 const {testProtos, uniqAddress} = require("./helpers")
 
-for (const proto of testProtos) {
+for (const proto of testProtos("tcp", "ipc", "inproc")) {
   describe(`proxy with ${proto} run`, function() {
     beforeEach(async function() {
       /* ZMQ < 4.0.5 has no steerable proxy support. */

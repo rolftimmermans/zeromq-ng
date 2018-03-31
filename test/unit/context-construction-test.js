@@ -1,5 +1,13 @@
 const zmq = require("../..")
+const semver = require("semver")
 const {assert} = require("chai")
+
+before(function() {
+  /* Avoid blocking on unclosed sockets on exit. */
+  if (semver.satisfies(zmq.version, ">= 4.2.0")) {
+    zmq.global.blocky = false
+  }
+})
 
 after(function() {
   zmq.global.close()

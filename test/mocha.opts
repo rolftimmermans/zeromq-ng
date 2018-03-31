@@ -4,4 +4,4 @@ test/unit test/unit/compat
 --use_strict
 --expose-gc
 --exit
---reporter list
+--reporter json-stream

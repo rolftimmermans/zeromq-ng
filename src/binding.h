@@ -15,6 +15,7 @@
 
 #include "inline/arguments.h"
 #include "inline/error.h"
+#include "inline/to_string.h"
 #include "inline/util.h"
 
 #ifdef _MSC_VER

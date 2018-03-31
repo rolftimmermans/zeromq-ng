@@ -3,7 +3,7 @@ const weak = require("weak")
 const {assert} = require("chai")
 const {testProtos, uniqAddress} = require("./helpers")
 
-for (const proto of testProtos) {
+for (const proto of testProtos("tcp", "ipc", "inproc")) {
   describe(`socket with ${proto} close`, function() {
     beforeEach(function() {
       this.sock = new zmq.Dealer

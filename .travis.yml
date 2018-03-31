@@ -1,56 +1,89 @@
 language: node_js
 cache: yarn
 
-node_js:
-- 9.7
-
 env:
   global:
     secure: wtBX98vubHC+/5aXLUB3fNZKmnrpLnpgZkbUrfWuq01fEKk/CmL64ArkoqrGOffUhFKRemjgXVPGLF118AZuyS/dW4o05v7KOuBHt7SehhdgO8AVlQ5DVrEQm3gVFNYcusaMRP1eJpSwekHqF7grHk1VTr/uNj01OyAExKynmn6rHJNa/KijRuHsTBEQL7drLOyAHUvodq0c2fclW71H85cTaHXC+NPzydWCWn3k4Z6sGEkQCOIG+v0skWEnN1uyt5MJ89a9WPF8qz/LqVolXKmWHVowpagV2KUQpeZs8Kkao93reWs/MocTXm82gcffBdhqozv6xN55bC1BoJ0oB/S7RHk1dWRgTcPj1hkX5H4X5S8COT9/5FE2tw74jN6mLSKdRy3nNOQZPZuXOn2jlkl2n+b0IwwXBXLfn3ks18AX1Y4kAQBsfPGPM7zPX742Z8cR2rW41aVwWFDVhqI4ITBWOzUC6Cvlm8JT+eADYG5R9sodxS9jEDOH/9Gjx4xRPQK7+Q909x1XmGnVOSFlsCLHT8f7y1mPWTzPT5x57rhkD4BmX4bb0+RAVvDSiVIcko9QznK9lGSNgSX4+Y/sZHW2DHdbo2SdDmLxwUDGAgHXJ3mQNsI0ojAIb/b0d9Ybw4OuWgdMu8aaB+vZuqm1AD57oNomEXnHeMkFlVT42ho=
 
 jobs:
   include:
-  # Test latest versions on Linux and macOS.
+  # Test latest ZMQ versions on Linux and macOS.
   - os: linux
+    node_js: 9.7
+
+  - os: linux
+    node_js: 8.8
+
+  - os: linux
+    env: ALPINE_CHROOT=true
+    sudo: required
+
   - os: osx
+    node_js: 9.7
+    env: NO_COMPAT_TEST=true
+    osx_image: xcode9.3beta
+
+  - os: osx
+    node_js: 8.8
+    env: NO_COMPAT_TEST=true
     osx_image: xcode9.3beta
 
   # Test shared libraries on Linux and macOS.
   - os: linux
-    env: ZMQ_SHARED=true
+    node_js: 9.7
+    env: ZMQ_SHARED=true NO_COMPAT_TEST=true
     addons: {apt: {packages: libzmq3-dev}}
+
   - os: osx
+    node_js: 9.7
     osx_image: xcode9.3beta
-    env: ZMQ_SHARED=true
+    env: ZMQ_SHARED=true NO_COMPAT_TEST=true
 
   # Test older version branches of ZMQ.
   - os: linux
+    node_js: 9.7
     # Previous stable version on 4.2 branch.
     env: ZMQ_VERSION=4.2.2
+
   - os: linux
+    node_js: 9.7
     # Latest stable version on 4.1 branch.
     env: ZMQ_VERSION=4.1.6
   - os: linux
+    node_js: 9.7
     # Version of libzmq3 on Ubuntu Trusty.
     env: ZMQ_VERSION=4.0.4
 
   # Publish all binaries for Linux and macOS.
   - stage: publish binaries
-    script: script/ci/release.sh
+    node_js: 9.7
     os: linux
-  - stage: publish binaries
     script: script/ci/release.sh
+
+  - stage: publish binaries
+    node_js: 9.7
     os: osx
     osx_image: xcode9.3beta
+    script: script/ci/release.sh
+
+  # Publish chroot cross-compiled binaries for Alpine Linux.
+  - stage: publish binaries
+    node_js: 9.7
+    os: linux
+    env: ALPINE_CHROOT=true
+    script: script/ci/release.sh
 
   # Publish cross-compiled binaries for arm & arm64.
   - stage: publish binaries
+    node_js: 9.7
     os: linux
     env: ARCH=arm TRIPLE=arm-linux-gnueabihf GCC=4.8
     install: script/ci/cross-install.sh
     script: script/ci/cross-release.sh
     addons: {apt: {packages: [gcc-4.8-arm-linux-gnueabihf, g++-4.8-arm-linux-gnueabihf]}}
+
   - stage: publish binaries
+    node_js: 9.7
     os: linux
     env: ARCH=arm64 TRIPLE=aarch64-linux-gnu GCC=4.8
     install: script/ci/cross-install.sh
@@ -80,4 +113,4 @@ install:
 - travis_retry script/ci/install.sh
 
 script:
-- travis_retry yarn test
+- travis_retry script/ci/test.sh

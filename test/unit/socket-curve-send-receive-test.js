@@ -2,7 +2,7 @@ const zmq = require("../..")
 const {assert} = require("chai")
 const {testProtos, uniqAddress} = require("./helpers")
 
-for (const proto of testProtos) {
+for (const proto of testProtos("tcp", "ipc", "inproc")) {
   describe(`socket with ${proto} curve send/receive`, function() {
     beforeEach(function() {
       if (!zmq.capability.curve) this.skip()
