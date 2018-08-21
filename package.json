@@ -45,6 +45,7 @@
   },
   "scripts": {
     "clean": "node-pre-gyp clean && rm -rf build-tmp-napi-v*",
+    "build": "node-pre-gyp build --verbose --build-latest-napi-version-only",
     "install": "node-pre-gyp configure --verbose --build-latest-napi-version-only",
     "test": "node-pre-gyp build --verbose --build-latest-napi-version-only && eslint lib && script/format.sh && mocha && tsc --project test/unit",
     "bench": "node-pre-gyp build --verbose --build-latest-napi-version-only && node --use_strict --harmony --expose-gc test/bench"

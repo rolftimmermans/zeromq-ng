@@ -19,7 +19,7 @@ install:
 - appveyor-retry call sh script/ci/install.sh
 
 test_script:
-- appveyor-retry call yarn test
+- appveyor-retry call sh script/ci/test.sh
 
 deploy_script:
 - IF "%appveyor_repo_tag%"=="true" sh script/ci/release.sh

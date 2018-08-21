@@ -8,8 +8,7 @@ if [ -n "${WINDIR}" ]; then
   export PYTHON="/c/Python27/python"
 elif [ "$TRAVIS_OS_NAME" = "osx" ]; then
   # MacOS still needs a few things to be installed.
-  brew update && brew install yarn coreutils
-  alias timeout=gtimeout
+  brew update && brew install yarn
 
   if [ -n "${ZMQ_SHARED}" ]; then
     brew install zeromq
