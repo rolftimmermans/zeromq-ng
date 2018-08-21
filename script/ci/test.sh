@@ -2,7 +2,7 @@
 set -e
 
 if [ -n "${ALPINE_CHROOT}" ]; then
-  /alpine/enter-chroot yarn test
+  /alpine/enter-chroot timeout 60 yarn test
 else
-  yarn test
+  timeout 60 yarn test
 fi
