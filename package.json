@@ -46,7 +46,7 @@
   "scripts": {
     "install": "node-pre-gyp configure --build-latest-napi-version-only",
     "test": "node-pre-gyp build --build-latest-napi-version-only && eslint lib && script/format.sh && mocha && tsc --project test/unit",
-    "bench": "node-pre-gyp build --build-latest-napi-version-only && node --use_strict --harmony_async_iteration --expose-gc test/bench"
+    "bench": "node-pre-gyp build --build-latest-napi-version-only && node --use_strict --harmony --expose-gc test/bench"
   },
   "keywords": [
     "zeromq",

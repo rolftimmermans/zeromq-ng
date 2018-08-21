@@ -26,20 +26,20 @@ if (!process.env["NO_COMPAT_TEST"]) {
       const zapReq = {
         version: data.shift(),
         requestId: data.shift(),
-        domain: new Buffer(data.shift()).toString("utf8"),
-        address: new Buffer(data.shift()).toString("utf8"),
-        identity: new Buffer(data.shift()).toString("utf8"),
-        mechanism: new Buffer(data.shift()).toString("utf8"),
+        domain: Buffer.from(data.shift()).toString("utf8"),
+        address: Buffer.from(data.shift()).toString("utf8"),
+        identity: Buffer.from(data.shift()).toString("utf8"),
+        mechanism: Buffer.from(data.shift()).toString("utf8"),
         credentials: data.slice(0)
       }
 
       zap.send(returnPath.concat([
         zapReq.version,
         zapReq.requestId,
-        new Buffer("200", "utf8"),
-        new Buffer("OK", "utf8"),
-        new Buffer(0),
-        new Buffer(0)
+        Buffer.from("200", "utf8"),
+        Buffer.from("OK", "utf8"),
+        Buffer.alloc(0),
+        Buffer.alloc(0)
       ]))
     })
 
@@ -81,10 +81,10 @@ if (!process.env["NO_COMPAT_TEST"]) {
         if (!zmq.capability.curve) this.skip()
 
         const address = uniqAddress(proto)
-        const serverPublicKey = new Buffer("7f188e5244b02bf497b86de417515cf4d4053ce4eb977aee91a55354655ec33a", "hex")
-        const serverPrivateKey = new Buffer("1f5d3873472f95e11f4723d858aaf0919ab1fb402cb3097742c606e61dd0d7d8", "hex")
-        const clientPublicKey = new Buffer("ea1cc8bd7c8af65497d43fc21dbec6560c5e7b61bcfdcbd2b0dfacf0b4c38d45", "hex")
-        const clientPrivateKey = new Buffer("83f99afacfab052406e5f421612568034e85f4c8182a1c92671e83dca669d31d", "hex")
+        const serverPublicKey = Buffer.from("7f188e5244b02bf497b86de417515cf4d4053ce4eb977aee91a55354655ec33a", "hex")
+        const serverPrivateKey = Buffer.from("1f5d3873472f95e11f4723d858aaf0919ab1fb402cb3097742c606e61dd0d7d8", "hex")
+        const clientPublicKey = Buffer.from("ea1cc8bd7c8af65497d43fc21dbec6560c5e7b61bcfdcbd2b0dfacf0b4c38d45", "hex")
+        const clientPrivateKey = Buffer.from("83f99afacfab052406e5f421612568034e85f4c8182a1c92671e83dca669d31d", "hex")
 
         rep.on("message", function(msg) {
           assert.instanceOf(msg, Buffer)

@@ -157,6 +157,8 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
           if (received.length == messages.length) break
         }
 
+        /* Unify different serialization output across Node versions. */
+        received[1] = received[1].replace("function()", "function ()")
         assert.deepEqual(
           received,
           ["null", "function () {}", "16.19", "true", "[object Object]", "[object Promise]"]

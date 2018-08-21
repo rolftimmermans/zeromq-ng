@@ -40,7 +40,7 @@ if (!process.env["NO_COMPAT_TEST"]) {
           push.connect(address)
           push.send("string")
           push.send(15.99)
-          push.send(new Buffer("buffer"))
+          push.send(Buffer.from("buffer"))
         })
       })
 
@@ -59,7 +59,7 @@ if (!process.env["NO_COMPAT_TEST"]) {
         pull.bind(address, err => {
           if (err) throw err
           push.connect(address)
-          push.send(["string", 15.99, new Buffer("buffer")])
+          push.send(["string", 15.99, Buffer.from("buffer")])
         })
       })
 
@@ -116,7 +116,7 @@ if (!process.env["NO_COMPAT_TEST"]) {
             if (err) throw err
             push.send("string")
             push.send(15.99)
-            push.send(new Buffer("buffer"))
+            push.send(Buffer.from("buffer"))
             pull.connect(address)
           })
         })
