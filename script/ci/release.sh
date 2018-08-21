@@ -19,7 +19,7 @@ if [ -z "${WINDIR}" ]; then
   if [ -n "${ALPINE_CHROOT}" ]; then
     /alpine/enter-chroot strip -Sx lib/binary/*/zeromq-ng.node
   else
-    strip -Sx lib/binary/*.node
+    strip -Sx lib/binary/*/zeromq-ng.node
   fi
 fi
 
