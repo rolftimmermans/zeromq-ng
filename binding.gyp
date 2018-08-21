@@ -86,7 +86,8 @@
         'conditions': [
           ['OS == "linux" or OS == "freebsd" or OS == "openbsd" or OS == "solaris"', {
             'cflags_cc!': [
-              '-std=gnu++0x'
+              '-std=gnu++0x',
+              '-std=gnu++1y'
             ],
             'cflags_cc+': [
               '-std=c++11',
@@ -118,7 +119,8 @@
         'conditions': [
           ['OS == "linux" or OS == "freebsd" or OS == "openbsd" or OS == "solaris"', {
             'cflags_cc!': [
-              '-std=gnu++0x'
+              '-std=gnu++0x',
+              '-std=gnu++1y'
             ],
             'cflags_cc+': [
               '-std=c++11',
