@@ -5,7 +5,8 @@ environment:
   GH_TOKEN:
     secure: 6V8UzhSBNiXKcwNF1cTFaqTZaX/YVUWutdbluQVdXPlUn1u9G+cd1XTgyZQDmD+4
   matrix:
-  - node_js: 9.7
+  - node_js: 8.11
+  - node_js: 10.9
 
 platform:
 - x64

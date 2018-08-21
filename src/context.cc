@@ -1,6 +1,8 @@
 /* Copyright (c) 2017-2018 Rolf Timmermans */
 #include "context.h"
 
+#include "inline/cleanup.h"
+
 namespace zmq {
 /* Create a reference to a single global context that is automatically
    closed on process exit. This is the default context. */
@@ -156,12 +158,10 @@ void Context::Initialize(Napi::Env& env, Napi::Object& exports) {
 
     exports.Set("global", global);
 
-    node::AtExit(
-        [](void*) {
-            /* Close global context and release reference. */
-            Context::Unwrap(GlobalContext.Value())->Close();
-        },
-        nullptr);
+    zmq::cleanup(env, [](void*) {
+        /* Close global context and release reference. */
+        Context::Unwrap(GlobalContext.Value())->Close();
+    });
 
     Constructor = Napi::Persistent(constructor);
     Constructor.SuppressDestruct();

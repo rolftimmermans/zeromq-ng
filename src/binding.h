@@ -9,7 +9,6 @@
 #endif
 
 #include <cassert>
-#include <node.h>
 
 #include <iostream>
 

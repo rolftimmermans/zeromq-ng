@@ -9,66 +9,66 @@ jobs:
   include:
   # Test latest ZMQ versions on Linux and macOS.
   - os: linux
-    node_js: 9.7
+    node_js: 10.9
 
   - os: linux
-    node_js: 8.8
+    node_js: 8.11
 
   - os: linux
     env: ALPINE_CHROOT=true
     sudo: required
 
   - os: osx
-    node_js: 9.7
+    node_js: 10.9
     env: NO_COMPAT_TEST=true
     osx_image: xcode9.3beta
 
   - os: osx
-    node_js: 8.8
+    node_js: 8.11
     env: NO_COMPAT_TEST=true
     osx_image: xcode9.3beta
 
   # Test shared libraries on Linux and macOS.
   - os: linux
-    node_js: 9.7
+    node_js: 10.9
     env: ZMQ_SHARED=true NO_COMPAT_TEST=true
     addons: {apt: {packages: libzmq3-dev}}
 
   - os: osx
-    node_js: 9.7
+    node_js: 10.9
     osx_image: xcode9.3beta
     env: ZMQ_SHARED=true NO_COMPAT_TEST=true
 
   # Test older version branches of ZMQ.
   - os: linux
-    node_js: 9.7
+    node_js: 10.9
     # Previous stable version on 4.2 branch.
-    env: ZMQ_VERSION=4.2.2
+    env: ZMQ_VERSION=4.2.5
 
   - os: linux
-    node_js: 9.7
+    node_js: 10.9
     # Latest stable version on 4.1 branch.
     env: ZMQ_VERSION=4.1.6
   - os: linux
-    node_js: 9.7
+    node_js: 10.9
     # Version of libzmq3 on Ubuntu Trusty.
     env: ZMQ_VERSION=4.0.4
 
   # Publish all binaries for Linux and macOS.
   - stage: publish binaries
-    node_js: 9.7
+    node_js: 10.9
     os: linux
     script: script/ci/release.sh
 
   - stage: publish binaries
-    node_js: 9.7
+    node_js: 10.9
     os: osx
     osx_image: xcode9.3beta
     script: script/ci/release.sh
 
   # Publish chroot cross-compiled binaries for Alpine Linux.
   - stage: publish binaries
-    node_js: 9.7
+    node_js: 10.9
     os: linux
     env: ALPINE_CHROOT=true
     sudo: required
@@ -76,7 +76,7 @@ jobs:
 
   # Publish cross-compiled binaries for arm & arm64.
   - stage: publish binaries
-    node_js: 9.7
+    node_js: 10.9
     os: linux
     env: ARCH=arm TRIPLE=arm-linux-gnueabihf GCC=4.8
     install: script/ci/cross-install.sh
@@ -84,7 +84,7 @@ jobs:
     addons: {apt: {packages: [gcc-4.8-arm-linux-gnueabihf, g++-4.8-arm-linux-gnueabihf]}}
 
   - stage: publish binaries
-    node_js: 9.7
+    node_js: 10.9
     os: linux
     env: ARCH=arm64 TRIPLE=aarch64-linux-gnu GCC=4.8
     install: script/ci/cross-install.sh

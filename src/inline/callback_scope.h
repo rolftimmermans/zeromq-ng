@@ -1,14 +1,7 @@
 /* Copyright (c) 2017-2018 Rolf Timmermans */
 #pragma once
 
-#include "node_version.h"
-
-#if NAPI_BUILD_VERSION < 3
-/* Implementation of new NAPI callback scope, which landed in Node 9.6,
-   which had NAPI version 2. Any newer Node.js that has a higher version
-   can use the native implementation. */
-#include "napi_callback_scope.h"
-#endif
+#include "napi_compat.h"
 
 #define NAPI_THROW_IF_FAILED(env, status, ...)                                           \
     if ((status) != napi_ok) {                                                           \

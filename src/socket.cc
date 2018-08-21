@@ -646,7 +646,8 @@ Napi::Value Socket::GetWritable(const Napi::CallbackInfo& info) {
 
 void Socket::Initialize(Napi::Env& env, Napi::Object& exports) {
     auto proto = {
-        InstanceMethod("bind", &Socket::Bind), InstanceMethod("unbind", &Socket::Unbind),
+        InstanceMethod("bind", &Socket::Bind),
+        InstanceMethod("unbind", &Socket::Unbind),
 
         InstanceMethod("connect", &Socket::Connect),
         InstanceMethod("disconnect", &Socket::Disconnect),

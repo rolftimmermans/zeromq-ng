@@ -1,6 +1,7 @@
 #pragma once
 
 #include "node.h"
+#include "uv.h"
 #include "v8.h"
 
 typedef struct napi_callback_scope__* napi_callback_scope;

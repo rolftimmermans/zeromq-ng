@@ -166,7 +166,8 @@ Napi::Value Proxy::GetBackEnd(const Napi::CallbackInfo& info) {
 
 void Proxy::Initialize(Napi::Env& env, Napi::Object& exports) {
     auto proto = {
-        InstanceMethod("run", &Proxy::Run), InstanceMethod("pause", &Proxy::Pause),
+        InstanceMethod("run", &Proxy::Run),
+        InstanceMethod("pause", &Proxy::Pause),
         InstanceMethod("resume", &Proxy::Resume),
         InstanceMethod("terminate", &Proxy::Terminate),
 
