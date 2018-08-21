@@ -21,5 +21,9 @@ install:
 test_script:
 - appveyor-retry call sh script/ci/test.sh
 
-deploy_script:
-- IF "%appveyor_repo_tag%"=="true" sh script/ci/release.sh
+for:
+- matrix:
+    only:
+    - node_js: 10.6
+  deploy_script:
+  - IF "%appveyor_repo_tag%"=="true" sh script/ci/release.sh
