@@ -537,6 +537,9 @@ The property names may differ somewhat from the native option names. This is int
 * **immediate** – ZMQ_IMMEDIATE <br/>
   <[boolean]> By default queues will fill on outgoing connections even if the connection has not completed. This can lead to "lost" messages on sockets with round-robin routing (`Req`, `Push`, `Dealer`). If this option is set to `true`, messages shall be queued only to completed connections. This will cause the socket to block if there are no other connections, but will prevent queues from filling on pipes awaiting connection.
 
+* **interface** – ZMQ_BINDTODEVICE
+  <[string] | [Buffer]> Binds the socket to the given network interface (Linux only). Allows to use Linux VRF, see: https://www.kernel.org/doc/Documentation/networking/vrf.txt. Requires the program to be ran as root **or** with `CAP_NET_RAW`.
+
 * **invertMatching** (on `Publisher`, `Subscriber` or `XPublisher` sockets only) – ZMQ_INVERT_MATCHING
   <[boolean]> On `Publisher` and `XPublisher` sockets, this causes messages to be sent to all connected sockets except those subscribed to a prefix that matches the message. On `Subscriber` sockets, this causes only incoming messages that do not match any of the socket's subscriptions to be received by the user.
 

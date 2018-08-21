@@ -90,6 +90,8 @@ interface SocketOptions {
   gssapiPrincipal?: string
   gssapiServicePrincipal?: string
   gssapiPlainText?: boolean
+  gssapiPrincipalNameType?: "hostBased" | "userName" | "krb5Principal"
+  gssapiServicePrincipalNameType?: "hostBased" | "userName" | "krb5Principal"
 
   zapDomain?: string
   typeOfService?: number
@@ -106,6 +108,7 @@ interface SocketOptions {
   vmciBufferMaxSize?: number
   vmciConnectTimeout?: number
   useFd?: number
+  interface?: string
 }
 
 export class Socket {
@@ -148,6 +151,8 @@ export class Socket {
   gssapiPrincipal?: string
   gssapiServicePrincipal?: string
   gssapiPlainText?: boolean
+  gssapiPrincipalNameType?: "hostBased" | "userName" | "krb5Principal"
+  gssapiServicePrincipalNameType?: "hostBased" | "userName" | "krb5Principal"
 
   zapDomain?: string
   typeOfService: number
@@ -165,6 +170,7 @@ export class Socket {
   vmciBufferMaxSize: number
   vmciConnectTimeout: number
   useFd: number
+  interface?: string
 
   readonly events: Observer
   readonly context: Context
@@ -339,7 +345,8 @@ export class Stream extends Socket {
 
 type Event = "connect" | "connectDelay" | "connectRetry" | "listening" |
   "bindError" | "accept" | "acceptError" | "close" | "closeError" |
-  "disconnect" | "stop" | "unknown"
+  "disconnect" | "stop" | "handshakeError" | "handshakeSucceeded" |
+  "handshakeProtocolError" | "handshakeAuthError" | "unknown"
 
 interface EventDetails {
   address?: string,

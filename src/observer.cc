@@ -50,6 +50,18 @@ static auto events = make_array<const char*>(
 #ifdef ZMQ_EVENT_MONITOR_STOPPED
     "stop",
 #endif
+#ifdef ZMQ_EVENT_HANDSHAKE_FAILED_NO_DETAIL
+    "handshakeError",
+#endif
+#ifdef ZMQ_EVENT_HANDSHAKE_SUCCEEDED
+    "handshakeSucceeded",
+#endif
+#ifdef ZMQ_EVENT_HANDSHAKE_FAILED_PROTOCOL
+    "handshakeProtocolError",
+#endif
+#ifdef ZMQ_EVENT_HANDSHAKE_FAILED_AUTH
+    "handshakeAuthError",
+#endif
     "unknown");
 
 /* https://stackoverflow.com/questions/757059/position-of-least-significant-bit-that-is-set
