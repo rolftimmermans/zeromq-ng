@@ -27,9 +27,12 @@ fi
 
 export npm_config_build_from_source=true
 
+# Installing node-gyp globally facilitates calling it in various ways, not just
+# via yarn but also via bin stubs in node_modules (even on Windows).
 if [ -n "${ALPINE_CHROOT}" ]; then
   /alpine/enter-chroot yarn global add node-gyp
   /alpine/enter-chroot yarn install
 else
+  yarn global add node-gyp
   yarn install
 fi
