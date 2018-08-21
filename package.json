@@ -12,7 +12,7 @@
   "binary": {
     "module_name": "zeromq-ng",
     "module_path": "./lib/binary/napi-v{napi_build_version}",
-    "remote_path": "v{version}",
+    "remote_path": "{version}",
     "package_name": "{module_name}-{version}-{platform}-{arch}-{libc}-napi-v{napi_build_version}.tar.gz",
     "host": "https://github.com/rolftimmermans/zeromq-ng/releases/download/",
     "napi_versions": [
