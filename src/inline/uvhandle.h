@@ -1,6 +1,7 @@
 /* Copyright (c) 2017-2018 Rolf Timmermans */
 #pragma once
 
+#include <memory>
 #include <uv.h>
 
 namespace zmq {
