@@ -14,7 +14,7 @@ fi
 # enforce a 60 second timeout ourselves. If that fails it should be retried.
 if [ -n "${ALPINE_CHROOT}" ]; then
   /alpine/enter-chroot yarn build
-  /alpine/enter-chroot timeout -t 60 yarn test
+  /alpine/enter-chroot timeout 60 yarn test
 else
   yarn build
   timeout 60 yarn test
