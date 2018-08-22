@@ -23,7 +23,7 @@ Next generation [ØMQ](http://zeromq.org) bindings for Node.js. The goals of thi
    * [Class: zmq.Context](#class-zmqcontext)
    * [Class: zmq.Observer](#class-zmqobserver)
    * [Class: zmq.Proxy](#class-zmqproxy)
-   * [Function: zmq.curveKeypair()](#function-zmqcurvekeypair)
+   * [Function: zmq.curveKeyPair()](#function-zmqcurvekeypair)
    * [Property: zmq.capability](#property-zmqcapability)
    * [Property: zmq.global](#property-zmqglobal)
    * [Property: zmq.version](#property-zmqversion)
@@ -683,13 +683,13 @@ Listed below are all socket options that are related to setting and retrieving t
   <[boolean]> Defines whether the socket will act as server for CURVE security. A value of `true` means the socket will act as CURVE server. A value of `false` means the socket will not act as CURVE server, and its security role then depends on other option settings.
 
 * **curveSecretKey** – ZMQ_CURVE_SECRETKEY <br/>
-  <[string] | [Buffer]> Sets the socket's long term secret key. You must set this on both CURVE client and server sockets. You can create a new keypair with `zmq.curveKeypair()`.
+  <[string] | [Buffer]> Sets the socket's long term secret key. You must set this on both CURVE client and server sockets. You can create a new keypair with `zmq.curveKeyPair()`.
 
 * **curvePublicKey** – ZMQ_CURVE_PUBLICKEY <br/>
-  <[string] | [Buffer]> Sets the socket's long term public key. You must set this on CURVE client sockets. A server socket does not need to know its own public key. You can create a new keypair with `zmq.curveKeypair()`.
+  <[string] | [Buffer]> Sets the socket's long term public key. You must set this on CURVE client sockets. A server socket does not need to know its own public key. You can create a new keypair with `zmq.curveKeyPair()`.
 
 * **curveServerKey** – ZMQ_CURVE_SERVERKEY <br/>
-  <[string] | [Buffer]> Sets the socket's long term server key. This is the public key of the CURVE *server* socket. You must set this on CURVE *client* sockets. This key must have been generated together with the server's secret key. You can create a new keypair with `zmq.curveKeypair()`.
+  <[string] | [Buffer]> Sets the socket's long term server key. This is the public key of the CURVE *server* socket. You must set this on CURVE *client* sockets. This key must have been generated together with the server's secret key. You can create a new keypair with `zmq.curveKeyPair()`.
 
 * **plainServer** – ZMQ_PLAIN_SERVER <br/>
   <[boolean]> Defines whether the socket will act as server for PLAIN security. A value of `true` means the socket will act as PLAIN server. A value of `false` means the socket will not act as PLAIN server, and its security role then depends on other option settings.
@@ -998,7 +998,7 @@ await done
   <[Socket]> The back-end socket passed to the constructor. Will be closed after the `run()` method resolves.
 
 
-## Function: zmq.curveKeypair()
+## Function: zmq.curveKeyPair()
 
 Returns a new random key pair to be used with the CURVE security mechanism.
 
@@ -1013,9 +1013,9 @@ Returns a new random key pair to be used with the CURVE security mechanism.
 
 To correctly connect two sockets with the CURVE security mechanism:
 
-* Generate a **client** keypair with `zmq.curveKeypair()`.
+* Generate a **client** keypair with `zmq.curveKeyPair()`.
   * Assign the private and public key on the client socket with `socket.curveSecretKey` and `socket.curvePublicKey`.
-* Generate a **server** keypair with `zmq.curveKeypair()`.
+* Generate a **server** keypair with `zmq.curveKeyPair()`.
   * Assign the private key on the server socket with `socket.curveSecretKey`.
   * Assign the public key **on the client socket** with `socket.curveServerKey`. The server does *not* need to know its own public key. Key distribution is *not* handled by the CURVE security mechanism.
 

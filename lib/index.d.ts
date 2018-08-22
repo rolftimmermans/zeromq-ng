@@ -17,12 +17,12 @@ export const capability: {
 }
 
 
-interface CurveKeypair {
+interface CurveKeyPair {
   publicKey: string,
   secretKey: string,
 }
 
-export function curveKeypair(): CurveKeypair
+export function curveKeyPair(): CurveKeyPair
 
 
 interface ContextOptions {

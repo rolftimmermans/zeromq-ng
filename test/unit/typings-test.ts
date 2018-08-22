@@ -13,7 +13,7 @@ if (capability.curve) console.log("curve")
 if (capability.gssapi) console.log("gssapi")
 if (capability.draft) console.log("draft")
 
-const keypair = zmq.curveKeypair()
+const keypair = zmq.curveKeyPair()
 console.log(keypair.publicKey)
 console.log(keypair.secretKey)
 

@@ -7,7 +7,7 @@ describe("zmq", function() {
     it("should include functions and constructors", function() {
       const expected = [
         /* Utility functions. */
-        "version", "capability", "curveKeypair",
+        "version", "capability", "curveKeyPair",
 
         /* The global/default context. */
         "global",
@@ -55,7 +55,7 @@ describe("zmq", function() {
     })
 
     it("should return keypair", function() {
-      const {publicKey, secretKey} = zmq.curveKeypair()
+      const {publicKey, secretKey} = zmq.curveKeyPair()
       assert.match(publicKey, /^[\x20-\x7F]{40}$/)
       assert.match(secretKey, /^[\x20-\x7F]{40}$/)
     })

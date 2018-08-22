@@ -42,7 +42,7 @@ static inline Napi::Object Capabilities(Napi::Env& env) {
     return result;
 }
 
-static inline Napi::Value CurveKeypair(const Napi::CallbackInfo& info) {
+static inline Napi::Value CurveKeyPair(const Napi::CallbackInfo& info) {
     char public_key[41];
     char secret_key[41];
     if (zmq_curve_keypair(public_key, secret_key) < 0) {
@@ -60,7 +60,7 @@ static inline Napi::Value CurveKeypair(const Napi::CallbackInfo& info) {
 Napi::Object init(Napi::Env env, Napi::Object exports) {
     exports.Set("version", zmq::Version(env));
     exports.Set("capability", zmq::Capabilities(env));
-    exports.Set("curveKeypair", Napi::Function::New(env, zmq::CurveKeypair));
+    exports.Set("curveKeyPair", Napi::Function::New(env, zmq::CurveKeyPair));
 
     zmq::Context::Initialize(env, exports);
     zmq::Socket::Initialize(env, exports);

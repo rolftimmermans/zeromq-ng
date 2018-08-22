@@ -7,8 +7,8 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
     beforeEach(function() {
       if (!zmq.capability.curve) this.skip()
 
-      const serverKeypair = zmq.curveKeypair()
-      const clientKeypair = zmq.curveKeypair()
+      const serverKeypair = zmq.curveKeyPair()
+      const clientKeypair = zmq.curveKeyPair()
 
       this.sockA = new zmq.Pair({
         linger: 0,
