@@ -1,13 +1,13 @@
 /* Copyright (c) 2017-2018 Rolf Timmermans */
 #pragma once
 
-#include "node_version.h"
+#define NAPI_BUILD_VERSION NAPI_VERSION
 
-#if NAPI_VERSION < 3
+#if NAPI_BUILD_VERSION < 3
 #include "napi_callback_scope.h"
 #endif
 
-#if NAPI_VERSION < 4
+#if NAPI_BUILD_VERSION < 4
 /* https://github.com/nodejs/abi-stable-node/issues/330 */
 #include "node.h"
 
