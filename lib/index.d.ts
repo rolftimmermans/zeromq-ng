@@ -270,7 +270,10 @@ interface RouterOptions {
   mandatory?: boolean
   probeRouter?: boolean
   handover?: boolean
-  connectRoutingId?: string
+}
+
+interface RouterConnectOptions {
+  routingId?: string
 }
 
 export class Router extends Socket {
@@ -278,9 +281,9 @@ export class Router extends Socket {
   mandatory: boolean
   probeRouter: boolean
   handover: boolean
-  connectRoutingId?: string
 
   constructor(options?: SocketOptions & RouterOptions)
+  connect(address: string, options?: RouterConnectOptions): void
 }
 
 interface PullOptions {
@@ -331,15 +334,18 @@ export class XSubscriber extends Socket {
 }
 
 interface StreamOptions {
-  connectRoutingId?: string
   notify?: boolean
 }
 
+interface StreamConnectOptions {
+  routingId?: string
+}
+
 export class Stream extends Socket {
-  connectRoutingId?: string
   notify: boolean
 
   constructor(options?: SocketOptions & StreamOptions)
+  connect(address: string, options?: StreamConnectOptions): void
 }
 
 

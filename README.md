@@ -296,6 +296,7 @@ Starts a new connection to the socket at the given address and returns immediate
 
 * **Arguments** <br/>
   `address` <[string]> Address to connect this socket to.
+  `options` <[Object]> An optional object with options that will be used during the connect phase (see below).
 
 * **Returns** <br/>
   <[undefined]>
@@ -304,6 +305,22 @@ Starts a new connection to the socket at the given address and returns immediate
 ```js
 socket.connect("tcp://127.0.0.1:3456")
 ```
+
+```js
+const socket = new zmq.Router
+socket.connect("tcp://127.0.0.1:3456", {routingId: "remote_id"})
+```
+
+### socket connect options
+
+* **routingId** (connect option, on `Router` or `Stream` sockets only) – corresponds to ZMQ_CONNECT_ROUTING_ID socket option<br/>
+  <[string] | [Buffer]> Sets the peer identity of the host connected to and immediately readies that connection for data transfer with the named identity. This option applies only to the current call to `connect()`. Connections thereafter use default behaviour.
+
+  Typical use is to set this socket option on each `connect()` attempt to a new host. Each connection MUST be assigned a unique name. Assigning a name that is already in use is not allowed.
+
+  Useful when connecting `Router` to `Router`, or `Stream` to `Stream`, as it allows for immediate sending to peers. Outbound ID framing requirements for `Router` and `Stream` sockets apply.
+
+  The peer identity should be from 1 to 255 bytes long and MAY NOT start with binary zero.
 
 
 ### socket.disconnect()
@@ -506,15 +523,6 @@ The property names may differ somewhat from the native option names. This is int
 
 * **conflate** (write only, on `Pull`, `Push`, `Subscriber`, `Publisher` or `Dealer` sockets only) – ZMQ_CONFLATE <br/>
   <[boolean]> If set to `true`, a socket shall keep only one message in its inbound/outbound queue: the last message to be received/sent. Ignores any high water mark options. Does not support multi-part messages – in particular, only one part of it is kept in the socket internal queue.
-
-* **connectRoutingId** (write only, on `Router` or `Stream` sockets only) – ZMQ_CONNTECT_ROUTING_ID <br/>
-  <[string] | [Buffer]> Sets the peer identity of the next host connected via the `connect()` and immediately readies that connection for data transfer with the named identity. This option applies only to the first subsequent call to `connect()`. Connections thereafter use default behaviour.
-
-  Typical use is to set this socket option ahead of each `connect()` attempt to a new host. Each connection MUST be assigned a unique name. Assigning a name that is already in use is not allowed.
-
-  Useful when connecting `Router` to `Router`, or `Stream` to `Stream`, as it allows for immediate sending to peers. Outbound ID framing requirements for `Router` and `Stream` sockets apply.
-
-  The peer identity should be from 1 to 255 bytes long and MAY NOT start with binary zero.
 
 * **correlate** (write only, on `Request` sockets only) – ZMQ_REQ_CORRELATE <br/>
   <[boolean]> The default behaviour of `Request` sockets is to rely on the ordering of messages to match requests and responses and that is usually sufficient. When this option is set to `true` the socket will prefix outgoing messages with an extra frame containing a request id. That means the full message is `[<request id>, `null`, user frames…]`. The `Request` socket will discard all incoming messages that don't begin with these two frames.

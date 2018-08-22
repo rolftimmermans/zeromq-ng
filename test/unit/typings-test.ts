@@ -37,6 +37,8 @@ const socket = new zmq.Dealer({
   routingId: "foobar",
 })
 
+const router = new zmq.Router
+
 console.log(socket.context)
 console.log(socket.sendTimeout)
 console.log(socket.routingId)
@@ -47,6 +49,7 @@ const stuff = async () => {
 
   socket.connect("tcp://foobar")
   socket.disconnect("tcp://foobar")
+  router.connect("tcp://foobar", {routingId: "remote_id"})
 
   for await (const [part1, part2] of socket) {
     console.log(part1)
