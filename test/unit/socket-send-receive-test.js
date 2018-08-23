@@ -79,7 +79,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
 
     describe("when connected", function() {
       beforeEach(async function() {
-          const address = uniqAddress(proto)
+        const address = uniqAddress(proto)
         await this.sockB.bind(address)
         await this.sockA.connect(address)
       })

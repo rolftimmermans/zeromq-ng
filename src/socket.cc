@@ -1,7 +1,6 @@
 /* Copyright (c) 2017-2018 Rolf Timmermans */
 #include "socket.h"
 #include "context.h"
-#include "inline/callback_scope.h"
 #include "observer.h"
 
 #include "inline/incoming.h"
@@ -53,7 +52,8 @@ public:
 
 Napi::FunctionReference Socket::Constructor;
 
-Socket::Socket(const Napi::CallbackInfo& info) : Napi::ObjectWrap<Socket>(info) {
+Socket::Socket(const Napi::CallbackInfo& info)
+    : Napi::ObjectWrap<Socket>(info), poller(*this) {
     auto args = {
         Argument{"Socket type must be a number", &Napi::Value::IsNumber},
         Argument{"Options must be an object", &Napi::Value::IsObject,
@@ -96,9 +96,6 @@ Socket::Socket(const Napi::CallbackInfo& info) : Napi::ObjectWrap<Socket>(info) 
         ErrnoException(Env(), errno).ThrowAsJavaScriptException();
         return;
     }
-
-    poller.ValidateReadable(std::bind(&Socket::HasEvents, this, ZMQ_POLLIN));
-    poller.ValidateWritable(std::bind(&Socket::HasEvents, this, ZMQ_POLLOUT));
 
     /* Sealing causes setting/getting invalid options to throw an error.
        Otherwise they would fail silently, which is very confusing. */
@@ -165,7 +162,7 @@ bool Socket::ValidateOpen() const {
     return true;
 }
 
-bool Socket::HasEvents(int32_t requested) {
+bool Socket::HasEvents(int32_t requested) const {
     int32_t events;
     size_t events_size = sizeof(events);
 
@@ -252,7 +249,7 @@ Napi::Value Socket::Bind(const Napi::CallbackInfo& info) {
     auto run_ctx =
         std::make_shared<AddressContext>(info[0].As<Napi::String>().Utf8Value());
 
-    Work::Queue(
+    Queue(
         [=]() {
             /* Don't access V8 internals here! Executed in worker thread. */
             while (zmq_bind(socket, run_ctx->address.c_str()) < 0) {
@@ -299,7 +296,7 @@ Napi::Value Socket::Unbind(const Napi::CallbackInfo& info) {
     auto run_ctx =
         std::make_shared<AddressContext>(info[0].As<Napi::String>().Utf8Value());
 
-    Work::Queue(
+    Queue(
         [=]() {
             /* Don't access V8 internals here! Executed in worker thread. */
             while (zmq_unbind(socket, run_ctx->address.c_str()) < 0) {
@@ -422,13 +419,8 @@ Napi::Value Socket::Send(const Napi::CallbackInfo& info) {
            outlives the scope of this method. We wrap the message reference
            in a shared pointer, because references cannot be copied. :( */
         auto res = Napi::Promise::Deferred::New(Env());
-        auto parts_ref =
-            std::make_shared<Napi::Reference<Napi::Array>>(Napi::Persistent(parts));
 
-        poller.PollWritable(send_timeout, [=]() {
-            CallbackScope scope(Env());
-            Send(res, parts_ref->Value());
-        });
+        poller.PollWritable(send_timeout, res, Napi::Persistent(parts));
 
         return res.Promise();
     }
@@ -461,10 +453,8 @@ Napi::Value Socket::Receive(const Napi::CallbackInfo& info) {
         /* Async receive. Capture any references by value because the lambda
            outlives the scope of this method. */
         auto res = Napi::Promise::Deferred::New(Env());
-        poller.PollReadable(receive_timeout, [=]() {
-            CallbackScope scope(Env());
-            Receive(res);
-        });
+
+        poller.PollReadable(receive_timeout, res);
 
         return res.Promise();
     }
@@ -684,5 +674,15 @@ void Socket::Initialize(Napi::Env& env, Napi::Object& exports) {
     Constructor.SuppressDestruct();
 
     exports.Set("Socket", constructor);
+}
+
+void Socket::Poller::ReadableCallback() {
+    CallbackScope scope(read_deferred.Env());
+    socket.Receive(read_deferred);
+}
+
+void Socket::Poller::WritableCallback() {
+    CallbackScope scope(write_deferred.Env());
+    socket.Send(write_deferred, write_value.Value());
 }
 }

@@ -6,16 +6,12 @@
 namespace zmq {
 /* Starts a UV poller with an attached timeout. The poller can be started
    and stopped multiple times. */
+template <typename T>
 class Poller {
     UvHandle<uv_poll_t> poll;
 
     UvHandle<uv_timer_t> readable_timer;
-    std::function<bool()> readable_validate;
-    std::function<void()> readable_callback;
-
     UvHandle<uv_timer_t> writable_timer;
-    std::function<bool()> writable_validate;
-    std::function<void()> writable_callback;
 
     int32_t events{0};
 
@@ -60,14 +56,6 @@ public:
         writable_timer.reset(nullptr);
     }
 
-    inline void ValidateReadable(std::function<bool()>&& callback) {
-        readable_validate = callback;
-    }
-
-    inline void ValidateWritable(std::function<bool()>&& callback) {
-        writable_validate = callback;
-    }
-
     inline bool PollingReadable() const {
         return events & UV_READABLE;
     }
@@ -77,9 +65,8 @@ public:
     }
 
     /* Start polling for readable state, with the given timeout. */
-    inline void PollReadable(int64_t timeout, std::function<void()>&& callback) {
+    inline void PollReadable(int64_t timeout) {
         assert((events & UV_READABLE) == 0);
-        readable_callback = callback;
 
         if (timeout > 0) {
             auto result = uv_timer_start(readable_timer,
@@ -101,9 +88,8 @@ public:
         events |= UV_READABLE;
     }
 
-    inline void PollWritable(int64_t timeout, std::function<void()>&& callback) {
+    inline void PollWritable(int64_t timeout) {
         assert((events & UV_WRITABLE) == 0);
-        writable_callback = callback;
 
         if (timeout > 0) {
             auto result = uv_timer_start(writable_timer,
@@ -131,11 +117,11 @@ public:
        which events are actually available. */
     inline void Trigger() {
         if (events & UV_READABLE) {
-            if (readable_validate()) Trigger(UV_READABLE);
+            if (static_cast<T*>(this)->ValidateReadable()) Trigger(UV_READABLE);
         }
 
         if (events & UV_WRITABLE) {
-            if (writable_validate()) Trigger(UV_WRITABLE);
+            if (static_cast<T*>(this)->ValidateWritable()) Trigger(UV_WRITABLE);
         }
     }
 
@@ -153,13 +139,13 @@ private:
         if (triggered & UV_READABLE) {
             auto result = uv_timer_stop(readable_timer);
             assert(result == 0);
-            readable_callback();
+            static_cast<T*>(this)->ReadableCallback();
         }
 
         if (triggered & UV_WRITABLE) {
             auto result = uv_timer_stop(writable_timer);
             assert(result == 0);
-            writable_callback();
+            static_cast<T*>(this)->WritableCallback();
         }
     }
 

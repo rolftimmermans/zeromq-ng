@@ -1,7 +1,6 @@
 /* Copyright (c) 2017-2018 Rolf Timmermans */
 #include "observer.h"
 #include "context.h"
-#include "inline/callback_scope.h"
 #include "socket.h"
 
 #include "inline/incoming.h"
@@ -76,7 +75,8 @@ static inline const char* EventName(uint32_t val) {
     return events[ffs];
 }
 
-Observer::Observer(const Napi::CallbackInfo& info) : Napi::ObjectWrap<Observer>(info) {
+Observer::Observer(const Napi::CallbackInfo& info)
+    : Napi::ObjectWrap<Observer>(info), poller(*this) {
     auto args = {
         Argument{"Socket must be a socket object", &Napi::Value::IsObject},
     };
@@ -118,8 +118,6 @@ Observer::Observer(const Napi::CallbackInfo& info) : Napi::ObjectWrap<Observer>(
         ErrnoException(Env(), errno).ThrowAsJavaScriptException();
         return;
     }
-
-    poller.ValidateReadable(std::bind(&Observer::HasEvents, this));
 }
 
 Observer::~Observer() {
@@ -135,7 +133,7 @@ bool Observer::ValidateOpen() const {
     return true;
 }
 
-bool Observer::HasEvents() {
+bool Observer::HasEvents() const {
     int32_t events;
     size_t events_size = sizeof(events);
 
@@ -250,10 +248,8 @@ Napi::Value Observer::Receive(const Napi::CallbackInfo& info) {
         /* Async receive. Capture any references by value because the lambda
            outlives the scope of this method. */
         auto res = Napi::Promise::Deferred::New(Env());
-        poller.PollReadable(0, [=]() {
-            CallbackScope scope(Env());
-            Receive(res);
-        });
+
+        poller.PollReadable(0, res);
 
         return res.Promise();
     }
@@ -276,5 +272,10 @@ void Observer::Initialize(Napi::Env& env, Napi::Object& exports) {
     Constructor.SuppressDestruct();
 
     exports.Set("Observer", constructor);
+}
+
+void Observer::Poller::ReadableCallback() {
+    CallbackScope scope(read_deferred.Env());
+    socket.Receive(read_deferred);
 }
 }

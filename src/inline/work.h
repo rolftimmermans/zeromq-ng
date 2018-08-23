@@ -3,23 +3,18 @@
 
 namespace zmq {
 /* Starts a UV worker. */
+template <typename E, typename C>
 class Work {
     /* Simple unique pointer suffices, since uv_work_t does not require
        calling uv_close() on completion. */
     std::unique_ptr<uv_work_t> work{new uv_work_t};
 
-    std::function<void()> execute_callback;
-    std::function<void()> complete_callback;
+    E execute_callback;
+    C complete_callback;
 
 public:
-    template <typename... Args>
-    static inline uint32_t Queue(Args&&... args) {
-        auto work = new Work(std::forward<Args>(args)...);
-        return work->Exec();
-    }
-
-    inline Work(std::function<void()>&& execute, std::function<void()>&& complete)
-        : execute_callback(std::move(execute)), complete_callback(std::move(complete)) {
+    inline Work(E execute, C complete)
+        : execute_callback(execute), complete_callback(complete) {
         work->data = this;
     }
 
@@ -40,4 +35,10 @@ public:
         return err;
     }
 };
+
+template <typename E, typename C>
+static inline uint32_t Queue(E execute, C complete) {
+    auto work = new Work<E, C>(execute, complete);
+    return work->Exec();
+}
 }

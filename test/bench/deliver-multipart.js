@@ -1,4 +1,4 @@
-suite.add(`deliver multipart proto=${proto} msgsize=${msgsize} zmq=cur`, Object.assign({
+suite.add(`deliver multipart proto=${proto} msgsize=${msgsize} n=${n} zmq=cur`, Object.assign({
   fn: deferred => {
     const server = zmq.cur.socket("dealer")
     const client = zmq.cur.socket("dealer")
@@ -30,7 +30,7 @@ suite.add(`deliver multipart proto=${proto} msgsize=${msgsize} zmq=cur`, Object.
   }
 }, benchOptions))
 
-suite.add(`deliver multipart proto=${proto} msgsize=${msgsize} zmq=ng`, Object.assign({
+suite.add(`deliver multipart proto=${proto} msgsize=${msgsize} n=${n} zmq=ng`, Object.assign({
   fn: async deferred => {
     const server = new zmq.ng.Dealer
     const client = new zmq.ng.Dealer

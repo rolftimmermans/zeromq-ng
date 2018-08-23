@@ -1,5 +1,5 @@
 /* Number of messages per benchmark. */
-const n = 1500
+const n = parseInt(process.env.N, 10) || 5000
 
 /* Which benchmarks to run. */
 const benchmarks = [
@@ -43,10 +43,8 @@ const suite = new bench.Suite
 
 const benchOptions = {
   defer: true,
-  delay: 0.05,
-  onStart: ({target}) => console.log(`Running bechmark: ${target.name}...`),
+  delay: 0.1,
   onError: console.error,
-  minSamples: 20,
 }
 
 for (const benchmark of benchmarks) {
@@ -58,10 +56,13 @@ for (const benchmark of benchmarks) {
   }
 }
 
+suite.on("cycle", ({target}) => {
+  console.log(target.toString())
+})
+
 suite.on("complete", () => {
-  suite.forEach(test => {
-    console.log(test.toString())
-  })
+  console.log("Completed.")
+  process.exit(0)
 })
 
 console.log("Running benchmarks...")

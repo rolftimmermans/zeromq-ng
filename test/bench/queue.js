@@ -1,4 +1,4 @@
-suite.add(`queue proto=${proto} msgsize=${msgsize} zmq=cur`, Object.assign({
+suite.add(`queue proto=${proto} msgsize=${msgsize} n=${n} zmq=cur`, Object.assign({
   fn: deferred => {
     const client = zmq.cur.socket("dealer")
     client.linger = 0
@@ -18,7 +18,7 @@ suite.add(`queue proto=${proto} msgsize=${msgsize} zmq=cur`, Object.assign({
   }
 }, benchOptions))
 
-suite.add(`queue proto=${proto} msgsize=${msgsize} zmq=ng`, Object.assign({
+suite.add(`queue proto=${proto} msgsize=${msgsize} n=${n} zmq=ng`, Object.assign({
   fn: async deferred => {
     const client = new zmq.ng.Dealer
     client.linger = 0

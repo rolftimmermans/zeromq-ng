@@ -2,6 +2,7 @@
 #pragma once
 
 #include "binding.h"
+#include "inline/callback_scope.h"
 #include "inline/poller.h"
 
 namespace zmq {
@@ -47,7 +48,7 @@ protected:
 private:
     inline void WarnUnlessImmediateOption(int32_t option) const;
     inline bool ValidateOpen() const;
-    inline bool HasEvents(int32_t events);
+    bool HasEvents(int32_t events) const;
 
     void Close();
 
@@ -57,9 +58,43 @@ private:
     force_inline void Send(const Napi::Promise::Deferred& res, const Napi::Array& msg);
     force_inline void Receive(const Napi::Promise::Deferred& res);
 
+    class Poller : public zmq::Poller<Poller> {
+        Socket& socket;
+        Napi::Promise::Deferred read_deferred;
+        Napi::Promise::Deferred write_deferred;
+        Napi::Reference<Napi::Array> write_value;
+
+    public:
+        inline bool ValidateReadable() const {
+            return socket.HasEvents(ZMQ_POLLIN);
+        }
+
+        inline bool ValidateWritable() const {
+            return socket.HasEvents(ZMQ_POLLOUT);
+        }
+
+        void ReadableCallback();
+        void WritableCallback();
+
+        inline void PollReadable(int64_t timeout, Napi::Promise::Deferred def) {
+            read_deferred = def;
+            zmq::Poller<Poller>::PollReadable(timeout);
+        }
+
+        inline void PollWritable(int64_t timeout, Napi::Promise::Deferred def,
+            Napi::Reference<Napi::Array>&& value) {
+            write_deferred = def;
+            write_value = std::move(value);
+            zmq::Poller<Poller>::PollWritable(timeout);
+        }
+
+        Poller(Socket& socket)
+            : socket(socket), read_deferred(socket.Env()), write_deferred(socket.Env()) {}
+    };
+
     Napi::ObjectReference context_ref;
     Napi::ObjectReference observer_ref;
-    Poller poller;
+    Socket::Poller poller;
     void* socket = nullptr;
 
     int64_t send_timeout = -1;

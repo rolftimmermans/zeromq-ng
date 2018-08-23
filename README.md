@@ -1082,4 +1082,3 @@ The version of the ØMQ library the bindings were built with.
 [Socket]: #class-zmqsocket "zmq.Socket"
 [string]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#String_type "string"
 [undefined]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined "undefined"
-

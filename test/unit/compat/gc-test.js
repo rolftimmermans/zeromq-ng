@@ -1,4 +1,4 @@
-if (process.versions["electron"] === undefined && !process.env["NO_COMPAT_TEST"]) {
+if (process.versions["electron"] === undefined && !process.env.NO_COMPAT_TEST) {
   const zmq = require("./load")
   const {assert} = require("chai")
   const {testProtos, uniqAddress} = require("../helpers")

@@ -2,6 +2,7 @@
 #pragma once
 
 #include "binding.h"
+#include "inline/callback_scope.h"
 #include "inline/poller.h"
 
 namespace zmq {
@@ -21,12 +22,37 @@ protected:
 
 private:
     inline bool ValidateOpen() const;
-    inline bool HasEvents();
+    bool HasEvents() const;
     void Close();
 
     force_inline void Receive(const Napi::Promise::Deferred& res);
 
-    Poller poller;
+    class Poller : public zmq::Poller<Poller> {
+        Observer& socket;
+        Napi::Promise::Deferred read_deferred;
+
+    public:
+        inline bool ValidateReadable() const {
+            return socket.HasEvents();
+        }
+
+        inline bool ValidateWritable() const {
+            return false;
+        }
+
+        void ReadableCallback();
+
+        inline void WritableCallback() {}
+
+        inline void PollReadable(int64_t timeout, Napi::Promise::Deferred def) {
+            read_deferred = def;
+            zmq::Poller<Poller>::PollReadable(timeout);
+        }
+
+        Poller(Observer& observer) : socket(observer), read_deferred(observer.Env()) {}
+    };
+
+    Observer::Poller poller;
     void* socket = nullptr;
 
     friend class Socket;

@@ -21,7 +21,7 @@
     ]
   },
   "dependencies": {
-    "node-addon-api": "^1.4",
+    "node-addon-api": "rolftimmermans/node-addon-api#deferred-env",
     "node-pre-gyp": "^0.11"
   },
   "bundledDependencies": [
@@ -43,11 +43,12 @@
     "node": ">= 8.8"
   },
   "scripts": {
-    "clean": "node-pre-gyp clean && rm -rf build-tmp-napi-v*",
-    "build": "node-pre-gyp build --verbose --build-latest-napi-version-only",
-    "install": "node-pre-gyp configure --verbose --build-latest-napi-version-only",
-    "test": "node-pre-gyp build --verbose --build-latest-napi-version-only && eslint lib && script/format.sh && mocha && tsc --project test/unit",
-    "bench": "node-pre-gyp build --verbose --build-latest-napi-version-only && node --use_strict --harmony --expose-gc test/bench"
+    "install": "node-pre-gyp install --fallback-to-build",
+    "dev:install": "node-pre-gyp configure --verbose --build-latest-napi-version-only",
+    "dev:clean": "node-pre-gyp clean && rm -rf build-tmp-napi-v*",
+    "dev:build": "node-pre-gyp build --verbose --build-latest-napi-version-only",
+    "dev:test": "node-pre-gyp build --verbose --build-latest-napi-version-only && eslint lib && script/format.sh && mocha && tsc --project test/unit",
+    "dev:bench": "node-pre-gyp build --verbose --build-latest-napi-version-only && node --use_strict --harmony --expose-gc test/bench"
   },
   "keywords": [
     "zeromq",
