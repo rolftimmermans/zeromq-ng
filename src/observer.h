@@ -2,8 +2,8 @@
 #pragma once
 
 #include "binding.h"
-#include "inline/callback_scope.h"
-#include "inline/poller.h"
+#include "util/callback_scope.h"
+#include "util/poller.h"
 
 namespace zmq {
 class Observer : public Napi::ObjectWrap<Observer> {

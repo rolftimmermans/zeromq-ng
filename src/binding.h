@@ -12,10 +12,10 @@
 
 #include <iostream>
 
-#include "inline/arguments.h"
-#include "inline/error.h"
-#include "inline/to_string.h"
-#include "inline/util.h"
+#include "util/arguments.h"
+#include "util/error.h"
+#include "util/to_string.h"
+#include "util/util.h"
 
 #ifdef _MSC_VER
 #define force_inline inline __forceinline

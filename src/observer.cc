@@ -3,7 +3,7 @@
 #include "context.h"
 #include "socket.h"
 
-#include "inline/incoming.h"
+#include "util/incoming.h"
 
 #include <array>
 

@@ -6,7 +6,7 @@ if (!process.env.NO_COMPAT_TEST) {
 
   /* TODO: This test regularly hangs. */
   for (const proto of testProtos("tcp")) {
-    describe.skip(`compat socket with ${proto} unbind`, function() {
+    describe(`compat socket with ${proto} unbind`, function() {
       beforeEach(function() {
         /* Seems < 4.2 is affected by https://github.com/zeromq/libzmq/issues/1583 */
         if (semver.satisfies(zmq.version, "< 4.2")) this.skip()

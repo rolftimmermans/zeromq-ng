@@ -2,8 +2,9 @@
 #pragma once
 
 #include "binding.h"
-#include "inline/callback_scope.h"
-#include "inline/poller.h"
+#include "util/callback_scope.h"
+#include "util/outgoing.h"
+#include "util/poller.h"
 
 namespace zmq {
 class Socket : public Napi::ObjectWrap<Socket> {
@@ -55,14 +56,14 @@ private:
     /* Send/receive are usually in a hot path and will benefit slightly
        from being inlined. They are used in more than one location and are
        not necessarily automatically inlined by all compilers. */
-    force_inline void Send(const Napi::Promise::Deferred& res, const Napi::Array& msg);
+    force_inline void Send(const Napi::Promise::Deferred& res, OutgoingParts& parts);
     force_inline void Receive(const Napi::Promise::Deferred& res);
 
     class Poller : public zmq::Poller<Poller> {
         Socket& socket;
         Napi::Promise::Deferred read_deferred;
         Napi::Promise::Deferred write_deferred;
-        Napi::Reference<Napi::Array> write_value;
+        OutgoingParts write_value;
 
     public:
         inline bool ValidateReadable() const {
@@ -81,8 +82,8 @@ private:
             zmq::Poller<Poller>::PollReadable(timeout);
         }
 
-        inline void PollWritable(int64_t timeout, Napi::Promise::Deferred def,
-            Napi::Reference<Napi::Array>&& value) {
+        inline void PollWritable(
+            int64_t timeout, Napi::Promise::Deferred def, OutgoingParts&& value) {
             write_deferred = def;
             write_value = std::move(value);
             zmq::Poller<Poller>::PollWritable(timeout);

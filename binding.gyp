@@ -29,6 +29,7 @@
         'src/observer.cc',
         'src/proxy.cc',
         'src/socket.cc',
+        'src/util/outgoing.cc',
       ],
 
       'include_dirs': [

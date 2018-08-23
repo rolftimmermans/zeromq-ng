@@ -1,7 +1,7 @@
 /* Copyright (c) 2017-2018 Rolf Timmermans */
 #include "context.h"
 
-#include "inline/cleanup.h"
+#include "util/cleanup.h"
 
 namespace zmq {
 /* Create a reference to a single global context that is automatically

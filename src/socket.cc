@@ -3,9 +3,8 @@
 #include "context.h"
 #include "observer.h"
 
-#include "inline/incoming.h"
-#include "inline/outgoing.h"
-#include "inline/work.h"
+#include "util/incoming.h"
+#include "util/work.h"
 
 #include <cmath>
 #include <limits>
@@ -199,12 +198,15 @@ void Socket::Close() {
     }
 }
 
-void Socket::Send(const Napi::Promise::Deferred& res, const Napi::Array& msg) {
-    auto last = msg.Length() - 1;
-    for (uint32_t i = 0; i <= last; i++) {
-        Outgoing part(msg[i]);
+void Socket::Send(const Napi::Promise::Deferred& res, OutgoingParts& parts) {
+    auto iter = parts.begin();
+    auto end = parts.end();
 
-        uint32_t flags = i < last ? ZMQ_DONTWAIT | ZMQ_SNDMORE : ZMQ_DONTWAIT;
+    while (iter != end) {
+        auto& part = *iter;
+        iter++;
+
+        uint32_t flags = iter == end ? ZMQ_DONTWAIT : ZMQ_DONTWAIT | ZMQ_SNDMORE;
         while (zmq_msg_send(part, socket, flags) < 0) {
             if (zmq_errno() != EINTR) {
                 res.Reject(ErrnoException(Env(), zmq_errno()).Value());
@@ -386,13 +388,7 @@ Napi::Value Socket::Send(const Napi::CallbackInfo& info) {
     if (!ValidateArguments(info, args)) return Env().Undefined();
     if (!ValidateOpen()) return Env().Undefined();
 
-    Napi::Array parts;
-    if (info[0].IsArray()) {
-        parts = info[0].As<Napi::Array>();
-    } else {
-        parts = Napi::Array::New(Env(), 1);
-        parts.Set(0u, info[0]);
-    }
+    OutgoingParts parts(info[0]);
 
     if (send_timeout == 0 || HasEvents(ZMQ_POLLOUT)) {
         /* We can send on the socket immediately. This is a separate code
@@ -420,7 +416,7 @@ Napi::Value Socket::Send(const Napi::CallbackInfo& info) {
            in a shared pointer, because references cannot be copied. :( */
         auto res = Napi::Promise::Deferred::New(Env());
 
-        poller.PollWritable(send_timeout, res, Napi::Persistent(parts));
+        poller.PollWritable(send_timeout, res, std::move(parts));
 
         return res.Promise();
     }
@@ -683,6 +679,7 @@ void Socket::Poller::ReadableCallback() {
 
 void Socket::Poller::WritableCallback() {
     CallbackScope scope(write_deferred.Env());
-    socket.Send(write_deferred, write_value.Value());
+    socket.Send(write_deferred, write_value);
+    write_value.clear();
 }
 }

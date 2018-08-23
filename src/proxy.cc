@@ -3,8 +3,8 @@
 #include "context.h"
 #include "socket.h"
 
-#include "inline/callback_scope.h"
-#include "inline/work.h"
+#include "util/callback_scope.h"
+#include "util/work.h"
 
 #ifdef ZMQ_HAS_STEERABLE_PROXY
 
