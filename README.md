@@ -172,7 +172,9 @@ In order to develop and test the library, you'll need the following:
 The test suite can be run with:
 
 ```sh
-npm test
+npm install
+npm dev:configure
+npm dev:test
 ```
 
 The test suite will validate and fix the coding style, run all unit tests and verify the validity of the included TypeScript type definitions.

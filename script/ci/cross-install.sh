@@ -14,4 +14,5 @@ fi
 
 export npm_config_build_from_source=true
 export npm_config_target_arch=${ARCH}
-yarn dev:install
+yarn install
+yarn dev:configure
