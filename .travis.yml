@@ -42,17 +42,16 @@ jobs:
   # Test older version branches of ZMQ.
   - os: linux
     node_js: 10.9
-    # Previous stable version on 4.2 branch.
-    env: ZMQ_VERSION=4.2.5
-
+    # Latest stable version on 4.2 branch.
+    env: ZMQ_VERSION=4.2.4 NO_COMPAT_TEST=true
   - os: linux
     node_js: 10.9
     # Latest stable version on 4.1 branch.
-    env: ZMQ_VERSION=4.1.6
+    env: ZMQ_VERSION=4.1.6 NO_COMPAT_TEST=true
   - os: linux
     node_js: 10.9
     # Version of libzmq3 on Ubuntu Trusty.
-    env: ZMQ_VERSION=4.0.4
+    env: ZMQ_VERSION=4.0.4 NO_COMPAT_TEST=true
 
   # Publish all binaries for Linux and macOS.
   - stage: publish binaries
