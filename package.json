@@ -42,6 +42,17 @@
   "engines": {
     "node": ">= 8.8"
   },
+  "files": {
+    "CHANGELOG.md",
+    "LICENSE",
+    "README.md",
+    "binding.gyp",
+    "compat.js",
+    "lib",
+    "src",
+    "script/build.sh",
+    "script/format.sh"
+  },
   "scripts": {
     "install": "node-pre-gyp install --fallback-to-build",
     "dev:clean": "node-pre-gyp clean && rm -rf build-tmp-napi-v*",
