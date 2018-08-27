@@ -2,6 +2,7 @@
 #pragma once
 
 #include "uvhandle.h"
+#include "uvloop.h"
 
 #include <deque>
 #include <memory>
@@ -20,9 +21,11 @@ class Trash {
 
 public:
     /* Construct trash with an associated asynchronous callback. */
-    inline Trash() {
+    inline void Initialize(Napi::Env env) {
+        auto loop = UvLoop(env);
+
         async->data = this;
-        auto err = uv_async_init(uv_default_loop(), async,
+        auto err = uv_async_init(loop, async,
             [](uv_async_t* async) { reinterpret_cast<Trash*>(async->data)->Clear(); });
 
         assert(err == 0);

@@ -4,7 +4,7 @@
 #include "socket.h"
 
 #include "util/callback_scope.h"
-#include "util/work.h"
+#include "util/uvwork.h"
 
 #ifdef ZMQ_HAS_STEERABLE_PROXY
 
@@ -93,7 +93,7 @@ Napi::Value Proxy::Run(const Napi::CallbackInfo& info) {
     auto front_ptr = front->socket;
     auto back_ptr = back->socket;
 
-    Queue(
+    auto status = UvQueue(info.Env(),
         [=]() {
             /* Don't access V8 internals here! Executed in worker thread. */
             if (zmq_bind(control_sub, run_ctx->address.c_str()) < 0) {
@@ -128,6 +128,11 @@ Napi::Value Proxy::Run(const Napi::CallbackInfo& info) {
 
             res.Resolve(Env().Undefined());
         });
+
+    if (status < 0) {
+        ErrnoException(Env(), EBADF).ThrowAsJavaScriptException();
+        return Env().Undefined();
+    }
 
     return res.Promise();
 }

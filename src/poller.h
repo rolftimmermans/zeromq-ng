@@ -1,7 +1,8 @@
 /* Copyright (c) 2017-2018 Rolf Timmermans */
 #pragma once
 
-#include "uvhandle.h"
+#include "util/uvhandle.h"
+#include "util/uvloop.h"
 
 namespace zmq {
 /* Starts a UV poller with an attached timeout. The poller can be started
@@ -25,19 +26,20 @@ public:
     /* Initialize the poller with the given file descriptor. FD should be
        ZMQ style edge-triggered, with READABLE state indicating that ANY
        event may be present on the corresponding ZMQ socket. */
-    inline int32_t Init(uv_os_sock_t& fd) {
+    inline int32_t Initialize(Napi::Env env, uv_os_sock_t& fd) {
         int32_t err;
+        auto loop = UvLoop(env);
 
         poll->data = this;
-        err = uv_poll_init_socket(uv_default_loop(), poll, fd);
+        err = uv_poll_init_socket(loop, poll, fd);
         if (err != 0) return err;
 
         readable_timer->data = this;
-        err = uv_timer_init(uv_default_loop(), readable_timer);
+        err = uv_timer_init(loop, readable_timer);
         if (err != 0) return err;
 
         writable_timer->data = this;
-        err = uv_timer_init(uv_default_loop(), writable_timer);
+        err = uv_timer_init(loop, writable_timer);
         if (err != 0) return err;
 
         return 0;

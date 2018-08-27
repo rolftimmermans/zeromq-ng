@@ -1,3 +1,9 @@
+### v5.0.0-beta.13
+
+* Internal improvements to sending outgoing messages to improve performance.
+
+* Stricter N-API compatibility.
+
 ### v5.0.0-beta.12
 
 * The `ZMQ_CONNECT_ROUTING_ID` socket option is now exposed as the `routingId` option of the `connect()` method for `Router` and `Stream` sockets.

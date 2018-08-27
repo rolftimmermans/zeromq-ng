@@ -1,12 +1,10 @@
 /* Copyright (c) 2017-2018 Rolf Timmermans */
-#include "../binding.h"
-
-#include "outgoing.h"
+#include "outgoing_msg.h"
 
 namespace zmq {
-Trash<Outgoing::Reference> Outgoing::trash;
+Trash<OutgoingMsg::Reference> OutgoingMsg::trash;
 
-Outgoing::Outgoing(Napi::Value value) {
+OutgoingMsg::OutgoingMsg(Napi::Value value) {
     if (value.IsBuffer()) {
         auto buf = value.As<Napi::Buffer<uint8_t>>();
         auto length = buf.Length();
@@ -18,6 +16,10 @@ Outgoing::Outgoing(Napi::Value value) {
            asynchronously. */
         static auto constexpr zero_copy_threshold = 32;
         if (length > zero_copy_threshold) {
+            /* Create a reference and a recycle lambda which is called when the
+               message is sent by ZeroMQ on an *arbitrary* thread. It will add
+               the reference to the global trash, which will schedule a callback
+               on the main v8 thread in order to safely dispose of the reference. */
             auto ref = new Reference(value);
             auto recycle = [](void*, void* item) {
                 trash.Add(static_cast<Reference*>(item));
@@ -39,11 +41,10 @@ Outgoing::Outgoing(Napi::Value value) {
             std::copy(data, data + length, static_cast<uint8_t*>(zmq_msg_data(&msg)));
         }
     } else {
-        /* String data should first be converted to UTF-8 before we
-           can send it; but once converted we do not have to copy a
-           second time. */
-        auto str = new std::string(
-            value.IsString() ? value.As<Napi::String>() : value.ToString());
+        /* String data should first be converted to UTF-8 before we can send it;
+           but once converted we do not have to copy a second time. */
+        auto val = value.IsString() ? value.As<Napi::String>() : value.ToString();
+        auto str = new std::string(val);
         auto length = str->size();
         auto data = const_cast<char*>(str->data());
 
@@ -58,8 +59,24 @@ Outgoing::Outgoing(Napi::Value value) {
     }
 }
 
-Outgoing::~Outgoing() {
+OutgoingMsg::~OutgoingMsg() {
     auto err = zmq_msg_close(&msg);
     assert(err == 0);
+}
+
+void OutgoingMsg::Initialize(Napi::Env env) {
+    trash.Initialize(env);
+}
+
+OutgoingMsg::Parts::Parts(Napi::Value value) {
+    if (value.IsArray()) {
+        /* Reverse insert parts into outgoing message list. */
+        auto arr = value.As<Napi::Array>();
+        for (auto i = arr.Length(); i--;) {
+            parts.emplace_front(arr[i]);
+        }
+    } else {
+        parts.emplace_front(value);
+    }
 }
 }

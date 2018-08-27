@@ -26,10 +26,11 @@
       'sources': [
         'src/binding.cc',
         'src/context.cc',
+        'src/incoming_msg.cc',
         'src/observer.cc',
+        'src/outgoing_msg.cc',
         'src/proxy.cc',
         'src/socket.cc',
-        'src/util/outgoing.cc',
       ],
 
       'include_dirs': [

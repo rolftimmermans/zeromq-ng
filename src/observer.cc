@@ -3,7 +3,7 @@
 #include "context.h"
 #include "socket.h"
 
-#include "util/incoming.h"
+#include "incoming_msg.h"
 
 #include <array>
 
@@ -114,7 +114,7 @@ Observer::Observer(const Napi::CallbackInfo& info)
         return;
     }
 
-    if (poller.Init(fd) < 0) {  // FIXME
+    if (poller.Initialize(info.Env(), fd) < 0) {
         ErrnoException(Env(), errno).ThrowAsJavaScriptException();
         return;
     }
@@ -245,13 +245,7 @@ Napi::Value Observer::Receive(const Napi::CallbackInfo& info) {
             return Env().Undefined();
         }
 
-        /* Async receive. Capture any references by value because the lambda
-           outlives the scope of this method. */
-        auto res = Napi::Promise::Deferred::New(Env());
-
-        poller.PollReadable(0, res);
-
-        return res.Promise();
+        return poller.ReadPromise(Env());
     }
 }
 
@@ -277,5 +271,11 @@ void Observer::Initialize(Napi::Env& env, Napi::Object& exports) {
 void Observer::Poller::ReadableCallback() {
     CallbackScope scope(read_deferred.Env());
     socket.Receive(read_deferred);
+}
+
+Napi::Promise Observer::Poller::ReadPromise(Napi::Env env) {
+    read_deferred = Napi::Promise::Deferred::New(env);
+    zmq::Poller<Poller>::PollReadable(0);
+    return read_deferred.Promise();
 }
 }

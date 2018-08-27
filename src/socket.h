@@ -2,9 +2,9 @@
 #pragma once
 
 #include "binding.h"
+#include "outgoing_msg.h"
+#include "poller.h"
 #include "util/callback_scope.h"
-#include "util/outgoing.h"
-#include "util/poller.h"
 
 namespace zmq {
 class Socket : public Napi::ObjectWrap<Socket> {
@@ -56,16 +56,22 @@ private:
     /* Send/receive are usually in a hot path and will benefit slightly
        from being inlined. They are used in more than one location and are
        not necessarily automatically inlined by all compilers. */
-    force_inline void Send(const Napi::Promise::Deferred& res, OutgoingParts& parts);
+    force_inline void Send(const Napi::Promise::Deferred& res, OutgoingMsg::Parts& parts);
     force_inline void Receive(const Napi::Promise::Deferred& res);
 
     class Poller : public zmq::Poller<Poller> {
         Socket& socket;
         Napi::Promise::Deferred read_deferred;
         Napi::Promise::Deferred write_deferred;
-        OutgoingParts write_value;
+        OutgoingMsg::Parts write_value;
 
     public:
+        Poller(Socket& socket)
+            : socket(socket), read_deferred(socket.Env()), write_deferred(socket.Env()) {}
+
+        Napi::Promise ReadPromise(Napi::Env, int64_t timeout);
+        Napi::Promise WritePromise(Napi::Env, int64_t timeout, OutgoingMsg::Parts&&);
+
         inline bool ValidateReadable() const {
             return socket.HasEvents(ZMQ_POLLIN);
         }
@@ -76,21 +82,6 @@ private:
 
         void ReadableCallback();
         void WritableCallback();
-
-        inline void PollReadable(int64_t timeout, Napi::Promise::Deferred def) {
-            read_deferred = def;
-            zmq::Poller<Poller>::PollReadable(timeout);
-        }
-
-        inline void PollWritable(
-            int64_t timeout, Napi::Promise::Deferred def, OutgoingParts&& value) {
-            write_deferred = def;
-            write_value = std::move(value);
-            zmq::Poller<Poller>::PollWritable(timeout);
-        }
-
-        Poller(Socket& socket)
-            : socket(socket), read_deferred(socket.Env()), write_deferred(socket.Env()) {}
     };
 
     Napi::ObjectReference context_ref;

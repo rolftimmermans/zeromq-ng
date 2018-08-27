@@ -2,8 +2,8 @@
 #pragma once
 
 #include "binding.h"
+#include "poller.h"
 #include "util/callback_scope.h"
-#include "util/poller.h"
 
 namespace zmq {
 class Observer : public Napi::ObjectWrap<Observer> {
@@ -32,6 +32,10 @@ private:
         Napi::Promise::Deferred read_deferred;
 
     public:
+        Poller(Observer& observer) : socket(observer), read_deferred(observer.Env()) {}
+
+        Napi::Promise ReadPromise(Napi::Env env);
+
         inline bool ValidateReadable() const {
             return socket.HasEvents();
         }
@@ -41,15 +45,7 @@ private:
         }
 
         void ReadableCallback();
-
         inline void WritableCallback() {}
-
-        inline void PollReadable(int64_t timeout, Napi::Promise::Deferred def) {
-            read_deferred = def;
-            zmq::Poller<Poller>::PollReadable(timeout);
-        }
-
-        Poller(Observer& observer) : socket(observer), read_deferred(observer.Env()) {}
     };
 
     Observer::Poller poller;

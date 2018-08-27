@@ -3,8 +3,9 @@
 #include "context.h"
 #include "observer.h"
 
-#include "util/incoming.h"
-#include "util/work.h"
+#include "incoming_msg.h"
+#include "util/uvloop.h"
+#include "util/uvwork.h"
 
 #include <cmath>
 #include <limits>
@@ -91,7 +92,7 @@ Socket::Socket(const Napi::CallbackInfo& info)
         return;
     }
 
-    if (poller.Init(fd) < 0) {  // FIXME
+    if (poller.Initialize(info.Env(), fd) < 0) {
         ErrnoException(Env(), errno).ThrowAsJavaScriptException();
         return;
     }
@@ -198,7 +199,7 @@ void Socket::Close() {
     }
 }
 
-void Socket::Send(const Napi::Promise::Deferred& res, OutgoingParts& parts) {
+void Socket::Send(const Napi::Promise::Deferred& res, OutgoingMsg::Parts& parts) {
     auto iter = parts.begin();
     auto end = parts.end();
 
@@ -223,7 +224,7 @@ void Socket::Receive(const Napi::Promise::Deferred& res) {
 
     uint32_t i = 0;
     while (true) {
-        Incoming part;
+        IncomingMsg part;
         while (zmq_msg_recv(part, socket, ZMQ_DONTWAIT) < 0) {
             if (zmq_errno() != EINTR) {
                 res.Reject(ErrnoException(Env(), zmq_errno()).Value());
@@ -251,7 +252,7 @@ Napi::Value Socket::Bind(const Napi::CallbackInfo& info) {
     auto run_ctx =
         std::make_shared<AddressContext>(info[0].As<Napi::String>().Utf8Value());
 
-    Queue(
+    auto status = UvQueue(info.Env(),
         [=]() {
             /* Don't access V8 internals here! Executed in worker thread. */
             while (zmq_bind(socket, run_ctx->address.c_str()) < 0) {
@@ -282,6 +283,11 @@ Napi::Value Socket::Bind(const Napi::CallbackInfo& info) {
             res.Resolve(Env().Undefined());
         });
 
+    if (status < 0) {
+        ErrnoException(Env(), EBADF).ThrowAsJavaScriptException();
+        return Env().Undefined();
+    }
+
     return res.Promise();
 }
 
@@ -298,7 +304,7 @@ Napi::Value Socket::Unbind(const Napi::CallbackInfo& info) {
     auto run_ctx =
         std::make_shared<AddressContext>(info[0].As<Napi::String>().Utf8Value());
 
-    Queue(
+    auto status = UvQueue(info.Env(),
         [=]() {
             /* Don't access V8 internals here! Executed in worker thread. */
             while (zmq_unbind(socket, run_ctx->address.c_str()) < 0) {
@@ -328,6 +334,11 @@ Napi::Value Socket::Unbind(const Napi::CallbackInfo& info) {
 
             res.Resolve(Env().Undefined());
         });
+
+    if (status < 0) {
+        ErrnoException(Env(), EBADF).ThrowAsJavaScriptException();
+        return Env().Undefined();
+    }
 
     return res.Promise();
 }
@@ -388,7 +399,7 @@ Napi::Value Socket::Send(const Napi::CallbackInfo& info) {
     if (!ValidateArguments(info, args)) return Env().Undefined();
     if (!ValidateOpen()) return Env().Undefined();
 
-    OutgoingParts parts(info[0]);
+    OutgoingMsg::Parts parts(info[0]);
 
     if (send_timeout == 0 || HasEvents(ZMQ_POLLOUT)) {
         /* We can send on the socket immediately. This is a separate code
@@ -411,14 +422,7 @@ Napi::Value Socket::Send(const Napi::CallbackInfo& info) {
             return Env().Undefined();
         }
 
-        /* Async send. Capture any references by value because the lambda
-           outlives the scope of this method. We wrap the message reference
-           in a shared pointer, because references cannot be copied. :( */
-        auto res = Napi::Promise::Deferred::New(Env());
-
-        poller.PollWritable(send_timeout, res, std::move(parts));
-
-        return res.Promise();
+        return poller.WritePromise(Env(), send_timeout, std::move(parts));
     }
 }
 
@@ -446,13 +450,7 @@ Napi::Value Socket::Receive(const Napi::CallbackInfo& info) {
             return Env().Undefined();
         }
 
-        /* Async receive. Capture any references by value because the lambda
-           outlives the scope of this method. */
-        auto res = Napi::Promise::Deferred::New(Env());
-
-        poller.PollReadable(receive_timeout, res);
-
-        return res.Promise();
+        return poller.ReadPromise(Env(), receive_timeout);
     }
 }
 
@@ -680,6 +678,20 @@ void Socket::Poller::ReadableCallback() {
 void Socket::Poller::WritableCallback() {
     CallbackScope scope(write_deferred.Env());
     socket.Send(write_deferred, write_value);
-    write_value.clear();
+    write_value.Clear();
+}
+
+Napi::Promise Socket::Poller::ReadPromise(Napi::Env env, int64_t timeout) {
+    read_deferred = Napi::Promise::Deferred::New(env);
+    zmq::Poller<Poller>::PollReadable(timeout);
+    return read_deferred.Promise();
+}
+
+Napi::Promise Socket::Poller::WritePromise(
+    Napi::Env env, int64_t timeout, OutgoingMsg::Parts&& value) {
+    write_deferred = Napi::Promise::Deferred::New(env);
+    write_value = std::move(value);
+    zmq::Poller<Poller>::PollWritable(timeout);
+    return write_deferred.Promise();
 }
 }

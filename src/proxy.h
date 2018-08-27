@@ -2,7 +2,6 @@
 #pragma once
 
 #include "binding.h"
-#include "util/poller.h"
 
 #ifdef ZMQ_HAS_STEERABLE_PROXY
 

@@ -14,8 +14,8 @@
 
 #include "util/arguments.h"
 #include "util/error.h"
+#include "util/object.h"
 #include "util/to_string.h"
-#include "util/util.h"
 
 #ifdef _MSC_VER
 #define force_inline inline __forceinline

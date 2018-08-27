@@ -3,12 +3,6 @@
 
 #include "napi_compat.h"
 
-#define NAPI_THROW_IF_FAILED(env, status, ...)                                           \
-    if ((status) != napi_ok) {                                                           \
-        Napi::Error::New(env).ThrowAsJavaScriptException();                              \
-        return;                                                                          \
-    }
-
 namespace zmq {
 template <typename F>
 inline void cleanup(napi_env env, F f) {

@@ -1,19 +1,19 @@
 /* Copyright (c) 2017-2018 Rolf Timmermans */
 #pragma once
 
+#define NAPI_THROW_IF_FAILED(env, status, ...)                                           \
+    if ((status) != napi_ok) {                                                           \
+        Napi::Error::New(env).ThrowAsJavaScriptException();                              \
+        return __VA_ARGS__;                                                              \
+    }
+
 #define NAPI_BUILD_VERSION NAPI_VERSION
 
 #if NAPI_BUILD_VERSION < 3
-#include "napi_callback_scope.h"
+#include "napi_compat_callback_scope.h"
+#include "napi_compat_event_loop.h"
 #endif
 
 #if NAPI_BUILD_VERSION < 4
-/* https://github.com/nodejs/abi-stable-node/issues/330 */
-#include "node.h"
-
-inline napi_status napi_add_env_cleanup_hook(
-    napi_env, void (*fun)(void* arg), void* arg) {
-    node::AtExit(fun, arg);
-    return napi_ok;
-}
+#include "napi_compat_cleanup_hook.h"
 #endif

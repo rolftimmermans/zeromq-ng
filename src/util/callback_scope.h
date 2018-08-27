@@ -3,12 +3,6 @@
 
 #include "napi_compat.h"
 
-#define NAPI_THROW_IF_FAILED(env, status, ...)                                           \
-    if ((status) != napi_ok) {                                                           \
-        Napi::Error::New(env).ThrowAsJavaScriptException();                              \
-        return;                                                                          \
-    }
-
 namespace zmq {
 /* Pending https://github.com/nodejs/node-addon-api/issues/223 */
 struct CallbackScope {

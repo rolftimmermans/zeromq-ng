@@ -1,6 +1,7 @@
 /* Copyright (c) 2017-2018 Rolf Timmermans */
 #include "context.h"
 #include "observer.h"
+#include "outgoing_msg.h"
 #include "proxy.h"
 #include "socket.h"
 
@@ -70,6 +71,7 @@ Napi::Object init(Napi::Env env, Napi::Object exports) {
     zmq::Proxy::Initialize(env, exports);
 #endif
 
+    zmq::OutgoingMsg::Initialize(env);
     return exports;
 }
 
