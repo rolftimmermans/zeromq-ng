@@ -60,5 +60,6 @@
     "binding",
     "addon"
   ],
-  "license": "MIT"
+  "license": "MIT",
+  "author": "Rolf Timmermans <rolf@zxcv.nl>"
 }
