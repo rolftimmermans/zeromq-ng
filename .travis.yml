@@ -7,12 +7,17 @@ env:
 
 jobs:
   include:
-  # Test latest ZMQ versions on Linux and macOS.
+  # Test latest 10.x branch.
   - os: linux
     node_js: 10.9
 
+  # Test NAPI version 3 on 8.x branch.
   - os: linux
     node_js: 8.11
+
+  # Test NAPI version 1.
+  - os: linux
+    node_js: 8.9
 
   - os: linux
     env: ALPINE_CHROOT=true
