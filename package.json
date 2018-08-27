@@ -42,7 +42,7 @@
   "engines": {
     "node": ">= 8.8"
   },
-  "files": {
+  "files": [
     "CHANGELOG.md",
     "LICENSE",
     "README.md",
@@ -52,7 +52,7 @@
     "src",
     "script/build.sh",
     "script/format.sh"
-  },
+  ],
   "scripts": {
     "install": "node-pre-gyp install --fallback-to-build",
     "dev:clean": "node-pre-gyp clean && rm -rf build-tmp-napi-v*",
