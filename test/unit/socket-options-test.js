@@ -244,7 +244,7 @@ describe("socket options", function() {
       await new Promise(process.nextTick)
       assert.deepEqual(
         warnings.map(w => w.message),
-        ["Value is larger than Number.MAX_SAFE_INTEGER and may not be rounded accurately"]
+        ["Value is larger than Number.MAX_SAFE_INTEGER and may have been rounded inaccurately"]
       )
     })
   })

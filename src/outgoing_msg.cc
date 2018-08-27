@@ -2,6 +2,7 @@
 #include "outgoing_msg.h"
 
 namespace zmq {
+/* Static collection of outgoing message references that can be recycled. */
 Trash<OutgoingMsg::Reference> OutgoingMsg::trash;
 
 OutgoingMsg::OutgoingMsg(Napi::Value value) {

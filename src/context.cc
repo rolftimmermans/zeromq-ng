@@ -1,7 +1,7 @@
 /* Copyright (c) 2017-2018 Rolf Timmermans */
 #include "context.h"
 
-#include "util/cleanup.h"
+#include "util/at_exit.h"
 
 namespace zmq {
 /* Create a reference to a single global context that is automatically
@@ -158,7 +158,7 @@ void Context::Initialize(Napi::Env& env, Napi::Object& exports) {
 
     exports.Set("global", global);
 
-    zmq::cleanup(env, [](void*) {
+    zmq::AtExit(env, [](void*) {
         /* Close global context and release reference. */
         Context::Unwrap(GlobalContext.Value())->Close();
     });

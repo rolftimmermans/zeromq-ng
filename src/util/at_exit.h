@@ -5,7 +5,7 @@
 
 namespace zmq {
 template <typename F>
-inline void cleanup(napi_env env, F f) {
+inline void AtExit(napi_env env, F f) {
     auto status = napi_add_env_cleanup_hook(env, f, nullptr);
     NAPI_THROW_IF_FAILED(env, status);
 }

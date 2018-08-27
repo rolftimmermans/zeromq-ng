@@ -28,8 +28,8 @@ uint64_t number_cast<uint64_t>(const Napi::Number& num) {
 
     if (value > static_cast<double>((1ull << 53) - 1)) {
         Warn(num.Env(),
-            "Value is larger than Number.MAX_SAFE_INTEGER and may not be rounded "
-            "accurately");
+            "Value is larger than Number.MAX_SAFE_INTEGER and may have been rounded "
+            "inaccurately");
     }
 
     /* If the next representable value of the double is beyond the maximum
