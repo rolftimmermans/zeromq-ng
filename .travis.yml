@@ -17,7 +17,7 @@ jobs:
 
   # Test NAPI version 1.
   - os: linux
-    node_js: 8.9
+    node_js: 8.10
 
   - os: linux
     env: ALPINE_CHROOT=true
