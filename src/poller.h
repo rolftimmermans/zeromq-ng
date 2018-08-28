@@ -30,24 +30,45 @@ public:
         int32_t err;
         auto loop = UvLoop(env);
 
+        /* Initialize uv pollers and timers, but unreference them immediately.
+           The poller will be referenced once the socket connects or binds.
+           The timers are weak references and will never prevent an exit. */
+
         poll->data = this;
         err = uv_poll_init_socket(loop, poll, fd);
         if (err != 0) return err;
+        uv_unref(poll);
 
         readable_timer->data = this;
         err = uv_timer_init(loop, readable_timer);
         if (err != 0) return err;
+        uv_unref(readable_timer);
 
         writable_timer->data = this;
         err = uv_timer_init(loop, writable_timer);
         if (err != 0) return err;
+        uv_unref(writable_timer);
 
         return 0;
     }
 
+    inline void Ref() {
+        /* Avoid segfault if accidentally called after closing. */
+        if (poll != nullptr) {
+            uv_ref(poll);
+        }
+    }
+
+    inline void Unref() {
+        /* Avoid segfault if accidentally called after closing. */
+        if (poll != nullptr) {
+            uv_unref(poll);
+        }
+    }
+
     /* Safely close and release all handles. This can be called before
        destruction to release resources early. */
-    inline void Reset() {
+    inline void Close() {
         /* Trigger all watched events manually, which causes any pending
            operation to succeed or fail immediately. */
         if (events) Trigger(events);

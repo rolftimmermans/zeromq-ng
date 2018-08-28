@@ -3,5 +3,4 @@ test/unit test/unit/compat
 --harmony
 --use_strict
 --expose-gc
---exit
 --reporter list

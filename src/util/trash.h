@@ -29,6 +29,10 @@ public:
             [](uv_async_t* async) { reinterpret_cast<Trash*>(async->data)->Clear(); });
 
         assert(err == 0);
+
+        /* Immediately unreference this handle in order to prevent the async
+           callback from preventing the Node.js process to exit. */
+        uv_unref(async);
     }
 
     /* Add given item to the trash, marking it for deletion next time the

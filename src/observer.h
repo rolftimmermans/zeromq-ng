@@ -32,9 +32,9 @@ private:
         Napi::Promise::Deferred read_deferred;
 
     public:
-        Poller(Observer& observer) : socket(observer), read_deferred(observer.Env()) {}
+        Poller(Observer& observer) : socket(observer), read_deferred(socket.Env()) {}
 
-        Napi::Promise ReadPromise(Napi::Env env);
+        Napi::Value ReadPromise();
 
         inline bool ValidateReadable() const {
             return socket.HasEvents();

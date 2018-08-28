@@ -174,17 +174,32 @@ bool Socket::HasEvents(int32_t requested) const {
     return events & requested;
 }
 
+void Socket::Ref() {
+    /* Reference this socket as well as the associated poller. Node.js will
+       remain active as longs as the socket is referenced. */
+    poller.Ref();
+    Napi::ObjectWrap<Socket>::Ref();
+}
+
+void Socket::Unref() {
+    /* Unreference this socket as well as the associated poller. Node.js is
+       free to exit while no references exit. */
+    poller.Unref();
+    Napi::ObjectWrap<Socket>::Unref();
+}
+
 void Socket::Close() {
     if (socket != nullptr) {
         Napi::HandleScope scope(Env());
 
-        /* Stop all polling and release event handlers. */
-        poller.Reset();
-
+        /* Unreference this socket if necessary. */
         if (endpoints > 0) {
             Unref();
             endpoints = 0;
         }
+
+        /* Stop all polling and release event handlers. */
+        poller.Close();
 
         /* Close succeeds unless socket is invalid. */
         auto err = zmq_close(socket);
@@ -422,7 +437,7 @@ Napi::Value Socket::Send(const Napi::CallbackInfo& info) {
             return Env().Undefined();
         }
 
-        return poller.WritePromise(Env(), send_timeout, std::move(parts));
+        return poller.WritePromise(send_timeout, std::move(parts));
     }
 }
 
@@ -450,7 +465,7 @@ Napi::Value Socket::Receive(const Napi::CallbackInfo& info) {
             return Env().Undefined();
         }
 
-        return poller.ReadPromise(Env(), receive_timeout);
+        return poller.ReadPromise(receive_timeout);
     }
 }
 
@@ -681,15 +696,14 @@ void Socket::Poller::WritableCallback() {
     write_value.Clear();
 }
 
-Napi::Promise Socket::Poller::ReadPromise(Napi::Env env, int64_t timeout) {
-    read_deferred = Napi::Promise::Deferred::New(env);
+Napi::Value Socket::Poller::ReadPromise(int64_t timeout) {
+    read_deferred = Napi::Promise::Deferred(read_deferred.Env());
     zmq::Poller<Poller>::PollReadable(timeout);
     return read_deferred.Promise();
 }
 
-Napi::Promise Socket::Poller::WritePromise(
-    Napi::Env env, int64_t timeout, OutgoingMsg::Parts&& value) {
-    write_deferred = Napi::Promise::Deferred::New(env);
+Napi::Value Socket::Poller::WritePromise(int64_t timeout, OutgoingMsg::Parts&& value) {
+    write_deferred = Napi::Promise::Deferred(read_deferred.Env());
     write_value = std::move(value);
     zmq::Poller<Poller>::PollWritable(timeout);
     return write_deferred.Promise();

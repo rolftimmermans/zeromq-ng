@@ -158,7 +158,7 @@ void Observer::Close() {
         /* Stop all polling and release event handlers. Callling this after
            setting socket to null causes a pending receive promise to be
            resolved with undefined. */
-        poller.Reset();
+        poller.Close();
     }
 }
 
@@ -245,7 +245,7 @@ Napi::Value Observer::Receive(const Napi::CallbackInfo& info) {
             return Env().Undefined();
         }
 
-        return poller.ReadPromise(Env());
+        return poller.ReadPromise();
     }
 }
 
@@ -273,8 +273,8 @@ void Observer::Poller::ReadableCallback() {
     socket.Receive(read_deferred);
 }
 
-Napi::Promise Observer::Poller::ReadPromise(Napi::Env env) {
-    read_deferred = Napi::Promise::Deferred::New(env);
+Napi::Value Observer::Poller::ReadPromise() {
+    read_deferred = Napi::Promise::Deferred(read_deferred.Env());
     zmq::Poller<Poller>::PollReadable(0);
     return read_deferred.Promise();
 }

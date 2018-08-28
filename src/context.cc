@@ -46,8 +46,9 @@ void Context::Close() {
             }
         }
 
-        /* Can block if there are sockets that aren't closed, but that
-           should not happen because the objects keep the context alive. */
+        /* Can block if there are sockets that aren't closed. This CAN happen
+           if sockets are not closed NOR gc'ed but the process exits.
+           The workaround is to call socket.close() manually from Node.js. */
         while (zmq_ctx_term(context) < 0) {
             if (zmq_errno() != EINTR) {
                 ErrnoException(Env(), zmq_errno()).ThrowAsJavaScriptException();

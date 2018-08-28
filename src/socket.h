@@ -51,6 +51,8 @@ private:
     inline bool ValidateOpen() const;
     bool HasEvents(int32_t events) const;
 
+    inline void Ref();
+    inline void Unref();
     void Close();
 
     /* Send/receive are usually in a hot path and will benefit slightly
@@ -69,8 +71,8 @@ private:
         Poller(Socket& socket)
             : socket(socket), read_deferred(socket.Env()), write_deferred(socket.Env()) {}
 
-        Napi::Promise ReadPromise(Napi::Env, int64_t timeout);
-        Napi::Promise WritePromise(Napi::Env, int64_t timeout, OutgoingMsg::Parts&&);
+        Napi::Value ReadPromise(int64_t timeout);
+        Napi::Value WritePromise(int64_t timeout, OutgoingMsg::Parts&& parts);
 
         inline bool ValidateReadable() const {
             return socket.HasEvents(ZMQ_POLLIN);
