@@ -249,7 +249,7 @@ new zmq.Pair(...)
 new zmq.Publisher(...)
 new zmq.Subscriber(...)
 new zmq.Request(...)
-new zmq.Response(...)
+new zmq.Reply(...)
 new zmq.Dealer(...)
 new zmq.Router(...)
 new zmq.Pull(...)
@@ -618,7 +618,7 @@ The property names may differ somewhat from the native option names. This is int
 
   **Note:** If set to `true`, also enable `correlate` to ensure correct matching of requests and replies. Otherwise a late reply to an aborted request can be reported as the reply to the superseding request.
 
-* **routingId** (on `Request`, `Response`, `Router` or `Dealer` sockets only)– ZMQ_ROUTING_ID <br/>
+* **routingId** (on `Request`, `Reply`, `Router` or `Dealer` sockets only)– ZMQ_ROUTING_ID <br/>
   <[string] | [Buffer]> The identity of the specified socket when connecting to a `Router` socket.
 
 * **sendBufferSize** – ZMQ_SNDBUF <br/>

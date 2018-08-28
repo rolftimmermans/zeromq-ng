@@ -6,7 +6,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
   describe(`socket with ${proto} req/rep`, function() {
     beforeEach(function() {
       this.req = new zmq.Request
-      this.rep = new zmq.Response
+      this.rep = new zmq.Reply
     })
 
     afterEach(function() {

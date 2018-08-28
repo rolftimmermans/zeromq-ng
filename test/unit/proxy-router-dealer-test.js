@@ -15,7 +15,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
       this.backAddress = uniqAddress(proto)
 
       this.req = new zmq.Request
-      this.rep = new zmq.Response
+      this.rep = new zmq.Reply
     })
 
     afterEach(function() {

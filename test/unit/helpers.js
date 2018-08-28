@@ -1,3 +1,4 @@
+const fs = require("fs")
 const zmq = require("../..")
 const semver = require("semver")
 
@@ -8,7 +9,9 @@ function uniqAddress(proto) {
   const id = seq++
   switch (proto) {
   case "ipc":
-    return `${proto}://${__dirname}/../../tmp/${proto}-${id}`
+    const file = `${proto}://${__dirname}/../../tmp/${proto}-${id}`
+    process.on("exit", () => fs.unlinkSync(file))
+    return file
   case "tcp":
     return `${proto}://127.0.0.1:${id}`
   default:

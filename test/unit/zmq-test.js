@@ -16,7 +16,7 @@ describe("zmq", function() {
         "Context", "Socket", "Observer", "Proxy",
 
         /* Specific socket constructors. */
-        "Pair", "Publisher", "Subscriber", "Request", "Response",
+        "Pair", "Publisher", "Subscriber", "Request", "Reply",
         "Dealer", "Router", "Pull", "Push", "XPublisher", "XSubscriber",
         "Stream",
       ]

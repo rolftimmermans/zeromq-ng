@@ -187,7 +187,7 @@ export class Socket {
   connect(address: string): void
   disconnect(address: string): void
 
-  send(message: string | Buffer | string[] | Buffer[]): Promise<void>
+  send(message: string | Buffer | Array<string | Buffer>): Promise<void>
   receive(): Promise<Buffer[]>
   [Symbol.asyncIterator](): AsyncIterator<Buffer[]>
 }
@@ -241,14 +241,14 @@ export class Request extends Socket {
   constructor(options?: SocketOptions & RequestOptions)
 }
 
-interface ResponseOptions {
+interface ReplyOptions {
   routingId?: string
 }
 
-export class Response extends Socket {
+export class Reply extends Socket {
   routingId?: string
 
-  constructor(options?: SocketOptions & ResponseOptions)
+  constructor(options?: SocketOptions & ReplyOptions)
 }
 
 interface DealerOptions {
