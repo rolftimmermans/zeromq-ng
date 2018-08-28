@@ -5,8 +5,8 @@ environment:
   GH_TOKEN:
     secure: 6V8UzhSBNiXKcwNF1cTFaqTZaX/YVUWutdbluQVdXPlUn1u9G+cd1XTgyZQDmD+4
   matrix:
-  - node_js: 8.11
-  - node_js: 10.6
+  - node_js: "8.11"
+  - node_js: "10.6"
 
 platform:
 - x64
@@ -24,6 +24,6 @@ test_script:
 for:
 - matrix:
     only:
-    - node_js: 10.6
+    - node_js: "10.6"
   deploy_script:
   - IF "%appveyor_repo_tag%"=="true" sh script/ci/release.sh
