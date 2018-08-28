@@ -9,9 +9,7 @@ function uniqAddress(proto) {
   const id = seq++
   switch (proto) {
   case "ipc":
-    const file = `${proto}://${__dirname}/../../tmp/${proto}-${id}`
-    process.on("exit", () => fs.unlinkSync(file))
-    return file
+    return `${proto}://${__dirname}/../../tmp/${proto}-${id}`
   case "tcp":
     return `${proto}://127.0.0.1:${id}`
   default:

@@ -6,16 +6,12 @@ namespace zmq {
 Trash<OutgoingMsg::Reference> OutgoingMsg::trash;
 
 OutgoingMsg::OutgoingMsg(Napi::Value value) {
-    if (value.IsBuffer()) {
-        auto buf = value.As<Napi::Buffer<uint8_t>>();
-        auto length = buf.Length();
-        auto data = buf.Data();
-
+    static auto constexpr zero_copy_threshold = 32;
+    auto buffer_send = [&](uint8_t* data, size_t length) {
         /* Zero-copy heuristic. There's an overhead in releasing the buffer with an
            async call to the main thread (v8 is not threadsafe), so copying small
            amounts of memory is faster than releasing the initial buffer
            asynchronously. */
-        static auto constexpr zero_copy_threshold = 32;
         if (length > zero_copy_threshold) {
             /* Create a reference and a recycle lambda which is called when the
                message is sent by ZeroMQ on an *arbitrary* thread. It will add
@@ -41,11 +37,33 @@ OutgoingMsg::OutgoingMsg(Napi::Value value) {
 
             std::copy(data, data + length, static_cast<uint8_t*>(zmq_msg_data(&msg)));
         }
+    };
+
+    if (value.IsBuffer()) {
+        auto buf = value.As<Napi::Buffer<uint8_t>>();
+        buffer_send(buf.Data(), buf.Length());
+    } else if (value.IsArrayBuffer()) {
+        auto buf = value.As<Napi::ArrayBuffer>();
+        buffer_send(static_cast<uint8_t*>(buf.Data()), buf.ByteLength());
     } else {
         /* String data should first be converted to UTF-8 before we can send it;
            but once converted we do not have to copy a second time. */
-        auto val = value.IsString() ? value.As<Napi::String>() : value.ToString();
-        auto str = new std::string(val);
+        std::string* str = nullptr;
+
+        switch (value.Type()) {
+            case napi_null:
+                zmq_msg_init(&msg);
+                return;
+
+            case napi_string:
+                str = new std::string(value.As<Napi::String>());
+                break;
+
+            default:
+                str = new std::string(value.ToString());
+                break;
+        }
+
         auto length = str->size();
         auto data = const_cast<char*>(str->data());
 

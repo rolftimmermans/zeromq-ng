@@ -6,6 +6,7 @@ const benchmarks = [
   "queue",
   "deliver",
   "deliver-multipart",
+  "deliver-for-await",
 ]
 
 /* Transport protocols to benchmark. */

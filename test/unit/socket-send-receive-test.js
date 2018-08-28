@@ -145,6 +145,32 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
         assert.deepEqual(received, messages)
       })
 
+      it("should deliver typed array and array buffer messages", async function() {
+        const messages = [
+          Uint8Array.from([0x66, 0x6f, 0x6f]),
+          Uint8Array.from([0x66, 0x6f, 0x6f]).buffer,
+          Int32Array.from([0x66, 0x6f, 0x6f]),
+          Int32Array.from([0x66, 0x6f, 0x6f]).buffer,
+        ]
+
+        for (const msg of messages) {
+          await this.sockA.send(msg)
+        }
+
+        const received = []
+        for await (const msg of this.sockB) {
+          received.push(msg.toString())
+          if (received.length == messages.length) break
+        }
+
+        assert.deepEqual(received, [
+          "foo",
+          "foo",
+          "f\x00\x00\x00o\x00\x00\x00o\x00\x00\x00",
+          "f\x00\x00\x00o\x00\x00\x00o\x00\x00\x00",
+        ])
+      })
+
       it("should deliver messages coercible to string", async function() {
         const messages = [null, function() {}, 16.19, true, {}, Promise.resolve()]
         for (const msg of messages) {
@@ -161,7 +187,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
         received[1] = received[1].replace("function()", "function ()")
         assert.deepEqual(
           received,
-          ["null", "function () {}", "16.19", "true", "[object Object]", "[object Promise]"]
+          ["", "function () {}", "16.19", "true", "[object Object]", "[object Promise]"]
         )
       })
 
@@ -270,7 +296,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
 
     describe("when closed", function() {
       beforeEach(function() {
-          this.sockA.close()
+        this.sockA.close()
         this.sockB.close()
       })
 
@@ -304,6 +330,13 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
           assert.equal(err.code, "EBADF")
           assert.typeOf(err.errno, "number")
         }
+      })
+    })
+
+    describe("during close", function() {
+      it("should gracefully stop async iterator", async function() {
+        process.nextTick(() => this.sockA.close())
+        for await (const msg of this.sockA) {}
       })
     })
   })
