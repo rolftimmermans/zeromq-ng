@@ -39,31 +39,9 @@ OutgoingMsg::OutgoingMsg(Napi::Value value) {
         }
     };
 
-    if (value.IsBuffer()) {
-        auto buf = value.As<Napi::Buffer<uint8_t>>();
-        buffer_send(buf.Data(), buf.Length());
-    } else if (value.IsArrayBuffer()) {
-        auto buf = value.As<Napi::ArrayBuffer>();
-        buffer_send(static_cast<uint8_t*>(buf.Data()), buf.ByteLength());
-    } else {
-        /* String data should first be converted to UTF-8 before we can send it;
-           but once converted we do not have to copy a second time. */
-        std::string* str = nullptr;
-
-        switch (value.Type()) {
-            case napi_null:
-                zmq_msg_init(&msg);
-                return;
-
-            case napi_string:
-                str = new std::string(value.As<Napi::String>());
-                break;
-
-            default:
-                str = new std::string(value.ToString());
-                break;
-        }
-
+    /* String data should first be converted to UTF-8 before we can send it;
+       but once converted we do not have to copy a second time. */
+    auto string_send = [&](std::string* str) {
         auto length = str->size();
         auto data = const_cast<char*>(str->data());
 
@@ -72,8 +50,38 @@ OutgoingMsg::OutgoingMsg(Napi::Value value) {
         };
 
         if (zmq_msg_init_data(&msg, data, length, release, str) < 0) {
+            delete str;
             ErrnoException(value.Env(), zmq_errno()).ThrowAsJavaScriptException();
             return;
+        }
+    };
+
+    /* It is likely that the message is either a buffer or a string. Don't test
+       for other object types (such as array buffer), until we've established
+       it is neither! */
+    if (value.IsBuffer()) {
+        auto buf = value.As<Napi::Buffer<uint8_t>>();
+        buffer_send(buf.Data(), buf.Length());
+    } else {
+        switch (value.Type()) {
+        case napi_null:
+            zmq_msg_init(&msg);
+            return;
+
+        case napi_string:
+            string_send(new std::string(value.As<Napi::String>()));
+            return;
+
+        case napi_object:
+            if (value.IsArrayBuffer()) {
+                auto buf = value.As<Napi::ArrayBuffer>();
+                buffer_send(static_cast<uint8_t*>(buf.Data()), buf.ByteLength());
+                return;
+            }
+            /* Fall through */
+
+        default:
+            string_send(new std::string(value.ToString()));
         }
     }
 }

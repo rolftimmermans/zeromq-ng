@@ -609,12 +609,12 @@ void Socket::SetSockOpt(const Napi::CallbackInfo& info) {
 
     /* Mirror a few options that are used internally. */
     switch (option) {
-        case ZMQ_SNDTIMEO:
-            send_timeout = value;
-            break;
-        case ZMQ_RCVTIMEO:
-            receive_timeout = value;
-            break;
+    case ZMQ_SNDTIMEO:
+        send_timeout = value;
+        break;
+    case ZMQ_RCVTIMEO:
+        receive_timeout = value;
+        break;
     }
 }
 

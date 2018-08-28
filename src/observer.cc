@@ -200,18 +200,18 @@ void Observer::Receive(const Napi::Promise::Deferred& res) {
     zmq_msg_close(&msg2);
 
     switch (event_id) {
-        case ZMQ_EVENT_CONNECT_RETRIED:
-            details["reconnectInterval"] = Napi::Number::New(Env(), event_value);
-            break;
-        case ZMQ_EVENT_BIND_FAILED:
-        case ZMQ_EVENT_ACCEPT_FAILED:
-        case ZMQ_EVENT_CLOSE_FAILED:
-            details["error"] = ErrnoException(Env(), event_value).Value();
-            break;
-        case ZMQ_EVENT_MONITOR_STOPPED:
-            /* Also close the monitoring socket. */
-            Close();
-            break;
+    case ZMQ_EVENT_CONNECT_RETRIED:
+        details["reconnectInterval"] = Napi::Number::New(Env(), event_value);
+        break;
+    case ZMQ_EVENT_BIND_FAILED:
+    case ZMQ_EVENT_ACCEPT_FAILED:
+    case ZMQ_EVENT_CLOSE_FAILED:
+        details["error"] = ErrnoException(Env(), event_value).Value();
+        break;
+    case ZMQ_EVENT_MONITOR_STOPPED:
+        /* Also close the monitoring socket. */
+        Close();
+        break;
     }
 
     auto msg = Napi::Array::New(Env(), 1);

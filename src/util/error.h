@@ -35,23 +35,23 @@ static inline Napi::Error ErrnoException(
 static inline const char* ErrnoMessage(int32_t errorno) {
     /* Clarify a few confusing default messages; otherwise rely on zmq. */
     switch (errorno) {
-        case EFAULT:
-            return "Context is closed";
-        case EAGAIN:
-            return "Socket temporarily unavailable";
-        case EMFILE:
-            return "Too many open file descriptors";
-        case ENOENT:
-            return "No such endpoint";
-        case EBUSY:
-            return "Socket is blocked by async operation (e.g. bind/unbind)";
-        case EBADF:
-            return "Socket is closed";
-        case EADDRINUSE:
-            /* Make sure this description is the same on all platforms. */
-            return "Address already in use";
-        default:
-            return zmq_strerror(errorno);
+    case EFAULT:
+        return "Context is closed";
+    case EAGAIN:
+        return "Socket temporarily unavailable";
+    case EMFILE:
+        return "Too many open file descriptors";
+    case ENOENT:
+        return "No such endpoint";
+    case EBUSY:
+        return "Socket is blocked by async operation (e.g. bind/unbind)";
+    case EBADF:
+        return "Socket is closed";
+    case EADDRINUSE:
+        /* Make sure this description is the same on all platforms. */
+        return "Address already in use";
+    default:
+        return zmq_strerror(errorno);
     }
 }
 
@@ -399,8 +399,8 @@ static inline const char* ErrnoCode(int32_t errorno) {
         ERRNO_CASE(EXDEV);
 #endif
 
-        default:
-            return "";
+    default:
+        return "";
     }
 }
 }

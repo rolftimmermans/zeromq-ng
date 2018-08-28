@@ -33,7 +33,7 @@ DisableFormat: false
 ExperimentalAutoDetectBinPacking: false
 FixNamespaceComments: false
 ForEachMacros: [ foreach, Q_FOREACH, BOOST_FOREACH ]
-IndentCaseLabels: true
+IndentCaseLabels: false
 IndentWidth: 4
 IndentWrappedFunctionNames: false
 KeepEmptyLinesAtTheStartOfBlocks: false
