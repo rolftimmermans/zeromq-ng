@@ -1,5 +1,4 @@
 const zmq = require("../..")
-const semver = require("semver")
 const {assert} = require("chai")
 const {spawn} = require("child_process")
 
@@ -16,12 +15,22 @@ describe("context process exit", function() {
       })
     })
 
-    it("should not occur when sockets are open", async function() {
+    it("should occur when sockets are not closed", async function() {
+      this.slow(200)
+      await ensureExit(function() {
+        const zmq = require(__dirname)
+        const socket1 = new zmq.Dealer
+        const socket2 = new zmq.Router
+      })
+    })
+
+    it("should not occur when sockets are open and polling", async function() {
       this.slow(750)
       await ensureNoExit(function() {
         const zmq = require(__dirname)
         const socket1 = new zmq.Dealer
-        socket1.bind("inproc://foo")
+        socket1.connect("inproc://foo")
+        socket1.receive()
       })
     })
   })
@@ -36,7 +45,44 @@ describe("context process exit", function() {
         socket1.close()
         const socket2 = new zmq.Router({context})
         socket2.close()
-        context.close()
+      })
+    })
+
+    it("should occur when sockets are closed and context is gced", async function() {
+      this.slow(200)
+      await ensureExit(function() {
+        const zmq = require(__dirname)
+        function run() {
+          const context = new zmq.Context
+          const socket1 = new zmq.Dealer({context})
+          socket1.close()
+          const socket2 = new zmq.Router({context})
+          socket2.close()
+        }
+
+        run()
+        gc()
+      })
+    })
+
+    it("should occur when sockets are not closed", async function() {
+      this.slow(200)
+      await ensureExit(function() {
+        const zmq = require(__dirname)
+        const context = new zmq.Context
+        const socket1 = new zmq.Dealer({context})
+        const socket2 = new zmq.Router({context})
+      })
+    })
+
+    it("should not occur when sockets are open and polling", async function() {
+      this.slow(750)
+      await ensureNoExit(function() {
+        const zmq = require(__dirname)
+        const context = new zmq.Context
+        const socket1 = new zmq.Dealer({context})
+        socket1.connect("inproc://foo")
+        socket1.receive()
       })
     })
   })
@@ -44,7 +90,7 @@ describe("context process exit", function() {
 
 async function ensureExit(fn) {
   return new Promise((resolve) => {
-    const child = spawn(process.argv[0])
+    const child = spawn(process.argv[0], ["--expose_gc"])
     child.stdin.write(`(${fn})()`)
     child.stdin.end()
 
@@ -55,6 +101,11 @@ async function ensureExit(fn) {
       assert.equal(code, 0)
       resolve()
     })
+
+    setTimeout(() => {
+      resolve()
+      child.kill()
+    }, 2000)
   })
 }
 

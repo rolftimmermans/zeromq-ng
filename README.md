@@ -393,6 +393,8 @@ Closes the socket and disposes of all resources. Any messages that are queued ma
 
 After this method is called, it is no longer possible to call any other methods on this socket.
 
+Sockets that go out of scope and have no `receive()` or `send()` operations in progress will automatically be closed. Therefore it is not necessary in most applications to call `close()` manually.
+
 * **Arguments** <br/>
   (none)
 
@@ -743,22 +745,6 @@ const context = new zmq.Context({ioThreads: 5})
 ```
 
 
-### context.close()
-
-Closes the context.
-
-* **Arguments** <br/>
-  (none)
-
-* **Returns** <br/>
-  <[undefined]>
-
-
-```js
-context.close()
-```
-
-
 ### context options
 
 Context options can be set by passing them in an object during context construction. Alternatively they can be set or retrieved with object properties.
@@ -889,7 +875,7 @@ while (!socket.events.closed) {
 
 ### observer.close()
 
-Closes the context.
+Closes the observer. Calling this method is optional.
 
 * **Arguments** <br/>
   (none)

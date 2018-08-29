@@ -73,21 +73,6 @@ describe("socket construction", function() {
       }
     })
 
-    it("should throw with closed context", function() {
-      const context = new zmq.Context
-      context.close()
-
-      try {
-        new zmq.Socket(1, {context})
-        assert.ok(false)
-      } catch (err) {
-        assert.instanceOf(err, Error)
-        assert.equal(err.message, "Context is closed")
-        assert.equal(err.code, "EFAULT")
-        assert.typeOf(err.errno, "number")
-      }
-    })
-
     it("should create socket with default context", function() {
       const sock1 = new zmq.Socket(1)
       const sock2 = new zmq.Socket(1)

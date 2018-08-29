@@ -15,7 +15,6 @@ struct ProxyContext {
     std::string address;
     uint32_t error = 0;
 
-public:
     ProxyContext(std::string&& address) : address(std::move(address)) {}
 };
 

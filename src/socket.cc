@@ -14,14 +14,14 @@
 namespace zmq {
 /* Ordinary static cast for all available numeric types. */
 template <typename T>
-T number_cast(const Napi::Number& num) {
+T NumberCast(const Napi::Number& num) {
     return static_cast<T>(num);
 }
 
 /* Specialization for uint64_t; check for out of bounds and warn on values
    that cannot be represented accurately. */
 template <>
-uint64_t number_cast<uint64_t>(const Napi::Number& num) {
+uint64_t NumberCast<uint64_t>(const Napi::Number& num) {
     auto value = num.DoubleValue();
 
     if (std::nextafter(value, -0.0) < 0) return 0;
@@ -46,7 +46,6 @@ struct AddressContext {
     std::string address;
     uint32_t error = 0;
 
-public:
     AddressContext(std::string&& address) : address(std::move(address)) {}
 };
 
@@ -76,13 +75,15 @@ Socket::Socket(const Napi::CallbackInfo& info)
         context_ref.Reset(GlobalContext.Value(), 1);
     }
 
-    auto context = Context::Unwrap(context_ref.Value());
+    auto& context = *Context::Unwrap(context_ref.Value());
     if (Env().IsExceptionPending()) return;
 
-    socket = zmq_socket(context->context, type);
+    socket = zmq_socket(context.context, type);
     if (socket == nullptr) {
         ErrnoException(Env(), zmq_errno()).ThrowAsJavaScriptException();
         return;
+    } else {
+        context.sockets.insert(socket);
     }
 
     uv_os_sock_t fd;
@@ -204,6 +205,9 @@ void Socket::Close() {
         /* Close succeeds unless socket is invalid. */
         auto err = zmq_close(socket);
         assert(err == 0);
+
+        auto& context = *Context::Unwrap(context_ref.Value());
+        context.sockets.erase(socket);
 
         /* Release reference to context and observer. */
         observer_ref.Reset();
@@ -601,7 +605,7 @@ void Socket::SetSockOpt(const Napi::CallbackInfo& info) {
     int32_t option = info[0].As<Napi::Number>();
     WarnUnlessImmediateOption(option);
 
-    T value = number_cast<T>(info[1].As<Napi::Number>());
+    T value = NumberCast<T>(info[1].As<Napi::Number>());
     if (zmq_setsockopt(socket, option, &value, sizeof(value)) < 0) {
         ErrnoException(Env(), zmq_errno()).ThrowAsJavaScriptException();
         return;

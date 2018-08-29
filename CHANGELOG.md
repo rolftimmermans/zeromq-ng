@@ -1,5 +1,9 @@
 ### v5.0.0-beta.13
 
+* Revise shutdown behaviour. All contexts will now automatically be terminated when they go out of scope. It is no longer possible to close contexts manually. When the process exits any open sockets will be closed automatically, and any active context will be terminated. Lingering messages will be sent before the process exits.
+
+* The method `context.close()` has been removed with no replacement.
+
 * Internal improvements to sending outgoing messages to improve performance.
 
 * Stricter N-API compatibility.

@@ -1,9 +1,17 @@
 /* Copyright (c) 2017-2018 Rolf Timmermans */
 #include "context.h"
 
-#include "util/at_exit.h"
+#include "util/callback_scope.h"
+#include "util/napi_compat.h"
+#include "util/uvwork.h"
 
 namespace zmq {
+struct CloseContext {
+    uint32_t error = 0;
+
+    CloseContext() {}
+};
+
 /* Create a reference to a single global context that is automatically
    closed on process exit. This is the default context. */
 Napi::ObjectReference GlobalContext;
@@ -24,6 +32,14 @@ Context::Context(const Napi::CallbackInfo& info) : Napi::ObjectWrap<Context>(inf
         return;
     }
 
+    /* There is no reason why these should fail, so just assert. Callbacks are
+       called in reverse order. */
+    auto status = napi_add_env_cleanup_hook(Env(), &Context::Terminate, context);
+    assert(status == napi_ok);
+
+    status = napi_add_env_cleanup_hook(Env(), &Context::CloseAll, &sockets);
+    assert(status == napi_ok);
+
     /* Sealing causes setting/getting invalid options to throw an error.
        Otherwise they would fail silently, which is very confusing. */
     Seal(info.This().As<Napi::Object>());
@@ -34,35 +50,23 @@ Context::Context(const Napi::CallbackInfo& info) : Napi::ObjectWrap<Context>(inf
 }
 
 Context::~Context() {
-    Close();
-}
-
-void Context::Close() {
     if (context != nullptr) {
-        while (zmq_ctx_shutdown(context) < 0) {
-            if (zmq_errno() != EINTR) {
-                ErrnoException(Env(), zmq_errno()).ThrowAsJavaScriptException();
-                return;
-            }
-        }
+        /* We should not have any associated sockets anymore if the context can
+           be gc'ed, since all sockets must have been closed first. */
+        assert(sockets.size() == 0);
 
-        /* Can block if there are sockets that aren't closed. This CAN happen
-           if sockets are not closed NOR gc'ed but the process exits.
-           The workaround is to call socket.close() manually from Node.js. */
-        while (zmq_ctx_term(context) < 0) {
-            if (zmq_errno() != EINTR) {
-                ErrnoException(Env(), zmq_errno()).ThrowAsJavaScriptException();
-                return;
-            }
-        }
+        /* Messages may still be in the pipeline, so we only shutdown
+           and do not terminate the context just yet. */
+        auto err = zmq_ctx_shutdown(context);
+        assert(err == 0);
+
+        /* Sockets are closed and the list of sockets is deallocated, so we
+           must unregister the close all cleanup hook. */
+        auto status = napi_remove_env_cleanup_hook(Env(), &Context::CloseAll, &sockets);
+        assert(status == napi_ok);
 
         context = nullptr;
     }
-}
-
-void Context::Close(const Napi::CallbackInfo& info) {
-    if (!ValidateArguments(info, {})) return;
-    Close();
 }
 
 template <>
@@ -139,10 +143,24 @@ void Context::SetCtxOpt(const Napi::CallbackInfo& info) {
     }
 }
 
+void Context::CloseAll(void* set) {
+    auto& sockets = *static_cast<std::unordered_set<void*>*>(set);
+
+    /* Close all sockets. */
+    for (auto socket : sockets) {
+        auto err = zmq_close(socket);
+        assert(err == 0);
+    }
+}
+
+void Context::Terminate(void* context) {
+    /* May block if messages still have to be sent. */
+    auto err = zmq_ctx_term(context);
+    assert(err == 0);
+}
+
 void Context::Initialize(Napi::Env& env, Napi::Object& exports) {
     auto proto = {
-        InstanceMethod("close", &Context::Close),
-
         InstanceMethod("getBoolOption", &Context::GetCtxOpt<bool>),
         InstanceMethod("setBoolOption", &Context::SetCtxOpt<bool>),
         InstanceMethod("getInt32Option", &Context::GetCtxOpt<int32_t>),
@@ -158,11 +176,6 @@ void Context::Initialize(Napi::Env& env, Napi::Object& exports) {
     GlobalContext.SuppressDestruct();
 
     exports.Set("global", global);
-
-    zmq::AtExit(env, [](void*) {
-        /* Close global context and release reference. */
-        Context::Unwrap(GlobalContext.Value())->Close();
-    });
 
     Constructor = Napi::Persistent(constructor);
     Constructor.SuppressDestruct();

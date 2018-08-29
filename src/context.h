@@ -3,6 +3,8 @@
 
 #include "binding.h"
 
+#include <unordered_set>
+
 namespace zmq {
 extern Napi::ObjectReference GlobalContext;
 
@@ -15,8 +17,6 @@ public:
     ~Context();
 
 protected:
-    inline void Close(const Napi::CallbackInfo& info);
-
     template <typename T>
     inline Napi::Value GetCtxOpt(const Napi::CallbackInfo& info);
 
@@ -24,9 +24,11 @@ protected:
     inline void SetCtxOpt(const Napi::CallbackInfo& info);
 
 private:
-    void Close();
+    static void CloseAll(void* sockets);
+    static void Terminate(void* context);
 
     void* context = nullptr;
+    std::unordered_set<void*> sockets;
 
     friend class Socket;
     friend class Observer;
