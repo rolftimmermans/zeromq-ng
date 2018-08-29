@@ -49,6 +49,4 @@ if (process.versions["electron"] === undefined && !process.env.NO_COMPAT_TEST) {
       })
     })
   }
-} else {
-  console.log("Running in electron: GC test skipped.")
 }
