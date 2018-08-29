@@ -6,12 +6,6 @@
 #include "util/uvwork.h"
 
 namespace zmq {
-struct CloseContext {
-    uint32_t error = 0;
-
-    CloseContext() {}
-};
-
 /* Create a reference to a single global context that is automatically
    closed on process exit. This is the default context. */
 Napi::ObjectReference GlobalContext;
