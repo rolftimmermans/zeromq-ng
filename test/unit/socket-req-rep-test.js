@@ -30,7 +30,6 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
         const address = uniqAddress(proto)
         const messages = ["foo", "bar", "baz", "qux"]
         const received = []
-        let last = false
 
         await this.rep.bind(address)
         await this.req.connect(address)
@@ -38,19 +37,19 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
         const echo = async () => {
           for await (const msg of this.rep) {
             await this.rep.send(msg)
-            if (last) break
           }
         }
 
         const send = async () => {
           for (const req of messages) {
-            if (received.length + 1 == messages.length) last = true
             await this.req.send(Buffer.from(req))
 
             const [rep] = await this.req.receive()
             received.push(rep.toString())
             if (received.length == messages.length) break
           }
+
+          this.rep.close()
         }
 
         await Promise.all([echo(), send()])
@@ -65,7 +64,6 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
 
         const address = uniqAddress(proto)
         const received = []
-        let last = false
 
         /* FIXME: Also trigger EFSM without setting timeout. */
         this.req.sendTimeout = 2
@@ -93,6 +91,8 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
 
           const [msg] = await this.req.receive()
           assert.deepEqual(msg, Buffer.from("foo"))
+
+          this.rep.close()
         }
 
         await Promise.all([echo(), send()])

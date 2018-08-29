@@ -30,16 +30,13 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
         const address = uniqAddress(proto)
         const messages = ["foo", "bar", "baz", "qux"]
         const received = []
-        let last = false
 
         await this.sockA.bind(address)
         await this.sockB.connect(address)
 
         const echo = async () => {
           for await (const msg of this.sockB) {
-            await new Promise(resolve => setTimeout(resolve, 5))
             await this.sockB.send(msg)
-            if (last) break
           }
         }
 
@@ -50,9 +47,10 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
 
           for await (const msg of this.sockA) {
             received.push(msg.toString())
-            if (received.length + 1 == messages.length) last = true
             if (received.length == messages.length) break
           }
+          
+          this.sockB.close()
         }
 
         await Promise.all([echo(), send()])

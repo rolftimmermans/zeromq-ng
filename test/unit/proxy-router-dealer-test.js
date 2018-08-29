@@ -49,7 +49,6 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
 
         const messages = ["foo", "bar", "baz", "qux"]
         const received = []
-        let last = false
 
         await this.req.connect(this.frontAddress)
         await this.rep.connect(this.backAddress)
@@ -57,7 +56,6 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
         const echo = async () => {
           for await (const msg of this.rep) {
             await this.rep.send(msg)
-            if (last) break
           }
         }
 
@@ -68,13 +66,14 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
               this.proxy.resume()
             }
 
-            if (received.length + 1 == messages.length) last = true
             await this.req.send(Buffer.from(req))
 
             const [rep] = await this.req.receive()
             received.push(rep.toString())
             if (received.length == messages.length) break
           }
+
+          this.rep.close()
         }
 
         await Promise.all([echo(), send()])

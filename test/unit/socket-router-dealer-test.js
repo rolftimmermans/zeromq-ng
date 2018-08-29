@@ -19,24 +19,19 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
     })
 
     describe("send", function() {
-      /* TODO: This test is unreliable in CI. */
-      it.skip("should deliver messages", async function() {
+      it("should deliver messages", async function() {
         const address = uniqAddress(proto)
         const messages = ["foo", "bar", "baz", "qux"]
         const receivedA = []
         const receivedB = []
-        let lastA = false
-        let lastB = false
 
         await this.router.bind(address)
-        await this.dealerA.connect(address)
-        await this.dealerB.connect(address)
+        this.dealerA.connect(address)
+        this.dealerB.connect(address)
 
         const echo = async () => {
           for await (const [sender, msg] of this.router) {
-            await new Promise(resolve => setTimeout(resolve, 5))
             await this.router.send([sender, msg])
-            if (lastA && lastB) break
           }
         }
 
@@ -48,15 +43,15 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
 
           for await (const msg of this.dealerA) {
             receivedA.push(msg.toString())
-            if (receivedA.length + 1 == messages.length) lastA = true
             if (receivedA.length == messages.length) break
           }
 
           for await (const msg of this.dealerB) {
             receivedB.push(msg.toString())
-            if (receivedB.length + 1 == messages.length) lastB = true
             if (receivedB.length == messages.length) break
           }
+
+          this.router.close()
         }
 
         await Promise.all([echo(), send()])
