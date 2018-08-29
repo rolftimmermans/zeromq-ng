@@ -46,7 +46,6 @@ Context::~Context() {
     if (context != nullptr) {
         /* Messages may still be in the pipeline, so we only shutdown
            and do not terminate the context just yet. */
-        ActivePtrs.erase(context);
         auto err = zmq_ctx_shutdown(context);
         assert(err == 0);
 
