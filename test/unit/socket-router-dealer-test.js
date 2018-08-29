@@ -59,8 +59,8 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
         assert.deepEqual(receivedB, messages)
       })
 
-      /* This only works reliably with ZMQ 4.2+ */
-      if (semver.satisfies(zmq.version, ">= 4.2")) {
+      /* This only works reliably with ZMQ 4.2.3+ */
+      if (semver.satisfies(zmq.version, ">= 4.2.3")) {
         it("should fail unroutable message if mandatory", async function() {
           this.router.mandatory = true
           this.router.sendTimeout = 0
@@ -70,16 +70,9 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
           } catch (err) {
             assert.instanceOf(err, Error)
 
-            /* ZMQ before 4.2.3 returns the wrong error. */
-            if (semver.satisfies(zmq.version, ">= 4.2.3")) {
-              assert.equal(err.message, "Host unreachable")
-              assert.equal(err.code, "EHOSTUNREACH")
-              assert.typeOf(err.errno, "number")
-            } else {
-              assert.equal(err.message, "Socket temporarily unavailable")
-              assert.equal(err.code, "EAGAIN")
-              assert.typeOf(err.errno, "number")
-            }
+            assert.equal(err.message, "Host unreachable")
+            assert.equal(err.code, "EHOSTUNREACH")
+            assert.typeOf(err.errno, "number")
           }
         })
       }
