@@ -46,7 +46,7 @@ struct AddressContext {
     std::string address;
     uint32_t error = 0;
 
-    AddressContext(std::string&& address) : address(std::move(address)) {}
+    explicit AddressContext(std::string&& address) : address(std::move(address)) {}
 };
 
 Napi::FunctionReference Socket::Constructor;

@@ -11,7 +11,7 @@ public:
     static Napi::FunctionReference Constructor;
     static void Initialize(Napi::Env& env, Napi::Object& exports);
 
-    Proxy(const Napi::CallbackInfo& info);
+    explicit Proxy(const Napi::CallbackInfo& info);
     ~Proxy();
 
 protected:

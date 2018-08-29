@@ -12,7 +12,7 @@ public:
     static Napi::FunctionReference Constructor;
     static void Initialize(Napi::Env& env, Napi::Object& exports);
 
-    Socket(const Napi::CallbackInfo& info);
+    explicit Socket(const Napi::CallbackInfo& info);
     ~Socket();
 
 protected:
@@ -68,7 +68,7 @@ private:
         OutgoingMsg::Parts write_value;
 
     public:
-        Poller(Socket& socket)
+        explicit Poller(Socket& socket)
             : socket(socket), read_deferred(socket.Env()), write_deferred(socket.Env()) {}
 
         Napi::Value ReadPromise(int64_t timeout);

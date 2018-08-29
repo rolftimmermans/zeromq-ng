@@ -11,7 +11,7 @@ public:
     static Napi::FunctionReference Constructor;
     static void Initialize(Napi::Env& env, Napi::Object& exports);
 
-    Observer(const Napi::CallbackInfo& info);
+    explicit Observer(const Napi::CallbackInfo& info);
     ~Observer();
 
 protected:
@@ -32,7 +32,8 @@ private:
         Napi::Promise::Deferred read_deferred;
 
     public:
-        Poller(Observer& observer) : socket(observer), read_deferred(socket.Env()) {}
+        explicit Poller(Observer& observer)
+            : socket(observer), read_deferred(socket.Env()) {}
 
         Napi::Value ReadPromise();
 

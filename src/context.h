@@ -13,7 +13,7 @@ public:
     static Napi::FunctionReference Constructor;
     static void Initialize(Napi::Env& env, Napi::Object& exports);
 
-    Context(const Napi::CallbackInfo& info);
+    explicit Context(const Napi::CallbackInfo& info);
     ~Context();
 
 protected:

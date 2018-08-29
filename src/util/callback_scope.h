@@ -10,7 +10,7 @@ struct CallbackScope {
     napi_handle_scope handle_scope;
     napi_callback_scope callback_scope;
 
-    CallbackScope(napi_env env) : env(env) {
+    explicit CallbackScope(napi_env env) : env(env) {
         napi_status status;
         napi_async_context context;
         napi_value resource_name, resource_object;
