@@ -5,12 +5,16 @@
 #include "util/napi_compat.h"
 #include "util/uvwork.h"
 
+#include <unordered_set>
+
 namespace zmq {
 /* Create a reference to a single global context that is automatically
    closed on process exit. This is the default context. */
 Napi::ObjectReference GlobalContext;
 
 Napi::FunctionReference Context::Constructor;
+
+std::unordered_set<void*> ContextPtrs;
 
 Context::Context(const Napi::CallbackInfo& info) : Napi::ObjectWrap<Context>(info) {
     auto args = {
@@ -21,18 +25,12 @@ Context::Context(const Napi::CallbackInfo& info) : Napi::ObjectWrap<Context>(inf
     if (!ValidateArguments(info, args)) return;
 
     context = zmq_ctx_new();
-    if (!context) {
+    if (context != nullptr) {
+        ContextPtrs.insert(context);
+    } else {
         ErrnoException(Env(), zmq_errno()).ThrowAsJavaScriptException();
         return;
     }
-
-    /* There is no reason why these should fail, so just assert. Callbacks are
-       called in reverse order. */
-    auto status = napi_add_env_cleanup_hook(Env(), &Context::Terminate, context);
-    assert(status == napi_ok);
-
-    status = napi_add_env_cleanup_hook(Env(), &Context::CloseAll, &sockets);
-    assert(status == napi_ok);
 
     /* Sealing causes setting/getting invalid options to throw an error.
        Otherwise they would fail silently, which is very confusing. */
@@ -45,19 +43,11 @@ Context::Context(const Napi::CallbackInfo& info) : Napi::ObjectWrap<Context>(inf
 
 Context::~Context() {
     if (context != nullptr) {
-        /* We should not have any associated sockets anymore if the context can
-           be gc'ed, since all sockets must have been closed first. */
-        assert(sockets.size() == 0);
-
         /* Messages may still be in the pipeline, so we only shutdown
            and do not terminate the context just yet. */
+        ContextPtrs.erase(context);
         auto err = zmq_ctx_shutdown(context);
         assert(err == 0);
-
-        /* Sockets are closed and the list of sockets is deallocated, so we
-           must unregister the close all cleanup hook. */
-        auto status = napi_remove_env_cleanup_hook(Env(), &Context::CloseAll, &sockets);
-        assert(status == napi_ok);
 
         context = nullptr;
     }
@@ -137,22 +127,6 @@ void Context::SetCtxOpt(const Napi::CallbackInfo& info) {
     }
 }
 
-void Context::CloseAll(void* set) {
-    auto& sockets = *static_cast<std::unordered_set<void*>*>(set);
-
-    /* Close all sockets. */
-    for (auto socket : sockets) {
-        auto err = zmq_close(socket);
-        assert(err == 0);
-    }
-}
-
-void Context::Terminate(void* context) {
-    /* May block if messages still have to be sent. */
-    auto err = zmq_ctx_term(context);
-    assert(err == 0);
-}
-
 void Context::Initialize(Napi::Env& env, Napi::Object& exports) {
     auto proto = {
         InstanceMethod("getBoolOption", &Context::GetCtxOpt<bool>),
@@ -175,5 +149,15 @@ void Context::Initialize(Napi::Env& env, Napi::Object& exports) {
     Constructor.SuppressDestruct();
 
     exports.Set("Context", constructor);
+
+    napi_add_env_cleanup_hook(env,
+        [](void*) {
+            /* Terminate all remaining contexts on process exit. */
+            for (auto context : ContextPtrs) {
+                auto err = zmq_ctx_term(context);
+                assert(err == 0);
+            }
+        },
+        nullptr);
 }
 }

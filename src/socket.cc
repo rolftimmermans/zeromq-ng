@@ -4,12 +4,13 @@
 #include "observer.h"
 
 #include "incoming_msg.h"
+#include "util/napi_compat.h"
 #include "util/uvloop.h"
 #include "util/uvwork.h"
 
 #include <cmath>
 #include <limits>
-#include <set>
+#include <unordered_set>
 
 namespace zmq {
 /* Ordinary static cast for all available numeric types. */
@@ -51,6 +52,8 @@ struct AddressContext {
 
 Napi::FunctionReference Socket::Constructor;
 
+std::unordered_set<void*> SocketPtrs;
+
 Socket::Socket(const Napi::CallbackInfo& info)
     : Napi::ObjectWrap<Socket>(info), poller(*this) {
     auto args = {
@@ -79,11 +82,11 @@ Socket::Socket(const Napi::CallbackInfo& info)
     if (Env().IsExceptionPending()) return;
 
     socket = zmq_socket(context->context, type);
-    if (socket == nullptr) {
+    if (socket != nullptr) {
+        SocketPtrs.insert(socket);
+    } else {
         ErrnoException(Env(), zmq_errno()).ThrowAsJavaScriptException();
         return;
-    } else {
-        context->sockets.insert(socket);
     }
 
     uv_os_sock_t fd;
@@ -115,7 +118,7 @@ Socket::~Socket() {
 /* Define all socket options that should not trigger a warning when set on
    a socket that is already bound/connected. */
 void Socket::WarnUnlessImmediateOption(int32_t option) const {
-    static const std::set<int32_t> immediate = {
+    static const std::unordered_set<int32_t> immediate = {
         ZMQ_SUBSCRIBE,
         ZMQ_UNSUBSCRIBE,
         ZMQ_LINGER,
@@ -203,11 +206,9 @@ void Socket::Close() {
         poller.Close();
 
         /* Close succeeds unless socket is invalid. */
+        SocketPtrs.erase(socket);
         auto err = zmq_close(socket);
         assert(err == 0);
-
-        auto context = Context::Unwrap(context_ref.Value());
-        context->sockets.erase(socket);
 
         /* Release reference to context and observer. */
         observer_ref.Reset();
@@ -687,6 +688,16 @@ void Socket::Initialize(Napi::Env& env, Napi::Object& exports) {
     Constructor.SuppressDestruct();
 
     exports.Set("Socket", constructor);
+
+    napi_add_env_cleanup_hook(env,
+        [](void*) {
+            /* Close all remaining sockets on process exit. */
+            for (auto socket : SocketPtrs) {
+                auto err = zmq_close(socket);
+                assert(err == 0);
+            }
+        },
+        nullptr);
 }
 
 void Socket::Poller::ReadableCallback() {
