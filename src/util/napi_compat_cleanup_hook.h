@@ -58,12 +58,12 @@ inline napi_status napi_add_env_cleanup_hook(napi_env, cb fn, void* arg) {
         node::AtExit(zmq::RunCleanup, nullptr);
     }
 
-    zmq::CleanupHooks.emplace(zmq::CleanupCallback({fn, arg, zmq::CleanupCounter++}));
+    zmq::CleanupHooks.emplace(zmq::CleanupCallback{fn, arg, zmq::CleanupCounter++});
     return napi_ok;
 }
 
 inline napi_status napi_remove_env_cleanup_hook(napi_env, cb fn, void* arg) {
-    zmq::CleanupCallback search({fn, arg, 0});
+    zmq::CleanupCallback search{fn, arg, 0};
     zmq::CleanupHooks.erase(search);
     return napi_ok;
 }
