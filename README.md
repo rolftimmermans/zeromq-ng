@@ -262,7 +262,7 @@ new zmq.Stream(...)
 
 ### socket.bind()
 
-Binds the socket to the given address. During `bind()` the socket cannot be used. Do not call any other methods until the returned promise resolves. Make sure to use `await` or similar.
+Binds the socket to the given address. During `bind()` the socket cannot be used. Do not call any other methods until the returned promise resolves. Make sure to use `await`.
 
 * **Arguments** <br/>
   `address` <[string]> Address to bind this socket to.
@@ -278,7 +278,7 @@ await socket.bind("tcp://*:3456")
 
 ### socket.unbind()
 
-Unbinds the socket to the given address. During `unbind()` the socket cannot be used. Do not call any other methods until the returned promise resolves. Make sure to use `await` or similar.
+Unbinds the socket to the given address. During `unbind()` the socket cannot be used. Do not call any other methods until the returned promise resolves. Make sure to use `await`.
 
 * **Arguments** <br/>
   `address` <[string]> Address to unbind this socket from.
@@ -347,7 +347,19 @@ Sends a single message or a multipart message on the socket. Queues the message 
 
 Queueing may fail eventually if the socket has been configured with a send timeout.
 
-Only **one** call to `send()` may be executed simultaneously. Do not call `send()` again on the same socket until the returned promise resolves. Make sure to use `await` or similar.
+A call to `send()` is guaranteed to return with a resolved promise immediately if the message could be queued directly.
+
+Only **one** asynchronously blocking call to `send()` may be executed simultaneously. If you call `send()` again on a socket that is in the mute state it will return a rejected promise with `EAGAIN`.
+
+The reason for disallowing multiple `send()` calls simultaneously is that it would create an implicit queue of unsendable outgoing messages. This would circumvent any high water mark settings. Such a hypothetical implementation could even exhaust all system memory and cause the Node.js process to abort.
+
+If your application requires sending messages on the same socket in different code paths, then you can choose from a few different strategies:
+
+* **Send directly** on the socket anyway, and deal with `EAGAIN` errors due to the socket being blocked by another send operation appropriately.
+
+* **Set send timeout to zero** and be prepared to deal with `EAGAIN` errors due to the socket being in the mute state.
+
+* **Queue messages** manually in a JavaScript array-based queue (up to a maximum) and send messages from the queue in a single loop.
 
 **Note:** Due to the nature of Node.js and to avoid blocking the main thread, this method always sends messages with the `ZMQ_DONTWAIT` flag. It polls asynchronously if sending is not currently possible. This means that all functionality related to timeouts and blocking behaviour is reimplemented in the Node.js bindings. Any differences in behaviour with the native ZMQ library is considered a bug.
 
@@ -370,7 +382,14 @@ Waits for the next single or multipart message to become availeble on the socket
 
 Reading may fail eventually if the socket has been configured with a receive timeout.
 
-Only **one** call to `receive()` may be executed simultaneously. Do not call `receive()` again on the same socket until the returned promise resolves. Make sure to use `await` or similar.
+A call to `receive()` is guaranteed to return with a resolved promise immediately if a message could be read from the socket directly.
+
+Only **one** asynchronously blocking call to `receive()` can be in progress simultaneously. If you call `receive()` again on the same socket it will return a rejected promise with `EAGAIN`. For example, if no messages can be read and no `await` is used:
+
+```js
+socket.receive() // -> pending promise until read is possible
+socket.receive() // -> promise rejection with `EAGAIN`
+```
 
 **Note:** Due to the nature of Node.js and to avoid blocking the main thread, this method always attempts to read messages with the `ZMQ_DONTWAIT` flag. It polls asynchronously if reading is not currently possible. This means that all functionality related to timeouts and blocking behaviour is reimplemented in the Node.js bindings. Any differences in behaviour with the native ZMQ library is considered a bug.
 
@@ -845,8 +864,6 @@ socket.events.on("listening", details => {
 ### observer.receive()
 
 Waits for the next event to become availeble on the observer. Reads an event immediately if possible. If no events are queued, it will wait asynchonously. The promise will be resolved with an array containing the event name and details of the next event when available.
-
-Only **one** call to `receive()` may be executed simultaneously. Do not call `receive()` again until the returned promise resolves. Make sure to use `await` or similar.
 
 When reading events with `receive()` the observer **must not be in event emitter** mode. Avoid mixing calls to `receive()` with attached event handlers via `on()`.
 
