@@ -10,7 +10,6 @@
 
 #include <cmath>
 #include <limits>
-#include <unordered_set>
 
 namespace zmq {
 /* Ordinary static cast for all available numeric types. */
@@ -52,7 +51,7 @@ struct AddressContext {
 
 Napi::FunctionReference Socket::Constructor;
 
-std::unordered_set<void*> SocketPtrs;
+std::unordered_set<void*> Socket::ActivePtrs;
 
 Socket::Socket(const Napi::CallbackInfo& info)
     : Napi::ObjectWrap<Socket>(info), poller(*this) {
@@ -83,7 +82,7 @@ Socket::Socket(const Napi::CallbackInfo& info)
 
     socket = zmq_socket(context->context, type);
     if (socket != nullptr) {
-        SocketPtrs.insert(socket);
+        ActivePtrs.insert(socket);
     } else {
         ErrnoException(Env(), zmq_errno()).ThrowAsJavaScriptException();
         return;
@@ -206,7 +205,7 @@ void Socket::Close() {
         poller.Close();
 
         /* Close succeeds unless socket is invalid. */
-        SocketPtrs.erase(socket);
+        ActivePtrs.erase(socket);
         auto err = zmq_close(socket);
         assert(err == 0);
 
@@ -688,16 +687,6 @@ void Socket::Initialize(Napi::Env& env, Napi::Object& exports) {
     Constructor.SuppressDestruct();
 
     exports.Set("Socket", constructor);
-
-    napi_add_env_cleanup_hook(env,
-        [](void*) {
-            /* Close all remaining sockets on process exit. */
-            for (auto socket : SocketPtrs) {
-                auto err = zmq_close(socket);
-                assert(err == 0);
-            }
-        },
-        nullptr);
 }
 
 void Socket::Poller::ReadableCallback() {

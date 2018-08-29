@@ -1,5 +1,6 @@
 /* Copyright (c) 2017-2018 Rolf Timmermans */
 #include "context.h"
+#include "socket.h"
 
 #include "util/callback_scope.h"
 #include "util/napi_compat.h"
@@ -14,7 +15,7 @@ Napi::ObjectReference GlobalContext;
 
 Napi::FunctionReference Context::Constructor;
 
-std::unordered_set<void*> ContextPtrs;
+std::unordered_set<void*> Context::ActivePtrs;
 
 Context::Context(const Napi::CallbackInfo& info) : Napi::ObjectWrap<Context>(info) {
     auto args = {
@@ -26,7 +27,7 @@ Context::Context(const Napi::CallbackInfo& info) : Napi::ObjectWrap<Context>(inf
 
     context = zmq_ctx_new();
     if (context != nullptr) {
-        ContextPtrs.insert(context);
+        ActivePtrs.insert(context);
     } else {
         ErrnoException(Env(), zmq_errno()).ThrowAsJavaScriptException();
         return;
@@ -45,7 +46,7 @@ Context::~Context() {
     if (context != nullptr) {
         /* Messages may still be in the pipeline, so we only shutdown
            and do not terminate the context just yet. */
-        ContextPtrs.erase(context);
+        ActivePtrs.erase(context);
         auto err = zmq_ctx_shutdown(context);
         assert(err == 0);
 
@@ -152,8 +153,14 @@ void Context::Initialize(Napi::Env& env, Napi::Object& exports) {
 
     napi_add_env_cleanup_hook(env,
         [](void*) {
+            /* Close all currently open sockets. */
+            for (auto socket : Socket::ActivePtrs) {
+                auto err = zmq_close(socket);
+                assert(err == 0);
+            }
+
             /* Terminate all remaining contexts on process exit. */
-            for (auto context : ContextPtrs) {
+            for (auto context : Context::ActivePtrs) {
                 auto err = zmq_ctx_term(context);
                 assert(err == 0);
             }

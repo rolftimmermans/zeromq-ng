@@ -97,7 +97,9 @@ Observer::Observer(const Napi::CallbackInfo& info)
 
     auto context = Context::Unwrap(target->context_ref.Value());
     socket = zmq_socket(context->context, ZMQ_PAIR);
-    if (socket == nullptr) {
+    if (socket != nullptr) {
+        Socket::ActivePtrs.insert(socket);
+    } else {
         ErrnoException(Env(), zmq_errno()).ThrowAsJavaScriptException();
         return;
     }
@@ -150,6 +152,7 @@ void Observer::Close() {
         Napi::HandleScope scope(Env());
 
         /* Close succeeds unless socket is invalid. */
+        Socket::ActivePtrs.erase(socket);
         auto err = zmq_close(socket);
         assert(err == 0);
 

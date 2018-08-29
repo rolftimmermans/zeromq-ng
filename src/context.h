@@ -3,12 +3,15 @@
 
 #include "binding.h"
 
+#include <unordered_set>
+
 namespace zmq {
 extern Napi::ObjectReference GlobalContext;
 
 class Context : public Napi::ObjectWrap<Context> {
 public:
     static Napi::FunctionReference Constructor;
+    static std::unordered_set<void*> ActivePtrs;
     static void Initialize(Napi::Env& env, Napi::Object& exports);
 
     explicit Context(const Napi::CallbackInfo& info);

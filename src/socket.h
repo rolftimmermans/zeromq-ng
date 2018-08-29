@@ -6,10 +6,13 @@
 #include "poller.h"
 #include "util/callback_scope.h"
 
+#include <unordered_set>
+
 namespace zmq {
 class Socket : public Napi::ObjectWrap<Socket> {
 public:
     static Napi::FunctionReference Constructor;
+    static std::unordered_set<void*> ActivePtrs;
     static void Initialize(Napi::Env& env, Napi::Object& exports);
 
     explicit Socket(const Napi::CallbackInfo& info);
