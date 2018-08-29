@@ -61,6 +61,11 @@ const stuff = async () => {
   await socket.send(part1)
   await socket.send([part1, part2])
 
+  await socket.send([null, Buffer.alloc(1), "foo"])
+  await socket.send(null)
+  await socket.send(Buffer.alloc(1))
+  await socket.send("foo")
+
   socket.close()
 
   socket.events.on("listening", details => {

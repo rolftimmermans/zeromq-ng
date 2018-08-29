@@ -25,6 +25,8 @@ interface CurveKeyPair {
 export function curveKeyPair(): CurveKeyPair
 
 
+export type Message = Buffer | string | null
+
 interface ContextOptions {
   blocky?: boolean,
   ioThreads?: number,
@@ -187,7 +189,7 @@ export class Socket {
   connect(address: string): void
   disconnect(address: string): void
 
-  send(message: string | Buffer | Array<string | Buffer>): Promise<void>
+  send(message: Message | Message[]): Promise<void>
   receive(): Promise<Buffer[]>
   [Symbol.asyncIterator](): AsyncIterator<Buffer[]>
 }
