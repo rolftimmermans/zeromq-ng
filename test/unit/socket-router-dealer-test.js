@@ -66,21 +66,11 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
 
       /* This only works reliably with ZMQ 4.2+ */
       if (semver.satisfies(zmq.version, ">= 4.2")) {
-        it.only("should fail unroutable message if mandatory", async function() {
-          const address = uniqAddress(proto)
-          const messages = ["foo", "bar", "baz", "qux"]
-          const received = []
-          let last = false
-
+        it("should fail unroutable message if mandatory", async function() {
           this.router.mandatory = true
-          await this.router.bind(address)
-          await this.dealerA.connect(address)
-          this.dealerA.send("ping")
-          await this.dealerA.disconnect(address)
-
-          const [sender, msg] = await this.router.receive()
+          this.router.sendTimeout = 0
           try {
-            await this.router.send([sender, msg])
+            await this.router.send(["fooId", "foo"])
             assert.ok(false)
           } catch (err) {
             assert.instanceOf(err, Error)
