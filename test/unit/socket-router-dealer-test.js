@@ -1,4 +1,5 @@
 const zmq = require("../..")
+const semver = require("semver")
 const {assert} = require("chai")
 const {testProtos, uniqAddress} = require("./helpers")
 
@@ -63,28 +64,40 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
         assert.deepEqual(receivedB, messages)
       })
 
-      it("should fail unroutable message if mandatory", async function() {
-        const address = uniqAddress(proto)
-        const messages = ["foo", "bar", "baz", "qux"]
-        const received = []
-        let last = false
+      /* This only works reliably with ZMQ 4.2+ */
+      if (semver.satisfies(zmq.version, ">= 4.2")) {
+        it.only("should fail unroutable message if mandatory", async function() {
+          const address = uniqAddress(proto)
+          const messages = ["foo", "bar", "baz", "qux"]
+          const received = []
+          let last = false
 
-        this.router.mandatory = true
-        await this.router.bind(address)
-        await this.dealerA.connect(address)
-        this.dealerA.send("ping")
-        await this.dealerA.disconnect(address)
+          this.router.mandatory = true
+          await this.router.bind(address)
+          await this.dealerA.connect(address)
+          this.dealerA.send("ping")
+          await this.dealerA.disconnect(address)
 
-        const [sender, msg] = await this.router.receive()
-        try {
-          await this.router.send([sender, msg])
-        } catch (err) {
-          assert.instanceOf(err, Error)
-          assert.equal(err.message, "Host unreachable")
-          assert.equal(err.code, "EHOSTUNREACH")
-          assert.typeOf(err.errno, "number")
-        }
-      })
+          const [sender, msg] = await this.router.receive()
+          try {
+            await this.router.send([sender, msg])
+            assert.ok(false)
+          } catch (err) {
+            assert.instanceOf(err, Error)
+
+            /* ZMQ before 4.2.3 returns the wrong error. */
+            if (semver.satisfies(zmq.version, ">= 4.2.3")) {
+              assert.equal(err.message, "Host unreachable")
+              assert.equal(err.code, "EHOSTUNREACH")
+              assert.typeOf(err.errno, "number")
+            } else {
+              assert.equal(err.message, "Socket temporarily unavailable")
+              assert.equal(err.code, "EAGAIN")
+              assert.typeOf(err.errno, "number")
+            }
+          }
+        })
+      }
     })
   })
 }
