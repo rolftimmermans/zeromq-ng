@@ -1,6 +1,7 @@
 #pragma once
 
 #include <unordered_set>
+#include <algorithm>
 
 typedef void(cb)(void* arg);
 
