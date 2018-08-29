@@ -3,11 +3,11 @@
 #include <algorithm>
 #include <unordered_set>
 
-typedef void(cb)(void* arg);
+typedef void (*cb)(void* arg);
 
 namespace zmq {
 struct CleanupCallback {
-    cb* fn;
+    cb fn;
     void* arg;
     uint64_t insertion_order;
 
@@ -53,7 +53,7 @@ static void RunCleanup(void*) {
 }
 
 /* https://github.com/nodejs/abi-stable-node/issues/330 */
-inline napi_status napi_add_env_cleanup_hook(napi_env, cb* fn, void* arg) {
+inline napi_status napi_add_env_cleanup_hook(napi_env, cb fn, void* arg) {
     if (zmq::CleanupCounter == 0) {
         node::AtExit(zmq::RunCleanup, nullptr);
     }
@@ -62,7 +62,7 @@ inline napi_status napi_add_env_cleanup_hook(napi_env, cb* fn, void* arg) {
     return napi_ok;
 }
 
-inline napi_status napi_remove_env_cleanup_hook(napi_env, cb* fn, void* arg) {
+inline napi_status napi_remove_env_cleanup_hook(napi_env, cb fn, void* arg) {
     zmq::CleanupCallback search({fn, arg, 0});
     zmq::CleanupHooks.erase(search);
     return napi_ok;
