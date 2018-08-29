@@ -75,15 +75,15 @@ Socket::Socket(const Napi::CallbackInfo& info)
         context_ref.Reset(GlobalContext.Value(), 1);
     }
 
-    auto& context = *Context::Unwrap(context_ref.Value());
+    auto context = Context::Unwrap(context_ref.Value());
     if (Env().IsExceptionPending()) return;
 
-    socket = zmq_socket(context.context, type);
+    socket = zmq_socket(context->context, type);
     if (socket == nullptr) {
         ErrnoException(Env(), zmq_errno()).ThrowAsJavaScriptException();
         return;
     } else {
-        context.sockets.insert(socket);
+        context->sockets.insert(socket);
     }
 
     uv_os_sock_t fd;
@@ -206,8 +206,8 @@ void Socket::Close() {
         auto err = zmq_close(socket);
         assert(err == 0);
 
-        auto& context = *Context::Unwrap(context_ref.Value());
-        context.sockets.erase(socket);
+        auto context = Context::Unwrap(context_ref.Value());
+        context->sockets.erase(socket);
 
         /* Release reference to context and observer. */
         observer_ref.Reset();

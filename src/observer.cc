@@ -53,7 +53,7 @@ static auto events = make_array<const char*>(
     "handshakeError",
 #endif
 #ifdef ZMQ_EVENT_HANDSHAKE_SUCCEEDED
-    "handshakeSucceeded",
+    "handshake",
 #endif
 #ifdef ZMQ_EVENT_HANDSHAKE_FAILED_PROTOCOL
     "handshakeProtocolError",

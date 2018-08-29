@@ -351,7 +351,7 @@ export class Stream extends Socket {
 
 type Event = "connect" | "connectDelay" | "connectRetry" | "listening" |
   "bindError" | "accept" | "acceptError" | "close" | "closeError" |
-  "disconnect" | "stop" | "handshakeError" | "handshakeSucceeded" |
+  "disconnect" | "stop" | "handshake" | "handshakeError" |
   "handshakeProtocolError" | "handshakeAuthError" | "unknown"
 
 interface EventDetails {
