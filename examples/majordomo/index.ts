@@ -20,7 +20,7 @@ class CoffeeWorker extends Worker {
   service = "coffee"
 
   async process(...msgs: Buffer[]): Promise<Buffer[]> {
-    await sleep(Math.random() * 500)
+    await sleep(Math.random() * 200)
     return msgs
   }
 }
@@ -34,7 +34,7 @@ const workers = [
 ]
 
 async function request(service: string, ...req: string[]): Promise<undefined | Buffer[]> {
-  const socket = new Request({receiveTimeout: 5000})
+  const socket = new Request({receiveTimeout: 2000})
   socket.connect(broker.address)
 
   console.log(`requesting '${req.join(", ")}' from '${service}'`)
@@ -50,10 +50,10 @@ async function request(service: string, ...req: string[]): Promise<undefined | B
 }
 
 async function main() {
-  broker.start()
   for (const worker of workers) worker.start()
+  broker.start()
 
-  /* Issue many requests in parallel. */
+  /* Requests are issued in parallel. */
   const beverages = await Promise.all([
     request("soda", "cola"),
     request("tea", "oolong"),

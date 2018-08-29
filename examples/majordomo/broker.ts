@@ -5,7 +5,7 @@ import {Header, Message} from "./types"
 
 export class Broker {
   address: string
-  socket: Router = new Router
+  socket: Router = new Router({sendHighWaterMark: 1, sendTimeout: 1})
   services: Map<string, Service> = new Map
   workers: Map<string, Buffer> = new Map
 
@@ -36,53 +36,55 @@ export class Broker {
   }
 
   async stop() {
-    this.socket.close()
+    if (!this.socket.closed) {
+      this.socket.close()
+    }
   }
 
-  async handleClient(client: Buffer, service?: Buffer, ...req: Buffer[]) {
+  handleClient(client: Buffer, service?: Buffer, ...req: Buffer[]) {
     if (service) {
       this.dispatchRequest(client, service, ...req)
     }
   }
 
-  async handleWorker(worker: Buffer, type?: Buffer, ...rest: Buffer[]) {
+  handleWorker(worker: Buffer, type?: Buffer, ...rest: Buffer[]) {
     switch (type && type.toString()) {
     case Message.Ready:
       const [service] = rest
-      await this.register(worker, service)
+      this.register(worker, service)
       break
     case Message.Reply:
       const [client, blank, ...rep] = rest
-      await this.dispatchReply(worker, client, ...rep)
+      this.dispatchReply(worker, client, ...rep)
       break
     case Message.Heartbeat:
       /* Heartbeats not implemented yet. */
       break
     case Message.Disconnect:
-      await this.deregister(worker)
+      this.deregister(worker)
       break
     default:
       console.error(`invalid worker message type: ${type}`)
     }
   }
 
-  async register(worker: Buffer, service: Buffer) {
+  register(worker: Buffer, service: Buffer) {
     this.setWorkerService(worker, service)
-    await this.getService(service).register(worker)
+    this.getService(service).register(worker)
   }
 
-  async dispatchRequest(client: Buffer, service: Buffer, ...req: Buffer[]) {
-    await this.getService(service).dispatchRequest(client, ...req)
+  dispatchRequest(client: Buffer, service: Buffer, ...req: Buffer[]) {
+    this.getService(service).dispatchRequest(client, ...req)
   }
 
-  async dispatchReply(worker: Buffer, client: Buffer, ...rep: Buffer[]) {
+  dispatchReply(worker: Buffer, client: Buffer, ...rep: Buffer[]) {
     const service = this.getWorkerService(worker)
-    await this.getService(service).dispatchReply(worker, client, ...rep)
+    this.getService(service).dispatchReply(worker, client, ...rep)
   }
 
-  async deregister(worker: Buffer) {
+  deregister(worker: Buffer) {
     const service = this.getWorkerService(worker)
-    await this.getService(service).deregister(worker)
+    this.getService(service).deregister(worker)
   }
 
   getService(service: Buffer): Service {

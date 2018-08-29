@@ -13,9 +13,9 @@ export class Service {
     this.name = name
   }
 
-  async dispatchRequest(client: Buffer, ...req: Buffer[]) {
+  dispatchRequest(client: Buffer, ...req: Buffer[]) {
     this.requests.push([client, req])
-    await this.dispatchPending()
+    this.dispatchPending()
   }
 
   async dispatchReply(worker: Buffer, client: Buffer, ...rep: Buffer[]) {
@@ -34,7 +34,7 @@ export class Service {
       ...rep,
     ])
 
-    await this.dispatchPending()
+    this.dispatchPending()
   }
 
   async dispatchPending() {
@@ -60,15 +60,15 @@ export class Service {
     }
   }
 
-  async register(worker: Buffer) {
+  register(worker: Buffer) {
     console.log(`registered worker ${worker.toString('hex')} for '${this.name}'`)
     this.workers.set(worker.toString('hex'), worker)
-    await this.dispatchPending()
+    this.dispatchPending()
   }
 
-  async deregister(worker: Buffer) {
+  deregister(worker: Buffer) {
     console.log(`deregistered worker ${worker.toString('hex')} for '${this.name}'`)
     this.workers.delete(worker.toString('hex'))
-    await this.dispatchPending()
+    this.dispatchPending()
   }
 }

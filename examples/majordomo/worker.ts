@@ -18,7 +18,11 @@ export class Worker {
     const loop = async () => {
       for await (const [blank1, header, type, client, blank2, ...req] of this.socket) {
         const rep = await this.process(...req)
-        await this.socket.send([null, Header.Worker, Message.Reply, client, null, ...rep])
+        try {
+          await this.socket.send([null, Header.Worker, Message.Reply, client, null, ...rep])
+        } catch (err) {
+          console.error(`unable to send reply for ${this.address}`)
+        }
       }
     }
 
@@ -26,8 +30,10 @@ export class Worker {
   }
 
   async stop() {
-    await this.socket.send([null, Header.Worker, Message.Disconnect, this.service])
-    this.socket.close()
+    if (!this.socket.closed) {
+      await this.socket.send([null, Header.Worker, Message.Disconnect, this.service])
+      this.socket.close()
+    }
   }
 
   async process(...req: Buffer[]): Promise<Buffer[]> {

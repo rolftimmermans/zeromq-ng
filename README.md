@@ -348,13 +348,13 @@ A call to `send()` is guaranteed to return with a resolved promise immediately i
 
 Only **one** asynchronously blocking call to `send()` may be executed simultaneously. If you call `send()` again on a socket that is in the mute state it will return a rejected promise with `EAGAIN`.
 
-The reason for disallowing multiple `send()` calls simultaneously is that it would create an implicit queue of unsendable outgoing messages. This would circumvent any high water mark settings. Such a hypothetical implementation could even exhaust all system memory and cause the Node.js process to abort.
+The reason for disallowing multiple `send()` calls simultaneously is that it would create an implicit queue of unsendable outgoing messages. This would circumvent any high water mark or related settings. Such a hypothetical implementation could even exhaust all system memory and cause the Node.js process to abort.
 
 If your application requires sending messages on the same socket in different code paths, then you can choose from a few different strategies:
 
 * **Send directly** on the socket anyway, and deal with `EAGAIN` errors due to the socket being blocked by another send operation appropriately.
 
-* **Set send timeout to zero** and be prepared to deal with `EAGAIN` errors due to the socket being in the mute state.
+* **Set send timeout to zero** and be prepared to deal with `EAGAIN` errors due to the socket not being able to queue any messages.
 
 * **Queue messages** manually in a JavaScript array-based queue (up to a maximum) and send messages from the queue in a single loop.
 
