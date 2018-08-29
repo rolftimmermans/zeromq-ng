@@ -17,18 +17,22 @@ export class Broker {
     console.log(`starting broker on ${this.address}`)
     await this.socket.bind(this.address)
 
-    for await (const [sender, blank, header, ...rest] of this.socket) {
-      switch (header.toString()) {
-      case Header.Client:
-        this.handleClient(sender, ...rest)
-        break
-      case Header.Worker:
-        this.handleWorker(sender, ...rest)
-        break
-      default:
-        console.error(`invalid message header: ${header}`)
+    const loop = async () => {
+      for await (const [sender, blank, header, ...rest] of this.socket) {
+        switch (header.toString()) {
+        case Header.Client:
+          this.handleClient(sender, ...rest)
+          break
+        case Header.Worker:
+          this.handleWorker(sender, ...rest)
+          break
+        default:
+          console.error(`invalid message header: ${header}`)
+        }
       }
     }
+
+    loop()
   }
 
   async stop() {

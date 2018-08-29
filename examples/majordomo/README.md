@@ -50,5 +50,6 @@ dispatching 'coffee' 00800041ae req -> 00800041af
 received 'espresso' from 'coffee'
 dispatching 'coffee' 00800041ae <- rep 00800041af
 received 'irish coffee' from 'coffee'
+timeout expired waiting for 'soda'
 deregistered worker 00800041b1 for 'tea'
 ```

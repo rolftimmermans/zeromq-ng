@@ -33,24 +33,29 @@ const workers = [
   new TeaWorker,
 ]
 
-async function request(service: string, ...req: string[]): Promise<Buffer[]> {
-  console.log(`requesting '${req.join(", ")}' from '${service}'`)
-
-  const socket = new Request()
+async function request(service: string, ...req: string[]): Promise<undefined | Buffer[]> {
+  const socket = new Request({receiveTimeout: 5000})
   socket.connect(broker.address)
-  await socket.send(["MDPC01", service, ...req])
-  const [blank, header, ...res] = await socket.receive()
 
-  console.log(`received '${res.join(", ")}' from '${service}'`)
-  return res
+  console.log(`requesting '${req.join(", ")}' from '${service}'`)
+  await socket.send(["MDPC01", service, ...req])
+
+  try {
+    const [blank, header, ...res] = await socket.receive()
+    console.log(`received '${res.join(", ")}' from '${service}'`)
+    return res
+  } catch (err) {
+    console.log(`timeout expired waiting for '${service}'`)
+  }
 }
 
 async function main() {
   broker.start()
-  workers.forEach(worker => worker.start())
+  for (const worker of workers) worker.start()
 
   /* Issue many requests in parallel. */
   const beverages = await Promise.all([
+    request("soda", "cola"),
     request("tea", "oolong"),
     request("tea", "sencha"),
     request("tea", "earl grey", "with milk"),
@@ -61,7 +66,7 @@ async function main() {
     request("coffee", "irish coffee"),
   ])
 
-  workers.forEach(worker => worker.stop())
+  for (const worker of workers) worker.stop()
   broker.stop()
 }
 
