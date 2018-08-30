@@ -62,13 +62,17 @@ Napi::Value Proxy::Run(const Napi::CallbackInfo& info) {
     if (Env().IsExceptionPending()) return Env().Undefined();
 
     control_sub = zmq_socket(context->context, ZMQ_DEALER);
-    if (control_sub == nullptr) {
+    if (control_sub != nullptr) {
+        Socket::ActivePtrs.insert(control_sub);
+    } else {
         ErrnoException(Env(), zmq_errno()).ThrowAsJavaScriptException();
         return Env().Undefined();
     }
 
     control_pub = zmq_socket(context->context, ZMQ_DEALER);
-    if (control_pub == nullptr) {
+    if (control_pub != nullptr) {
+        Socket::ActivePtrs.insert(control_pub);
+    } else {
         ErrnoException(Env(), zmq_errno()).ThrowAsJavaScriptException();
         return Env().Undefined();
     }
@@ -111,9 +115,11 @@ Napi::Value Proxy::Run(const Napi::CallbackInfo& info) {
             front->Close();
             back->Close();
 
+            Socket::ActivePtrs.erase(control_pub);
             auto err1 = zmq_close(control_pub);
             assert(err1 == 0);
 
+            Socket::ActivePtrs.erase(control_sub);
             auto err2 = zmq_close(control_sub);
             assert(err2 == 0);
 
