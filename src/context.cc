@@ -127,6 +127,20 @@ void Context::SetCtxOpt(const Napi::CallbackInfo& info) {
     }
 }
 
+void TerminateAll(void*) {
+    /* Close all currently open sockets. */
+    for (auto socket : Socket::ActivePtrs) {
+        auto err = zmq_close(socket);
+        assert(err == 0);
+    }
+
+    /* Terminate all remaining contexts on process exit. */
+    for (auto context : Context::ActivePtrs) {
+        auto err = zmq_ctx_term(context);
+        assert(err == 0);
+    }
+}
+
 void Context::Initialize(Napi::Env& env, Napi::Object& exports) {
     auto proto = {
         InstanceMethod("getBoolOption", &Context::GetCtxOpt<bool>),
@@ -150,20 +164,7 @@ void Context::Initialize(Napi::Env& env, Napi::Object& exports) {
 
     exports.Set("Context", constructor);
 
-    napi_add_env_cleanup_hook(env,
-        [](void*) {
-            /* Close all currently open sockets. */
-            for (auto socket : Socket::ActivePtrs) {
-                auto err = zmq_close(socket);
-                assert(err == 0);
-            }
-
-            /* Terminate all remaining contexts on process exit. */
-            for (auto context : Context::ActivePtrs) {
-                auto err = zmq_ctx_term(context);
-                assert(err == 0);
-            }
-        },
-        nullptr);
+    auto status = napi_add_env_cleanup_hook(env, TerminateAll, nullptr);
+    assert(status == napi_ok);
 }
 }
