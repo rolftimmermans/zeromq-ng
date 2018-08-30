@@ -20,46 +20,46 @@ static auto events = make_array<const char*>(
     "connect",
 #endif
 #ifdef ZMQ_EVENT_CONNECT_DELAYED
-    "connectDelay",
+    "connect:delay",
 #endif
 #ifdef ZMQ_EVENT_CONNECT_RETRIED
-    "connectRetry",
+    "connect:retry",
 #endif
 #ifdef ZMQ_EVENT_LISTENING
-    "listening",
+    "bind",
 #endif
 #ifdef ZMQ_EVENT_BIND_FAILED
-    "bindError",
+    "bind:error",
 #endif
 #ifdef ZMQ_EVENT_ACCEPTED
     "accept",
 #endif
 #ifdef ZMQ_EVENT_ACCEPT_FAILED
-    "acceptError",
+    "accept:error",
 #endif
 #ifdef ZMQ_EVENT_CLOSED
     "close",
 #endif
 #ifdef ZMQ_EVENT_CLOSE_FAILED
-    "closeError",
+    "close:error",
 #endif
 #ifdef ZMQ_EVENT_DISCONNECTED
     "disconnect",
 #endif
 #ifdef ZMQ_EVENT_MONITOR_STOPPED
-    "stop",
+    "end",
 #endif
 #ifdef ZMQ_EVENT_HANDSHAKE_FAILED_NO_DETAIL
-    "handshakeError",
+    "handshake:error:other",
 #endif
 #ifdef ZMQ_EVENT_HANDSHAKE_SUCCEEDED
     "handshake",
 #endif
 #ifdef ZMQ_EVENT_HANDSHAKE_FAILED_PROTOCOL
-    "handshakeProtocolError",
+    "handshake:error:protocol",
 #endif
 #ifdef ZMQ_EVENT_HANDSHAKE_FAILED_AUTH
-    "handshakeAuthError",
+    "handshake:error:auth",
 #endif
     "unknown");
 
@@ -204,7 +204,7 @@ void Observer::Receive(const Napi::Promise::Deferred& res) {
 
     switch (event_id) {
     case ZMQ_EVENT_CONNECT_RETRIED:
-        details["reconnectInterval"] = Napi::Number::New(Env(), event_value);
+        details["interval"] = Napi::Number::New(Env(), event_value);
         break;
     case ZMQ_EVENT_BIND_FAILED:
     case ZMQ_EVENT_ACCEPT_FAILED:

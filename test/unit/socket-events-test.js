@@ -30,7 +30,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
         await this.sockA.close()
         await done
 
-        assert.deepEqual(events, [["stop", {}]])
+        assert.deepEqual(events, [["end", {}]])
       })
     })
 
@@ -60,12 +60,12 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
         await new Promise(resolve => setTimeout(resolve, 15))
 
         if (proto == "inproc") {
-          assert.deepEqual(events, [["stop", {}]])
+          assert.deepEqual(events, [["end", {}]])
         } else {
-          assert.deepInclude(events, ["listening", {address}])
+          assert.deepInclude(events, ["bind", {address}])
           assert.deepInclude(events, ["accept", {address}])
           assert.deepInclude(events, ["close", {address}])
-          assert.deepInclude(events, ["stop", {}])
+          assert.deepInclude(events, ["end", {}])
         }
       })
 
@@ -90,14 +90,14 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
         await new Promise(resolve => setTimeout(resolve, 15))
 
         if (proto == "inproc") {
-          assert.deepEqual(events, [["stop", {}]])
+          assert.deepEqual(events, [["end", {}]])
         } else {
           if (proto == "tcp") {
-            assert.deepInclude(events, ["connectDelay", {address}])
+            assert.deepInclude(events, ["connect:delay", {address}])
           }
 
           assert.deepInclude(events, ["connect", {address}])
-          assert.deepInclude(events, ["stop", {}])
+          assert.deepInclude(events, ["end", {}])
         }
       })
 
@@ -126,7 +126,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
         await done
 
         if (proto == "tcp") {
-          const [, data] = events.find(([ev]) => ev == "bindError")
+          const [, data] = events.find(([ev]) => ev == "bind:error")
           assert.equal("tcp://" + data.address, address)
           assert.instanceOf(data.error, Error)
           assert.equal(data.error.message, "Address already in use")
@@ -134,15 +134,15 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
           assert.typeOf(data.error.errno, "number")
         }
 
-        assert.deepInclude(events, ["stop", {}])
+        assert.deepInclude(events, ["end", {}])
       })
 
       it("should receive events with emitter", async function() {
         const address = uniqAddress(proto)
         const events = []
 
-        this.sockA.events.on("listening", data => {
-          events.push(["listening", data])
+        this.sockA.events.on("bind", data => {
+          events.push(["bind", data])
         })
 
         this.sockA.events.on("accept", data => {
@@ -153,8 +153,8 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
           events.push(["close", data])
         })
 
-        this.sockA.events.on("stop", data => {
-          events.push(["stop", data])
+        this.sockA.events.on("end", data => {
+          events.push(["end", data])
         })
 
         assert.throws(
@@ -171,12 +171,12 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
         await new Promise(resolve => setTimeout(resolve, 15))
 
         if (proto == "inproc") {
-          assert.deepEqual(events, [["stop", {}]])
+          assert.deepEqual(events, [["end", {}]])
         } else {
-          assert.deepInclude(events, ["listening", {address}])
+          assert.deepInclude(events, ["bind", {address}])
           assert.deepInclude(events, ["accept", {address}])
           assert.deepInclude(events, ["close", {address}])
-          assert.deepInclude(events, ["stop", {}])
+          assert.deepInclude(events, ["end", {}])
         }
       })
     })
@@ -188,7 +188,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
         this.sockB.close()
 
         const [event, data] = await events.receive()
-        assert.equal(event, "stop")
+        assert.equal(event, "end")
 
         try {
           await events.receive()
