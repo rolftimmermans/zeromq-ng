@@ -73,6 +73,14 @@ public:
            operation to succeed or fail immediately. */
         if (events) Trigger(events);
 
+        /* Stop any timers. */
+        int32_t err;
+        err = uv_timer_stop(readable_timer);
+        assert(err == 0);
+
+        err = uv_timer_stop(writable_timer);
+        assert(err == 0);
+
         /* Release references to all UV handles. */
         poll.reset(nullptr);
         readable_timer.reset(nullptr);
