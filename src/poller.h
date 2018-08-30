@@ -17,12 +17,6 @@ class Poller {
     int32_t events{0};
 
 public:
-    ~Poller() {
-        /* Trigger all watched events manually, which causes any pending
-           operation to succeed or fail immediately. */
-        if (events) Trigger(events);
-    }
-
     /* Initialize the poller with the given file descriptor. FD should be
        ZMQ style edge-triggered, with READABLE state indicating that ANY
        event may be present on the corresponding ZMQ socket. */
@@ -73,13 +67,8 @@ public:
            operation to succeed or fail immediately. */
         if (events) Trigger(events);
 
-        /* Stop any timers. */
-        int32_t err;
-        err = uv_timer_stop(readable_timer);
-        assert(err == 0);
-
-        err = uv_timer_stop(writable_timer);
-        assert(err == 0);
+        /* Pollers and timers are stopped automatically by uv_close() which is
+           wrapped in UvHandle. */
 
         /* Release references to all UV handles. */
         poll.reset(nullptr);
