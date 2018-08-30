@@ -2,6 +2,8 @@
 
 * BREAKING: Renamed socket events to be more predictable and consistent. All events and the associated details are now documented.
 
+* Upgraded bundled version of ZeroMQ to 4.2.5 on Windows (matching the version bundled on other platforms).
+
 * Fix potential use after free error in Socket destruction process.
 
 ### v5.0.0-beta.13
