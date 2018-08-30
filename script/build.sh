@@ -3,90 +3,73 @@ set -e
 
 ZMQ_VERSION=${ZMQ_VERSION:-"4.2.5"}
 
-if [ "${ZMQ_VERSION}" \< "4.1.0" ]; then
-  ZMQ_GH_REPO="zeromq4-x"
-elif [ "${ZMQ_VERSION}" \< "4.2.0" ]; then
-  ZMQ_GH_REPO="zeromq4-1"
-else
-  ZMQ_GH_REPO="libzmq"
-fi
+SRC_URL="https://github.com/zeromq/libzmq/releases/download/v${ZMQ_VERSION}/zeromq-${ZMQ_VERSION}.tar.gz"
+SRC_DIR="zeromq-${ZMQ_VERSION}"
+TARBALL="zeromq-${ZMQ_VERSION}.tar.gz"
+BUILD_OPTIONS=""
 
 if [ -n "${WINDIR}" ]; then
-  # We're on Windows. Download a prebuilt library.
-  export ARCH=$(node -p 'process.arch')
-
-  # Working directory is "build"
-  ZMQ_PREFIX="${PWD}/libzmq"
-
-  ZMQ_BINARY="https://github.com/nteract/libzmq-win/releases/download/v2.1.0/libzmq-${ZMQ_VERSION}-${ARCH}.lib"
-  ZMQ_HEADER="https://raw.githubusercontent.com/zeromq/${ZMQ_GH_REPO}/v${ZMQ_VERSION}/include/zmq.h"
-  ZMQ_LIB="libzmq.lib"
-  ZMQ_H="zmq.h"
-
   # Give preference to all MSYS64 binaries. This solves issues with mkdir and
-  # other commands not working properly.
+  # other commands not working properly in many environments.
   export PATH="/usr/bin:${PATH}"
   export PYTHON="/c/Python27/python"
 
-  mkdir -p "${ZMQ_PREFIX}/lib"
-  mkdir -p "${ZMQ_PREFIX}/include"
+  # Working directory is NAPI temporary build directory.
+  PATH_PREFIX="${PWD}/libzmq"
+  ARTIFACT="${PATH_PREFIX}/lib/libzmq.lib"
+  CMAKE_GENERATOR="Visual Studio 14 2015"
+  TOOLSET_VERSION="140"
 
-  echo "Downloading libzmq binary..."
-  curl "${ZMQ_BINARY}" -fsSL -o "${ZMQ_PREFIX}/lib/${ZMQ_LIB}"
-  curl "${ZMQ_HEADER}" -fsSL -o "${ZMQ_PREFIX}/include/${ZMQ_H}"
-else
-  # Working directory is project directory.
-  ZMQ_PREFIX="${PWD}/build/libzmq"
-
-  ZMQ_SOURCE="https://github.com/zeromq/${ZMQ_GH_REPO}/releases/download/v${ZMQ_VERSION}/zeromq-${ZMQ_VERSION}.tar.gz"
-  ZMQ_SRC_DIR="zeromq-${ZMQ_VERSION}"
-  ZMQ_TARBALL="zeromq-${ZMQ_VERSION}.tar.gz"
-  export MACOSX_DEPLOYMENT_TARGET=10.9
-
-  mkdir -p "${ZMQ_PREFIX}"
-  cd "${ZMQ_PREFIX}"
-
-  if [ -f "lib/libzmq.a" ]; then
-    echo "Found previously built libzmq; skipping rebuild..."
-  else
-    if [ -f "${ZMQ_TARBALL}" ]; then
-      echo "Found libzmq source; skipping download..."
-    else
-      echo "Downloading libzmq source..."
-      curl "${ZMQ_SOURCE}" -fsSL -o "${ZMQ_TARBALL}"
-    fi
-
-    export CFLAGS=-fPIC
-    export CXXFLAGS=-fPIC
-    export PKG_CONFIG_PATH="${ZMQ_PREFIX}/lib/pkgconfig"
-
-    test -d "${ZMQ_SRC_DIR}" || tar xzf "${ZMQ_TARBALL}"
-    cd "${ZMQ_SRC_DIR}"
-
-    echo "Building libzmq..."
-    test -f configure || ./autogen.sh
-
-    if [ "${npm_config_zmq_draft}" = "true" ] || [ "${ZMQ_DRAFT}" = "true" ]; then
-      export ZMQ_BUILD_OPTIONS=--enable-drafts ${ZMQ_BUILD_OPTIONS}
-    fi
-
-    if [ "${ZMQ_VERSION}" \< "4.1.0" ]; then
-      # Do not disable shared library because it will fail to build the
-      # curve keygen tool, which cannot be excluded before 4.1.
-      export ZMQ_BUILD_OPTIONS="--with-relaxed --without-documentation ${ZMQ_BUILD_OPTIONS}"
-    elif [ "${ZMQ_VERSION}" \< "4.2.0" ]; then
-      export ZMQ_BUILD_OPTIONS="--disable-shared --without-libsodium --with-relaxed --without-documentation ${ZMQ_BUILD_OPTIONS}"
-    else
-      export ZMQ_BUILD_OPTIONS="--disable-shared --disable-curve-keygen --disable-pedantic --without-docs ${ZMQ_BUILD_OPTIONS}"
-    fi
-
-    # Build as static library, don't build curve_keygen binary.
-    ./configure "--prefix=${ZMQ_PREFIX}" --enable-static ${ZMQ_BUILD_OPTIONS}
-
-    make -j 2
-    make install
-
-    cd "${ZMQ_PREFIX}"
-    rm -rf "${ZMQ_SRC_DIR}" "${ZMQ_TARBALL}"
+  if [ "${Platform}" = "x64" ]; then
+    CMAKE_GENERATOR="${CMAKE_GENERATOR} Win64"
   fi
+
+  BUILD_OPTIONS="-DCMAKE_CXX_FLAGS_RELEASE=\"/MT\" ${BUILD_OPTIONS}"
+else
+  # Working directory is project root.
+  PATH_PREFIX="${PWD}/build/libzmq"
+  ARTIFACT="${PATH_PREFIX}/lib/libzmq.a"
+  CMAKE_GENERATOR="Unix Makefiles"
+
+  export MACOSX_DEPLOYMENT_TARGET=10.9
+fi
+
+mkdir -p "${PATH_PREFIX}" && cd "${PATH_PREFIX}"
+
+echo ${ARTIFACT}
+echo ${SRC_DIR}
+
+if [ -f "${ARTIFACT}" ]; then
+  echo "Found previously built libzmq; skipping rebuild..."
+else
+  if [ -f "${TARBALL}" ]; then
+    echo "Found libzmq source; skipping download..."
+  else
+    echo "Downloading libzmq source..."
+    curl "${SRC_URL}" -fsSL -o "${TARBALL}"
+  fi
+
+  test -d "${SRC_DIR}" || tar xzf "${TARBALL}"
+
+  echo "Building libzmq..."
+
+  if [ "${npm_config_zmq_draft}" = "true" ] || [ "${ZMQ_DRAFT}" = "true" ]; then
+    BUILD_OPTIONS="-DENABLE_DRAFTS=ON ${BUILD_OPTIONS}"
+  fi
+
+  # ClangFormat include causes issues but is not required to build.
+  if [ -f "${SRC_DIR}/builds/cmake/Modules/ClangFormat.cmake" ]; then
+    echo > "${SRC_DIR}/builds/cmake/Modules/ClangFormat.cmake"
+  fi
+
+  cmake -G "${CMAKE_GENERATOR}" "${BUILD_OPTIONS}" -DCMAKE_INSTALL_PREFIX="${PATH_PREFIX}" -DCMAKE_INSTALL_LIBDIR=lib -DBUILD_STATIC=ON -DBUILD_TESTS=OFF -DBUILD_SHARED=OFF "${SRC_DIR}"
+
+  if [ -n "${WINDIR}" ]; then
+    cmake --build . --config Release --target install -- -verbosity:Minimal -maxcpucount -logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+    mv "${PATH_PREFIX}/lib/libzmq-v${TOOLSET_VERSION}-mt-s-${ZMQ_VERSION//./_}.lib" "${PATH_PREFIX}/lib/libzmq.lib"
+  else
+    cmake --build . --config Release --target install -- -j5
+  fi
+
+  rm -rf "${SRC_DIR}" "${TARBALL}"
 fi

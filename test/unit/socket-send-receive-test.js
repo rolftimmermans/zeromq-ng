@@ -1,5 +1,4 @@
 const zmq = require("../..")
-const weak = require("weak")
 const {assert} = require("chai")
 const {testProtos, uniqAddress} = require("./helpers")
 
@@ -44,37 +43,43 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
         }
       })
 
-      it("should copy and release small buffers", async function() {
-        let released = false
-        const release = () => released = true
+      if (process.env.INCLUDE_GC_TESTS) {
+        it("should copy and release small buffers", async function() {
+          const weak = require("weak")
 
-        this.sockA.connect(uniqAddress(proto))
-        const send = async size => {
-          const msg = Buffer.alloc(size)
-          weak(msg, release)
-          await this.sockA.send(msg)
-        }
+          let released = false
+          const release = () => released = true
 
-        await send(16)
-        gc()
-        assert.equal(released, true)
-      })
+          this.sockA.connect(uniqAddress(proto))
+          const send = async size => {
+            const msg = Buffer.alloc(size)
+            weak(msg, release)
+            await this.sockA.send(msg)
+          }
 
-      it("should retain large buffers", async function() {
-        let released = false
-        const release = () => released = true
+          await send(16)
+          gc()
+          assert.equal(released, true)
+        })
 
-        this.sockA.connect(uniqAddress(proto))
-        const send = async size => {
-          const msg = Buffer.alloc(size)
-          weak(msg, release)
-          await this.sockA.send(msg)
-        }
+        it("should retain large buffers", async function() {
+          const weak = require("weak")
 
-        await send(1025)
-        gc()
-        assert.equal(released, false)
-      })
+          let released = false
+          const release = () => released = true
+
+          this.sockA.connect(uniqAddress(proto))
+          const send = async size => {
+            const msg = Buffer.alloc(size)
+            weak(msg, release)
+            await this.sockA.send(msg)
+          }
+
+          await send(1025)
+          gc()
+          assert.equal(released, false)
+        })
+      }
     })
 
     describe("when connected", function() {
@@ -247,33 +252,37 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
         }
       })
 
-      it("should release buffers", async function() {
-        let released = 0
-        const release = () => released++
+      if (process.env.INCLUDE_GC_TESTS) {
+        it("should release buffers", async function() {
+          const weak = require("weak")
 
-        const address = uniqAddress(proto)
-        await this.sockB.bind(address)
-        this.sockA.connect(address)
+          let released = 0
+          const release = () => released++
 
-        const send = async size => {
-          const msg = Buffer.alloc(size)
-          weak(msg, release)
-          await this.sockA.send(msg)
-        }
+          const address = uniqAddress(proto)
+          await this.sockB.bind(address)
+          this.sockA.connect(address)
 
-        const receive = async () => {
-          const msg = await this.sockB.receive()
-          weak(msg, release)
-        }
+          const send = async size => {
+            const msg = Buffer.alloc(size)
+            weak(msg, release)
+            await this.sockA.send(msg)
+          }
 
-        const sent = send(2048)
-        await receive()
-        await sent
-        await new Promise(resolve => setTimeout(resolve, 5))
+          const receive = async () => {
+            const msg = await this.sockB.receive()
+            weak(msg, release)
+          }
 
-        gc()
-        assert.equal(released, proto == "inproc" ? 1 : 2)
-      })
+          const sent = send(2048)
+          await receive()
+          await sent
+          await new Promise(resolve => setTimeout(resolve, 5))
+
+          gc()
+          assert.equal(released, proto == "inproc" ? 1 : 2)
+        })
+      }
 
       if (proto == "inproc") {
         it("should share memory of large buffers", async function() {

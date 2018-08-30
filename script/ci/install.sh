@@ -18,7 +18,7 @@ fi
 echo "Installing dependencies..."
 
 if [ -n "${ALPINE_CHROOT}" ]; then
-  sudo script/ci/alpine-chroot-install.sh -b v3.8 -p 'nodejs-dev yarn build-base git curl python2 coreutils' -k 'CI TRAVIS_.* ZMQ_.* NODE_.* npm_.*'
+  sudo script/ci/alpine-chroot-install.sh -b v3.8 -p 'nodejs-dev yarn build-base git cmake curl python2 coreutils' -k 'CI TRAVIS_.* ZMQ_.* NODE_.* npm_.*'
 fi
 
 if [ -n "${ZMQ_SHARED}" ]; then
@@ -31,10 +31,10 @@ export npm_config_build_from_source=true
 # via yarn but also via bin stubs in node_modules (even on Windows).
 if [ -n "${ALPINE_CHROOT}" ]; then
   /alpine/enter-chroot yarn global add node-gyp
-  /alpine/enter-chroot yarn install
+  /alpine/enter-chroot yarn install --ignore-scripts
   /alpine/enter-chroot yarn dev:configure
 else
   yarn global add node-gyp
-  yarn install
+  yarn install --ignore-scripts
   yarn dev:configure
 fi

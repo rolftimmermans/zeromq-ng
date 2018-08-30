@@ -1,5 +1,4 @@
 const zmq = require("../..")
-const weak = require("weak")
 const {assert} = require("chai")
 const {testProtos, uniqAddress} = require("./helpers")
 
@@ -94,52 +93,60 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
         assert.equal(this.sock.closed, true)
       })
 
-      it("should release reference to context", async function() {
-        let released = false
-        let completed = false
-        const release = () => {
-          if (completed) released = true
-        }
+      if (process.env.INCLUDE_GC_TESTS) {
+        it("should release reference to context", async function() {
+          const weak = require("weak")
 
-        const task = async () => {
-          let context = new zmq.Context
-          const socket = new zmq.Dealer({context, linger: 0})
+          let released = false
+          let completed = false
+          const release = () => {
+            if (completed) released = true
+          }
 
-          weak(context, release)
-          context = null
+          const task = async () => {
+            let context = new zmq.Context
+            const socket = new zmq.Dealer({context, linger: 0})
 
+            weak(context, release)
+            context = null
+
+            gc()
+            socket.connect(uniqAddress(proto))
+            await socket.send(Buffer.from("foo"))
+            socket.close()
+            completed = true
+          }
+
+          await task()
           gc()
-          socket.connect(uniqAddress(proto))
-          await socket.send(Buffer.from("foo"))
-          socket.close()
-          completed = true
-        }
-
-        await task()
-        gc()
-        assert.equal(released, true)
-      })
+          assert.equal(released, true)
+        })
+      }
     })
 
-    describe("in gc finalizer", function() {
-      it("should release reference to context", async function() {
-        let released = false
-        const release = () => released = true
+    if (process.env.INCLUDE_GC_TESTS) {
+      describe("in gc finalizer", function() {
+        it("should release reference to context", async function() {
+          const weak = require("weak")
 
-        const task = async () => {
-          let context = new zmq.Context
-          let socket = new zmq.Dealer({context, linger: 0})
+          let released = false
+          const release = () => released = true
 
-          weak(context, release)
-          context = null
-          socket = null
+          const task = async () => {
+            let context = new zmq.Context
+            let socket = new zmq.Dealer({context, linger: 0})
+
+            weak(context, release)
+            context = null
+            socket = null
+            gc()
+          }
+
+          await task()
           gc()
-        }
-
-        await task()
-        gc()
-        assert.equal(released, true)
+          assert.equal(released, true)
+        })
       })
-    })
+    }
   })
 }

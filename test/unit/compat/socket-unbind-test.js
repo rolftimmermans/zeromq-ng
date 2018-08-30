@@ -1,4 +1,4 @@
-if (!process.env.NO_COMPAT_TEST) {
+if (process.env.INCLUDE_COMPAT_TESTS) {
   const zmq = require("./load")
   const semver = require("semver")
   const {assert} = require("chai")
