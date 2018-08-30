@@ -1,3 +1,7 @@
+### v5.0.0-beta.14
+
+* Fix potential use after free error in Socket destruction process.
+
 ### v5.0.0-beta.13
 
 * Shutdown behaviour has been revised. All contexts will now automatically be shut down when they go out of scope. It is no longer possible to close contexts manually. When the process exits any open sockets will be closed automatically, and any active context will be terminated. Lingering messages will be sent before the process exits (which may block).
