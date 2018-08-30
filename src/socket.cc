@@ -177,27 +177,13 @@ bool Socket::HasEvents(int32_t requested) const {
     return events & requested;
 }
 
-void Socket::Ref() {
-    /* Reference this socket as well as the associated poller. Node.js will
-       remain active as longs as the socket is referenced. */
-    poller.Ref();
-    Napi::ObjectWrap<Socket>::Ref();
-}
-
-void Socket::Unref() {
-    /* Unreference this socket as well as the associated poller. Node.js is
-       free to exit while no references exit. */
-    poller.Unref();
-    Napi::ObjectWrap<Socket>::Unref();
-}
-
 void Socket::Close() {
     if (socket != nullptr) {
         Napi::HandleScope scope(Env());
 
         /* Unreference this socket if necessary. */
         if (endpoints > 0) {
-            Unref();
+            poller.Unref();
             endpoints = 0;
         }
 
@@ -296,7 +282,7 @@ Napi::Value Socket::Bind(const Napi::CallbackInfo& info) {
             }
 
             if (endpoints++ == 0) {
-                Ref();
+                poller.Ref();
             }
 
             res.Resolve(Env().Undefined());
@@ -348,7 +334,7 @@ Napi::Value Socket::Unbind(const Napi::CallbackInfo& info) {
             }
 
             if (--endpoints == 0) {
-                Unref();
+                poller.Unref();
             }
 
             res.Resolve(Env().Undefined());
@@ -377,7 +363,7 @@ void Socket::Connect(const Napi::CallbackInfo& info) {
     }
 
     if (endpoints++ == 0) {
-        Ref();
+        poller.Ref();
     }
 }
 
@@ -396,7 +382,7 @@ void Socket::Disconnect(const Napi::CallbackInfo& info) {
     }
 
     if (--endpoints == 0) {
-        Unref();
+        poller.Unref();
     }
 }
 
