@@ -380,7 +380,7 @@ export class Observer {
 
   close(): void
 
-  on(event: Event, callback: (details: EventDetails) => any): EventEmitter
+  on(event: Event, callback: (details: EventDetails) => void): EventEmitter
   receive(): Promise<[Event, EventDetails]>
   [Symbol.asyncIterator](): AsyncIterator<[Event, EventDetails]>
 }
