@@ -7,12 +7,12 @@ suite.add(`deliver multipart proto=${proto} msgsize=${msgsize} n=${n} zmq=cur`, 
     server.on("message", (msg1, msg2, mgs3) => {
       j++
       if (j == n - 1) {
-        gc()
+        global.gc()
 
         server.close()
         client.close()
 
-        gc()
+        global.gc()
 
         deferred.resolve()
       }
@@ -21,7 +21,7 @@ suite.add(`deliver multipart proto=${proto} msgsize=${msgsize} n=${n} zmq=cur`, 
     server.bind(address, () => {
       client.connect(address)
 
-      gc()
+      global.gc()
 
       for (let i = 0; i < n; i++) {
         client.send([Buffer.alloc(msgsize), Buffer.alloc(msgsize), Buffer.alloc(msgsize)])
@@ -38,7 +38,7 @@ suite.add(`deliver multipart proto=${proto} msgsize=${msgsize} n=${n} zmq=ng`, O
     await server.bind(address)
     client.connect(address)
 
-    gc()
+    global.gc()
 
     const send = async () => {
       for (let i = 0; i < n; i++) {
@@ -55,12 +55,12 @@ suite.add(`deliver multipart proto=${proto} msgsize=${msgsize} n=${n} zmq=ng`, O
 
     await Promise.all([send(), receive()])
 
-    gc()
+    global.gc()
 
     server.close()
     client.close()
 
-    gc()
+    global.gc()
 
     deferred.resolve()
   }

@@ -28,7 +28,10 @@
     "node-pre-gyp"
   ],
   "devDependencies": {
+    "@types/chai": ">= 4.1",
+    "@types/mocha": ">= 5.2",
     "@types/node": ">= 8.0",
+    "@types/semver": "^5.5.0",
     "benchmark": ">= 0",
     "chai": ">= 4.1",
     "choma": ">= 1.2",
@@ -36,7 +39,8 @@
     "mocha": ">= 4.0",
     "node-pre-gyp-github": "= 1.3.1",
     "semver": ">= 0",
-    "typescript": "^3.0",
+    "ts-node": ">= 7",
+    "typescript": ">= 3",
     "weak": ">= 1.0"
   },
   "engines": {
@@ -58,7 +62,7 @@
     "dev:clean": "node-pre-gyp clean && rm -rf build-tmp-napi-v*",
     "dev:configure": "node-pre-gyp configure --verbose --build-latest-napi-version-only",
     "dev:build": "node-pre-gyp build --verbose --build-latest-napi-version-only",
-    "dev:test": "node-pre-gyp build --verbose --build-latest-napi-version-only && eslint lib && script/format.sh && mocha && tsc --project test/unit && rm -f tmp/*",
+    "dev:test": "node-pre-gyp build --verbose --build-latest-napi-version-only && eslint lib && script/format.sh && mocha && rm -f tmp/*",
     "dev:bench": "node-pre-gyp build --verbose --build-latest-napi-version-only && node --use_strict --harmony --expose-gc test/bench"
   },
   "keywords": [

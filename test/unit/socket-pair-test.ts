@@ -1,6 +1,6 @@
-const zmq = require("../..")
-const {assert} = require("chai")
-const {testProtos, uniqAddress} = require("./helpers")
+import * as zmq from "../.."
+import {assert} from "chai"
+import {testProtos, uniqAddress} from "./helpers"
 
 for (const proto of testProtos("tcp", "ipc", "inproc")) {
   describe(`socket with ${proto} pair/pair`, function() {
@@ -12,7 +12,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
     afterEach(function() {
       this.sockA.close()
       this.sockB.close()
-      gc()
+      global.gc()
     })
 
     describe("send", function() {
@@ -29,7 +29,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
 
         const address = uniqAddress(proto)
         const messages = ["foo", "bar", "baz", "qux"]
-        const received = []
+        const received: string[] = []
 
         await this.sockA.bind(address)
         await this.sockB.connect(address)
@@ -49,7 +49,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
             received.push(msg.toString())
             if (received.length == messages.length) break
           }
-          
+
           this.sockB.close()
         }
 

@@ -7,12 +7,12 @@ suite.add(`deliver proto=${proto} msgsize=${msgsize} n=${n} zmq=cur`, Object.ass
     server.on("message", msg => {
       j++
       if (j == n - 1) {
-        gc()
+        global.gc()
 
         server.close()
         client.close()
 
-        gc()
+        global.gc()
 
         deferred.resolve()
       }
@@ -21,7 +21,7 @@ suite.add(`deliver proto=${proto} msgsize=${msgsize} n=${n} zmq=cur`, Object.ass
     server.bind(address, () => {
       client.connect(address)
 
-      gc()
+      global.gc()
 
       for (let i = 0; i < n; i++) {
         client.send(Buffer.alloc(msgsize))
@@ -38,7 +38,7 @@ suite.add(`deliver proto=${proto} msgsize=${msgsize} n=${n} zmq=ng`, Object.assi
     await server.bind(address)
     client.connect(address)
 
-    gc()
+    global.gc()
 
     const send = async () => {
       for (let i = 0; i < n; i++) {
@@ -55,12 +55,12 @@ suite.add(`deliver proto=${proto} msgsize=${msgsize} n=${n} zmq=ng`, Object.assi
 
     await Promise.all([send(), receive()])
 
-    gc()
+    global.gc()
 
     server.close()
     client.close()
 
-    gc()
+    global.gc()
 
     deferred.resolve()
   }

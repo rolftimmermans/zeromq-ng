@@ -1,6 +1,6 @@
-const zmq = require("../..")
-const {assert} = require("chai")
-const {testProtos, uniqAddress} = require("./helpers")
+import * as zmq from "../.."
+import {assert} from "chai"
+import {testProtos, uniqAddress} from "./helpers"
 
 for (const proto of testProtos("tcp", "ipc", "inproc")) {
   describe(`socket with ${proto} send/receive`, function() {
@@ -12,7 +12,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
     afterEach(function() {
       this.sockA.close()
       this.sockB.close()
-      gc()
+      global.gc()
     })
 
     describe("when not connected", function() {
@@ -51,14 +51,14 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
           const release = () => released = true
 
           this.sockA.connect(uniqAddress(proto))
-          const send = async size => {
+          const send = async (size: number) => {
             const msg = Buffer.alloc(size)
             weak(msg, release)
             await this.sockA.send(msg)
           }
 
           await send(16)
-          gc()
+          global.gc()
           assert.equal(released, true)
         })
 
@@ -69,14 +69,14 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
           const release = () => released = true
 
           this.sockA.connect(uniqAddress(proto))
-          const send = async size => {
+          const send = async (size: number) => {
             const msg = Buffer.alloc(size)
             weak(msg, release)
             await this.sockA.send(msg)
           }
 
           await send(1025)
-          gc()
+          global.gc()
           assert.equal(released, false)
         })
       }
@@ -108,7 +108,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
         await this.sockA.send(sent)
 
         const recv = await this.sockB.receive()
-        assert.deepEqual([sent], recv.map(buf => buf.toString()))
+        assert.deepEqual([sent], recv.map((buf: Buffer) => buf.toString()))
       })
 
       it("should deliver single buffer message", async function() {
@@ -124,7 +124,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
         await this.sockA.send(sent)
 
         const recv = await this.sockB.receive()
-        assert.deepEqual(sent, recv.map(buf => buf.toString()))
+        assert.deepEqual(sent, recv.map((buf: Buffer) => buf.toString()))
       })
 
       it("should deliver single multipart buffer message", async function() {
@@ -141,7 +141,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
           await this.sockA.send(msg)
         }
 
-        const received = []
+        const received: string[] = []
         for await (const msg of this.sockB) {
           received.push(msg.toString())
           if (received.length == messages.length) break
@@ -162,7 +162,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
           await this.sockA.send(msg)
         }
 
-        const received = []
+        const received: string[] = []
         for await (const msg of this.sockB) {
           received.push(msg.toString())
           if (received.length == messages.length) break
@@ -182,14 +182,15 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
           await this.sockA.send(msg)
         }
 
-        const received = []
+        const received: string[] = []
         for await (const msg of this.sockB) {
           received.push(msg.toString())
           if (received.length == messages.length) break
         }
 
-        /* Unify different serialization output across Node versions. */
+        /* Unify different output across Node/TypeScript versions. */
         received[1] = received[1].replace("function()", "function ()")
+        received[1] = received[1].replace("function () { }", "function () {}")
         assert.deepEqual(
           received,
           ["", "function () {}", "16.19", "true", "[object Object]", "[object Promise]"]
@@ -263,7 +264,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
           await this.sockB.bind(address)
           this.sockA.connect(address)
 
-          const send = async size => {
+          const send = async (size: number) => {
             const msg = Buffer.alloc(size)
             weak(msg, release)
             await this.sockA.send(msg)
@@ -279,7 +280,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
           await sent
           await new Promise(resolve => setTimeout(resolve, 5))
 
-          gc()
+          global.gc()
           assert.equal(released, proto == "inproc" ? 1 : 2)
         })
       }
@@ -289,7 +290,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
           const orig = Buffer.alloc(2048)
           await this.sockA.send(orig)
 
-          const echo = async sock => {
+          const echo = async (sock: zmq.Socket) => {
             const msg = await sock.receive()
             sock.send(msg)
           }
@@ -345,14 +346,14 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
     describe("during close", function() {
       it("should gracefully stop async iterator", async function() {
         process.nextTick(() => this.sockA.close())
-        for await (const msg of this.sockA) {}
+        for await (const _ of this.sockA) {}
       })
 
       it("should not mask other error type in async iterator", async function() {
         this.sockA = new zmq.Request
         process.nextTick(() => this.sockA.close())
         try {
-          for await (const msg of this.sockA) {}
+          for await (const _ of this.sockA) {}
           assert.ok(false)
         } catch (err) {
           assert.instanceOf(err, Error)

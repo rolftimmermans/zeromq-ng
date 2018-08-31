@@ -1,7 +1,8 @@
-const zmq = require("../..")
 const {assert} = require("chai")
 const {spawn} = require("child_process")
 
+/* This file is in JavaScript instead of TypeScript because most code is
+   being evaluated with toString() and executed in a sub-process. */
 describe("context process exit", function() {
   describe("with default context", function() {
     it("should occur when sockets are closed", async function() {
@@ -61,7 +62,7 @@ describe("context process exit", function() {
         }
 
         run()
-        gc()
+        global.gc()
       })
     })
 

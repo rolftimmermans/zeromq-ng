@@ -1,0 +1,13 @@
+{
+  "include": ["*"],
+  "compilerOptions": {
+    "target": "es5",
+    "module": "commonjs",
+    "lib": ["es2017", "esnext.asynciterable"],
+    "types": ["node", "mocha"],
+    "strict": true,
+    "downlevelIteration": true,
+    "noUnusedLocals": true,
+    "noEmit": true,
+  }
+}

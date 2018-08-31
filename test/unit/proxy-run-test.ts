@@ -1,7 +1,7 @@
-const zmq = require("../..")
-const semver = require("semver")
-const {assert} = require("chai")
-const {testProtos, uniqAddress} = require("./helpers")
+import * as zmq from "../.."
+import * as semver from "semver"
+import {assert} from "chai"
+import {testProtos, uniqAddress} from "./helpers"
 
 for (const proto of testProtos("tcp", "ipc", "inproc")) {
   describe(`proxy with ${proto} run`, function() {
@@ -15,7 +15,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
     afterEach(function() {
       this.proxy.frontEnd.close()
       this.proxy.backEnd.close()
-      gc()
+      global.gc()
     })
 
     describe("run", function() {

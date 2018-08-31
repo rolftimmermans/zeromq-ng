@@ -1,6 +1,6 @@
-const zmq = require("../..")
-const {assert} = require("chai")
-const {testProtos, uniqAddress} = require("./helpers")
+import * as zmq from "../.."
+import {assert} from "chai"
+import {testProtos, uniqAddress} from "./helpers"
 
 for (const proto of testProtos("tcp", "ipc", "inproc")) {
   describe(`socket with ${proto} close`, function() {
@@ -10,7 +10,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
 
     afterEach(function() {
       this.sock.close()
-      gc()
+      global.gc()
     })
 
     describe("with explicit call", function() {
@@ -104,13 +104,13 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
           }
 
           const task = async () => {
-            let context = new zmq.Context
+            let context: zmq.Context|undefined = new zmq.Context
             const socket = new zmq.Dealer({context, linger: 0})
 
             weak(context, release)
-            context = null
+            context = undefined
 
-            gc()
+            global.gc()
             socket.connect(uniqAddress(proto))
             await socket.send(Buffer.from("foo"))
             socket.close()
@@ -118,7 +118,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
           }
 
           await task()
-          gc()
+          global.gc()
           assert.equal(released, true)
         })
       }
@@ -133,17 +133,16 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
           const release = () => released = true
 
           const task = async () => {
-            let context = new zmq.Context
-            let socket = new zmq.Dealer({context, linger: 0})
+            let context: zmq.Context|undefined = new zmq.Context
+            new zmq.Dealer({context, linger: 0})
 
             weak(context, release)
-            context = null
-            socket = null
-            gc()
+            context = undefined
+            global.gc()
           }
 
           await task()
-          gc()
+          global.gc()
           assert.equal(released, true)
         })
       })

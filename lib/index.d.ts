@@ -356,10 +356,15 @@ type Event = "connect" | "connectDelay" | "connectRetry" | "listening" |
   "disconnect" | "stop" | "handshake" | "handshakeError" |
   "handshakeProtocolError" | "handshakeAuthError" | "unknown"
 
+export class ErrnoError extends Error {
+  code?: string
+  errno?: number
+}
+
 interface EventDetails {
   address?: string,
-  reconnectInterval?: number,
-  error?: Error,
+  interval?: number,
+  error?: ErrnoError,
 }
 
 export class Observer {

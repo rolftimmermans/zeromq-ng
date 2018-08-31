@@ -1,9 +1,9 @@
-const zmq = require("../..")
-const {assert} = require("chai")
+import * as zmq from "../.."
+import {assert} from "chai"
 
 describe("context options", function() {
   afterEach(function() {
-    gc()
+    global.gc()
   })
 
   it("should set and get bool socket option", function() {
@@ -23,7 +23,7 @@ describe("context options", function() {
   it("should throw for readonly option", function() {
     const context = new zmq.Context
     assert.throws(
-      () => context.maxSocketsLimit = 1,
+      () => (context as any).maxSocketsLimit = 1,
       TypeError,
       "Cannot set property maxSocketsLimit of #<Context> which has only a getter"
     )
@@ -32,7 +32,7 @@ describe("context options", function() {
   it("should throw for unknown option", function() {
     const context = new zmq.Context
     assert.throws(
-      () => context.doesNotExist = 1,
+      () => (context as any).doesNotExist = 1,
       TypeError,
       "Cannot add property doesNotExist, object is not extensible"
     )

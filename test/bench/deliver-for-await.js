@@ -6,7 +6,7 @@ suite.add(`deliver for await proto=${proto} msgsize=${msgsize} n=${n} zmq=ng`, O
     await server.bind(address)
     client.connect(address)
 
-    gc()
+    global.gc()
 
     const send = async () => {
       for (let i = 0; i < n; i++) {
@@ -23,12 +23,12 @@ suite.add(`deliver for await proto=${proto} msgsize=${msgsize} n=${n} zmq=ng`, O
 
     await Promise.all([send(), receive()])
 
-    gc()
+    global.gc()
 
     server.close()
     client.close()
 
-    gc()
+    global.gc()
 
     deferred.resolve()
   }

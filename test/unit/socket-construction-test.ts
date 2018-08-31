@@ -1,16 +1,15 @@
-const zmq = require("../..")
-const {assert} = require("chai")
-const {EventEmitter} = require("events")
+import * as zmq from "../.."
+import {assert} from "chai"
 
 describe("socket construction", function() {
   afterEach(function() {
-    gc()
+    global.gc()
   })
 
   describe("with constructor", function() {
     it("should throw if called as function", function() {
       assert.throws(
-        () => zmq.Socket(1, new zmq.Context),
+        () => (zmq.Socket as any)(1, new zmq.Context),
         TypeError,
         "Class constructors cannot be invoked without 'new'",
       )
@@ -18,7 +17,7 @@ describe("socket construction", function() {
 
     it("should throw with too few arguments", function() {
       assert.throws(
-        () => new zmq.Socket,
+        () => new (zmq.Socket as any),
         TypeError,
         "Socket type must be a number",
       )
@@ -26,7 +25,7 @@ describe("socket construction", function() {
 
     it("should throw with too many arguments", function() {
       assert.throws(
-        () => new zmq.Socket(1, new zmq.Context, 2),
+        () => new (zmq.Socket as any)(1, new zmq.Context, 2),
         TypeError,
         "Expected 2 arguments",
       )
@@ -34,7 +33,7 @@ describe("socket construction", function() {
 
     it("should throw with wrong options argument", function() {
       assert.throws(
-        () => new zmq.Socket(3, 1),
+        () => new (zmq.Socket as any)(3, 1),
         TypeError,
         "Options must be an object",
       )
@@ -42,7 +41,7 @@ describe("socket construction", function() {
 
     it("should throw with wrong type argument", function() {
       assert.throws(
-        () => new zmq.Socket("foo", new zmq.Context),
+        () => new (zmq.Socket as any)("foo", new zmq.Context),
         TypeError,
         "Socket type must be a number",
       )
@@ -50,7 +49,7 @@ describe("socket construction", function() {
 
     it("should throw with wrong type id", function() {
       try {
-        new zmq.Socket(37, new zmq.Context)
+        new (zmq.Socket as any)(37, new zmq.Context)
         assert.ok(false)
       } catch (err) {
         assert.instanceOf(err, Error)
@@ -62,7 +61,7 @@ describe("socket construction", function() {
 
     it("should throw with invalid context", function() {
       try {
-        new zmq.Socket(1, {context: {}})
+        new (zmq.Socket as any)(1, {context: {}})
         assert.ok(false)
       } catch (err) {
         assert.instanceOf(err, Error)
@@ -91,7 +90,7 @@ describe("socket construction", function() {
   describe("with child constructor", function() {
     it("should throw if called as function", function() {
       assert.throws(
-        () => zmq.Dealer(),
+        () => (zmq.Dealer as any)(),
         TypeError,
         "Class constructor Dealer cannot be invoked without 'new'",
       )
@@ -117,7 +116,7 @@ describe("socket construction", function() {
 
     it("should throw with invalid option value", function() {
       assert.throws(
-        () => new zmq.Dealer({recoveryInterval: "hello"}),
+        () => new (zmq.Dealer as any)({recoveryInterval: "hello"}),
         TypeError,
         "Option value must be a number"
       )
@@ -125,7 +124,7 @@ describe("socket construction", function() {
 
     it("should throw with readonly option", function() {
       assert.throws(
-        () => new zmq.Dealer({mechanism: 1}),
+        () => new (zmq.Dealer as any)({mechanism: 1}),
         TypeError,
         "Cannot set property mechanism of #<Socket> which has only a getter"
       )
@@ -133,7 +132,7 @@ describe("socket construction", function() {
 
     it("should throw with unknown option", function() {
       assert.throws(
-        () => new zmq.Dealer({doesNotExist: 1}),
+        () => new (zmq.Dealer as any)({doesNotExist: 1}),
         TypeError,
         "Cannot add property doesNotExist, object is not extensible"
       )

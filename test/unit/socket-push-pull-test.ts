@@ -1,6 +1,6 @@
-const zmq = require("../..")
-const {assert} = require("chai")
-const {testProtos, uniqAddress} = require("./helpers")
+import * as zmq from "../.."
+import {assert} from "chai"
+import {testProtos, uniqAddress} from "./helpers"
 
 for (const proto of testProtos("tcp", "ipc", "inproc")) {
   describe(`socket with ${proto} push/pull`, function() {
@@ -12,7 +12,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
     afterEach(function() {
       this.push.close()
       this.pull.close()
-      gc()
+      global.gc()
     })
 
     describe("send", function() {
@@ -25,7 +25,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
 
         const address = uniqAddress(proto)
         const messages = ["foo", "bar", "baz", "qux"]
-        const received = []
+        const received: string[] = []
 
         await this.pull.bind(address)
         await this.push.connect(address)
@@ -47,7 +47,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
         it("should deliver messages with immediate", async function() {
           const address = uniqAddress(proto)
           const messages = ["foo", "bar", "baz", "qux"]
-          const received = []
+          const received: string[] = []
 
           await this.pull.bind(address)
 

@@ -4,13 +4,13 @@ suite.add(`queue proto=${proto} msgsize=${msgsize} n=${n} zmq=cur`, Object.assig
     client.linger = 0
     client.connect(address)
 
-    gc()
+    global.gc()
 
     for (let i = 0; i < n; i++) {
       client.send(Buffer.alloc(msgsize))
     }
 
-    gc()
+    global.gc()
 
     client.close()
 
@@ -25,13 +25,13 @@ suite.add(`queue proto=${proto} msgsize=${msgsize} n=${n} zmq=ng`, Object.assign
     client.sendHighWaterMark = n * 2
     client.connect(address)
 
-    gc()
+    global.gc()
 
     for (let i = 0; i < n; i++) {
       await client.send(Buffer.alloc(msgsize))
     }
 
-    gc()
+    global.gc()
 
     client.close()
 

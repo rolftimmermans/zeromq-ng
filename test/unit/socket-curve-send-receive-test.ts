@@ -1,6 +1,6 @@
-const zmq = require("../..")
-const {assert} = require("chai")
-const {testProtos, uniqAddress} = require("./helpers")
+import * as zmq from "../.."
+import {assert} from "chai"
+import {testProtos, uniqAddress} from "./helpers"
 
 for (const proto of testProtos("tcp", "ipc", "inproc")) {
   describe(`socket with ${proto} curve send/receive`, function() {
@@ -28,7 +28,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
     afterEach(function() {
       this.sockA.close()
       this.sockB.close()
-      gc()
+      global.gc()
     })
 
     describe("when connected", function() {
@@ -45,7 +45,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
         await this.sockA.send(sent)
 
         const recv = await this.sockB.receive()
-        assert.deepEqual([sent], recv.map(buf => buf.toString()))
+        assert.deepEqual([sent], recv.map((buf: Buffer) => buf.toString()))
       })
     })
   })

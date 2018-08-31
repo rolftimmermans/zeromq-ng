@@ -1,11 +1,10 @@
-const fs = require("fs")
-const zmq = require("../..")
-const semver = require("semver")
+import * as zmq from "../.."
+import * as semver from "semver"
 
 /* Windows cannot bind on a ports just above 1014; start higher to be safe. */
 let seq = 5000
 
-function uniqAddress(proto) {
+export function uniqAddress(proto: string) {
   const id = seq++
   switch (proto) {
   case "ipc":
@@ -17,7 +16,7 @@ function uniqAddress(proto) {
   }
 }
 
-function testProtos(...requested) {
+export function testProtos(...requested: string[]) {
   const set = new Set(requested)
 
   /* Do not test with ipc if unsupported. */
@@ -26,9 +25,7 @@ function testProtos(...requested) {
   /* Only test inproc with version 4.2+, earlier versions are unreliable. */
   if (semver.satisfies(zmq.version, "< 4.2")) set.delete("inproc")
 
-  if (set.empty) console.error("Warning: test protocol set is empty")
+  if (!set.size) console.error("Warning: test protocol set is empty")
 
   return [...set]
 }
-
-module.exports = {testProtos, uniqAddress}

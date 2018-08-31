@@ -1,6 +1,6 @@
-const zmq = require("../..")
-const {assert} = require("chai")
-const {testProtos, uniqAddress} = require("./helpers")
+import * as zmq from "../.."
+import {assert} from "chai"
+import {testProtos, uniqAddress} from "./helpers"
 
 for (const proto of testProtos("tcp", "ipc", "inproc")) {
   describe(`socket with ${proto} req/rep`, function() {
@@ -12,7 +12,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
     afterEach(function() {
       this.req.close()
       this.rep.close()
-      gc()
+      global.gc()
     })
 
     describe("send", function() {
@@ -29,7 +29,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
 
         const address = uniqAddress(proto)
         const messages = ["foo", "bar", "baz", "qux"]
-        const received = []
+        const received: string[] = []
 
         await this.rep.bind(address)
         await this.req.connect(address)
@@ -63,7 +63,6 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
          */
 
         const address = uniqAddress(proto)
-        const received = []
 
         /* FIXME: Also trigger EFSM without setting timeout. */
         this.req.sendTimeout = 2

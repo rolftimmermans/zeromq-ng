@@ -1,4 +1,4 @@
-if (process.versions["electron"] === undefined && !process.env.NO_COMPAT_TEST) {
+if (process.env.INCLUDE_COMPAT_TESTS) {
   const zmq = require("./load")
   const {assert} = require("chai")
   const {testProtos, uniqAddress} = require("../helpers")
@@ -13,7 +13,7 @@ if (process.versions["electron"] === undefined && !process.env.NO_COMPAT_TEST) {
          * We create 2 dealer sockets.
          * One of them (`a`) is not referenced explicitly after the main loop
          * finishes so it"s a pretender for garbage collection.
-         * This test performs gc() explicitly and then tries to send a message
+         * This test performs global.gc() explicitly and then tries to send a message
          * to a dealer socket that could be destroyed and collected.
          * If a message is delivered, than everything is ok. Otherwise the guard
          * timeout will make the test fail.
@@ -39,7 +39,7 @@ if (process.versions["electron"] === undefined && !process.env.NO_COMPAT_TEST) {
         })
 
         let interval = setInterval(function() {
-          gc()
+          global.gc()
           if (bound) {
             clearInterval(interval)
             sockB.connect(address)

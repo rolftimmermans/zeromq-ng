@@ -1,7 +1,6 @@
-const zmq = require("../..")
-const semver = require("semver")
-const {assert} = require("chai")
-const {EventEmitter} = require("events")
+import * as zmq from "../.."
+import * as semver from "semver"
+import {assert} from "chai"
 
 describe("proxy construction", function() {
   beforeEach(function() {
@@ -10,13 +9,13 @@ describe("proxy construction", function() {
   })
 
   afterEach(function() {
-    gc()
+    global.gc()
   })
 
   describe("with constructor", function() {
     it("should throw if called as function", function() {
       assert.throws(
-        () => zmq.Proxy(),
+        () => (zmq.Proxy as any)(),
         TypeError,
         "Class constructors cannot be invoked without 'new'",
       )
@@ -24,7 +23,7 @@ describe("proxy construction", function() {
 
     it("should throw with too few arguments", function() {
       assert.throws(
-        () => new zmq.Proxy,
+        () => new (zmq.Proxy as any),
         TypeError,
         "Front-end must be a socket object",
       )
@@ -32,7 +31,7 @@ describe("proxy construction", function() {
 
     it("should throw with too many arguments", function() {
       assert.throws(
-        () => new zmq.Proxy(new zmq.Dealer, new zmq.Dealer, new zmq.Dealer),
+        () => new (zmq.Proxy as any)(new zmq.Dealer, new zmq.Dealer, new zmq.Dealer),
         TypeError,
         "Expected 2 arguments",
       )
@@ -40,7 +39,7 @@ describe("proxy construction", function() {
 
     it("should throw with invalid socket", function() {
       try {
-        new zmq.Proxy({}, {})
+        new (zmq.Proxy as any)({}, {})
         assert.ok(false)
       } catch (err) {
         assert.instanceOf(err, Error)

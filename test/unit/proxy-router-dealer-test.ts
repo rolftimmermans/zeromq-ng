@@ -1,7 +1,7 @@
-const zmq = require("../..")
-const semver = require("semver")
-const {assert} = require("chai")
-const {testProtos, uniqAddress} = require("./helpers")
+import * as zmq from "../.."
+import * as semver from "semver"
+import {assert} from "chai"
+import {testProtos, uniqAddress} from "./helpers"
 
 for (const proto of testProtos("tcp", "ipc", "inproc")) {
   describe(`proxy with ${proto} router/dealer`, function() {
@@ -25,7 +25,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
 
       this.req.close()
       this.rep.close()
-      gc()
+      global.gc()
     })
 
     describe("run", function() {
@@ -48,7 +48,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
         const done = this.proxy.run()
 
         const messages = ["foo", "bar", "baz", "qux"]
-        const received = []
+        const received: string[] = []
 
         await this.req.connect(this.frontAddress)
         await this.rep.connect(this.backAddress)

@@ -1,6 +1,6 @@
-const zmq = require("../..")
-const semver = require("semver")
-const {assert} = require("chai")
+import * as zmq from "../.."
+import * as semver from "semver"
+import {assert} from "chai"
 
 describe("zmq", function() {
   describe("exports", function() {

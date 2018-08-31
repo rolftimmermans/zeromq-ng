@@ -1,15 +1,14 @@
-const zmq = require("../..")
-const semver = require("semver")
-const {assert} = require("chai")
+import * as zmq from "../.."
+import {assert} from "chai"
 
 describe("context construction", function() {
   afterEach(function() {
-    gc()
+    global.gc()
   })
 
   it("should throw if called as function", function() {
     assert.throws(
-      () => zmq.Context(),
+      () => (zmq.Context as any)(),
       TypeError,
       "Class constructors cannot be invoked without 'new'"
     )
@@ -17,7 +16,7 @@ describe("context construction", function() {
 
   it("should throw with wrong options argument", function() {
     assert.throws(
-      () => new zmq.Context(1),
+      () => new (zmq.Context as any)(1),
       TypeError,
       "Options must be an object"
     )
@@ -25,7 +24,7 @@ describe("context construction", function() {
 
   it("should throw with too many arguments", function() {
     assert.throws(
-      () => new zmq.Context({}, 2),
+      () => new (zmq.Context as any)({}, 2),
       TypeError,
       "Expected 1 argument"
     )
@@ -38,7 +37,7 @@ describe("context construction", function() {
 
   it("should throw with invalid option value", function() {
     assert.throws(
-      () => new zmq.Context({ioThreads: "hello"}),
+      () => new (zmq.Context as any)({ioThreads: "hello"}),
       TypeError,
       "Option value must be a number"
     )
@@ -46,7 +45,7 @@ describe("context construction", function() {
 
   it("should throw with readonly option", function() {
     assert.throws(
-      () => new zmq.Context({maxSocketsLimit: 1}),
+      () => new (zmq.Context as any)({maxSocketsLimit: 1}),
       TypeError,
       "Cannot set property maxSocketsLimit of #<Context> which has only a getter"
     )
@@ -54,7 +53,7 @@ describe("context construction", function() {
 
   it("should throw with unknown option", function() {
     assert.throws(
-      () => new zmq.Context({doesNotExist: 1}),
+      () => new (zmq.Context as any)({doesNotExist: 1}),
       TypeError,
       "Cannot add property doesNotExist, object is not extensible"
     )

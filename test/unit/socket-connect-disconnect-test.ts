@@ -1,6 +1,6 @@
-const zmq = require("../..")
-const {assert} = require("chai")
-const {testProtos, uniqAddress} = require("./helpers")
+import * as zmq from "../.."
+import {assert} from "chai"
+import {testProtos, uniqAddress} from "./helpers"
 
 for (const proto of testProtos("tcp", "ipc", "inproc")) {
   describe(`socket with ${proto} connect/disconnect`, function() {
@@ -10,7 +10,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
 
     afterEach(function() {
       this.sock.close()
-      gc()
+      global.gc()
     })
 
     describe("connect", function() {

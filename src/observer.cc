@@ -16,22 +16,21 @@ auto constexpr make_array(N&&... args) -> std::array<T, sizeof...(args)> {
 }
 
 /* Events must be in order corresponding to the value of the #define value. */
-static auto events = make_array<const char*>(
-    "connect", // ZMQ_EVENT_CONNECTED
-    "connect:delay", // ZMQ_EVENT_CONNECT_DELAYED
-    "connect:retry", // ZMQ_EVENT_CONNECT_RETRIED
-    "bind", // ZMQ_EVENT_LISTENING
-    "bind:error", // ZMQ_EVENT_BIND_FAILED
-    "accept", // ZMQ_EVENT_ACCEPTED
-    "accept:error", // ZMQ_EVENT_ACCEPT_FAILED
-    "close", // ZMQ_EVENT_CLOSED
-    "close:error", // ZMQ_EVENT_CLOSE_FAILED
-    "disconnect", // ZMQ_EVENT_DISCONNECTED
-    "end", // ZMQ_EVENT_MONITOR_STOPPED
-    "handshake:error:other", // ZMQ_EVENT_HANDSHAKE_FAILED_NO_DETAIL
-    "handshake", // ZMQ_EVENT_HANDSHAKE_SUCCEEDED
-    "handshake:error:protocol", // ZMQ_EVENT_HANDSHAKE_FAILED_PROTOCOL
-    "handshake:error:auth", // ZMQ_EVENT_HANDSHAKE_FAILED_AUTH
+static auto events = make_array<const char*>("connect",  // ZMQ_EVENT_CONNECTED
+    "connect:delay",  // ZMQ_EVENT_CONNECT_DELAYED
+    "connect:retry",  // ZMQ_EVENT_CONNECT_RETRIED
+    "bind",  // ZMQ_EVENT_LISTENING
+    "bind:error",  // ZMQ_EVENT_BIND_FAILED
+    "accept",  // ZMQ_EVENT_ACCEPTED
+    "accept:error",  // ZMQ_EVENT_ACCEPT_FAILED
+    "close",  // ZMQ_EVENT_CLOSED
+    "close:error",  // ZMQ_EVENT_CLOSE_FAILED
+    "disconnect",  // ZMQ_EVENT_DISCONNECTED
+    "end",  // ZMQ_EVENT_MONITOR_STOPPED
+    "handshake:error:other",  // ZMQ_EVENT_HANDSHAKE_FAILED_NO_DETAIL
+    "handshake",  // ZMQ_EVENT_HANDSHAKE_SUCCEEDED
+    "handshake:error:protocol",  // ZMQ_EVENT_HANDSHAKE_FAILED_PROTOCOL
+    "handshake:error:auth",  // ZMQ_EVENT_HANDSHAKE_FAILED_AUTH
     /* ^-- Insert new events here. */
     "unknown");
 
