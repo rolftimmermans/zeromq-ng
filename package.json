@@ -24,9 +24,6 @@
     "node-addon-api": "rolftimmermans/node-addon-api#deferred-env",
     "node-pre-gyp": "^0.11"
   },
-  "bundledDependencies": [
-    "node-pre-gyp"
-  ],
   "devDependencies": {
     "@types/chai": ">= 4.1",
     "@types/mocha": ">= 5.2",

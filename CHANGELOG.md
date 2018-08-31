@@ -1,3 +1,11 @@
+### v5.0.0-beta.15
+
+* The node-pre-gyp dependency is now no longer bundled.
+
+* Improvements and bugfixes to TypeScript typings.
+
+* Move test suite to TypeScript.
+
 ### v5.0.0-beta.14
 
 * BREAKING: Renamed socket events to be more predictable and consistent. All events and the associated details are now documented.
