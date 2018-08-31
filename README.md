@@ -848,9 +848,6 @@ const events = new zmq.Observer(socket)
 ```
 
 
-### observer events
-
-
 ### observer.on()
 
 Converts this observer into event emitter mode and attaches the event listener.
@@ -926,8 +923,6 @@ The following socket events can be generated. This list may be different dependi
 Note that the **error** event is avoided by design, since this has a [special behaviour](https://nodejs.org/api/events.html#events_error_events) in Node.js causing an exception to be thrown if it is unhandled.
 
 Other error names are adjusted to be as close to possible as other [networking related](https://nodejs.org/api/net.html) event names in Node.js and/or to the corresponding ZeroMQ.js method call. Events (including any errors) that correspond to a specific operation are namespaced with a colon `:`, e.g. `bind:error` or `connect:retry`.
-
-Some events will also include
 
 * **accept** – ZMQ_EVENT_ACCEPTED <br/>
   The socket has accepted a connection from a remote peer.
