@@ -6,8 +6,10 @@ This is an example broker implementation that partially implements [7/MDP](https
 
 To run this example, install the example project depedencies and run the majordomo example script with `yarn`:
 
+```
 > yarn install
 > yarn majordomo
+```
 
 ## Expected behaviour
 

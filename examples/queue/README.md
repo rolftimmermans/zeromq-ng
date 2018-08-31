@@ -8,8 +8,10 @@ This example can serve as the basis for a queue that can be used in a broker to 
 
 To run this example, install the example project depedencies and run the majordomo example script with `yarn`:
 
+```
 > yarn install
 > yarn queue
+```
 
 ## Expected behaviour
 
