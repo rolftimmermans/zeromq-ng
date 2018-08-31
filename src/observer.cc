@@ -15,52 +15,24 @@ auto constexpr make_array(N&&... args) -> std::array<T, sizeof...(args)> {
     return {{std::forward<N>(args)...}};
 }
 
+/* Events must be in order corresponding to the value of the #define value. */
 static auto events = make_array<const char*>(
-#ifdef ZMQ_EVENT_CONNECTED
-    "connect",
-#endif
-#ifdef ZMQ_EVENT_CONNECT_DELAYED
-    "connect:delay",
-#endif
-#ifdef ZMQ_EVENT_CONNECT_RETRIED
-    "connect:retry",
-#endif
-#ifdef ZMQ_EVENT_LISTENING
-    "bind",
-#endif
-#ifdef ZMQ_EVENT_BIND_FAILED
-    "bind:error",
-#endif
-#ifdef ZMQ_EVENT_ACCEPTED
-    "accept",
-#endif
-#ifdef ZMQ_EVENT_ACCEPT_FAILED
-    "accept:error",
-#endif
-#ifdef ZMQ_EVENT_CLOSED
-    "close",
-#endif
-#ifdef ZMQ_EVENT_CLOSE_FAILED
-    "close:error",
-#endif
-#ifdef ZMQ_EVENT_DISCONNECTED
-    "disconnect",
-#endif
-#ifdef ZMQ_EVENT_MONITOR_STOPPED
-    "end",
-#endif
-#ifdef ZMQ_EVENT_HANDSHAKE_FAILED_NO_DETAIL
-    "handshake:error:other",
-#endif
-#ifdef ZMQ_EVENT_HANDSHAKE_SUCCEEDED
-    "handshake",
-#endif
-#ifdef ZMQ_EVENT_HANDSHAKE_FAILED_PROTOCOL
-    "handshake:error:protocol",
-#endif
-#ifdef ZMQ_EVENT_HANDSHAKE_FAILED_AUTH
-    "handshake:error:auth",
-#endif
+    "connect", // ZMQ_EVENT_CONNECTED
+    "connect:delay", // ZMQ_EVENT_CONNECT_DELAYED
+    "connect:retry", // ZMQ_EVENT_CONNECT_RETRIED
+    "bind", // ZMQ_EVENT_LISTENING
+    "bind:error", // ZMQ_EVENT_BIND_FAILED
+    "accept", // ZMQ_EVENT_ACCEPTED
+    "accept:error", // ZMQ_EVENT_ACCEPT_FAILED
+    "close", // ZMQ_EVENT_CLOSED
+    "close:error", // ZMQ_EVENT_CLOSE_FAILED
+    "disconnect", // ZMQ_EVENT_DISCONNECTED
+    "end", // ZMQ_EVENT_MONITOR_STOPPED
+    "handshake:error:other", // ZMQ_EVENT_HANDSHAKE_FAILED_NO_DETAIL
+    "handshake", // ZMQ_EVENT_HANDSHAKE_SUCCEEDED
+    "handshake:error:protocol", // ZMQ_EVENT_HANDSHAKE_FAILED_PROTOCOL
+    "handshake:error:auth", // ZMQ_EVENT_HANDSHAKE_FAILED_AUTH
+    /* ^-- Insert new events here. */
     "unknown");
 
 /* https://stackoverflow.com/questions/757059/position-of-least-significant-bit-that-is-set
