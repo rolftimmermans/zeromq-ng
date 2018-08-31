@@ -36,9 +36,6 @@ fi
 
 mkdir -p "${PATH_PREFIX}" && cd "${PATH_PREFIX}"
 
-echo ${ARTIFACT}
-echo ${SRC_DIR}
-
 if [ -f "${ARTIFACT}" ]; then
   echo "Found previously built libzmq; skipping rebuild..."
 else
