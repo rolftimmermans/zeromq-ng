@@ -4,6 +4,8 @@
 
 * Improvements and bugfixes to TypeScript typings.
 
+* Bugfix in async iterator.
+
 * Move test suite to TypeScript.
 
 ### v5.0.0-beta.14
