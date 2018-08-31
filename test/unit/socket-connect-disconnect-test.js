@@ -39,6 +39,12 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
           assert.equal(err.address, "foo://bar")
         }
       })
+
+      it("should allow setting routing id on router", async function() {
+        this.sock = new zmq.Router({mandatory: true})
+        await this.sock.connect(uniqAddress(proto), {routingId: "remoteId"})
+        await this.sock.send(["remoteId", "hi"])
+      })
     })
 
     describe("disconnect", function() {

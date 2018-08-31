@@ -347,6 +347,20 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
         process.nextTick(() => this.sockA.close())
         for await (const msg of this.sockA) {}
       })
+
+      it("should not mask other error type in async iterator", async function() {
+        this.sockA = new zmq.Request
+        process.nextTick(() => this.sockA.close())
+        try {
+          for await (const msg of this.sockA) {}
+          assert.ok(false)
+        } catch (err) {
+          assert.instanceOf(err, Error)
+          assert.equal(err.message, "Operation cannot be accomplished in current state")
+          assert.equal(err.code, "EFSM")
+          assert.typeOf(err.errno, "number")
+        }
+      })
     })
   })
 }
