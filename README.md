@@ -364,15 +364,21 @@ A call to `send()` is guaranteed to return with a resolved promise immediately i
 
 Only **one** asynchronously blocking call to `send()` may be executed simultaneously. If you call `send()` again on a socket that is in the mute state it will return a rejected promise with `EAGAIN`.
 
-The reason for disallowing multiple `send()` calls simultaneously is that it would create an implicit queue of unsendable outgoing messages. This would circumvent any high water mark or related settings. Such a hypothetical implementation could even exhaust all system memory and cause the Node.js process to abort.
+The reason for disallowing multiple `send()` calls simultaneously is that it could create an implicit queue of unsendable outgoing messages. This would circumvent the socket's high water mark. Such an implementation could even exhaust all system memory and cause the Node.js process to abort.
 
-If your application requires sending messages on the same socket in different code paths, then you can choose from a few different strategies:
+For most application you should not notice this implementation detail. Only in rare occasions will a call to `send()` that does not resolve immediately be undesired. Here are some common scenarios:
 
-* **Send directly** on the socket anyway, and deal with `EAGAIN` errors due to the socket being blocked by another send operation appropriately.
+* If you wish to **send a message**, use `await send(...)`. ZeroMQ socket types have been carefully designed to give you the correct blocking behaviour on the chosen socket type in almost all cases:
 
-* **Set send timeout to zero** and be prepared to deal with `EAGAIN` errors due to the socket not being able to queue any messages.
+  * If sending is not possible, it is often better to wait than to continue as if nothing happened.
 
-* **Queue messages** manually in a JavaScript array-based queue (up to a maximum) and send messages from the queue in a single loop.
+    For example, on a `Request` socket, you can only receive a reply once a message has been sent; so waiting until a message could be queued before continuing with the rest of the program (likely to read from the socket) is required.
+
+  * Certain socket types (such as `Router`) will always allow queueing messages and `await send(...)` won't delay any code that comes after. This makes sense for routers, since typically you don't want a single send operation to stop the handling of other incoming or outgoing messages.
+
+* If you wish to send on an occasionally **blocking** socket (for example on a `Router` with the `mandatory` option set, or on a `Dealer`) and you're 100% certain that **dropping a message is better than blocking**, then you can set the `sendTimeout` option to `0` to effectively force `send()` to always resolve immediately. Be prepared to catch or log exceptions if sending a message is not possible right now.
+
+* If you wish to send on a socket and **messages should be queued before they are dropped**, you should implement a [simple queue](examples/queue/queue.ts) in JavaScript. Such a queue is not provided by this library because most real world applications need to deal with undeliverable messages in more complex ways – for example, they might need to reply with a status message; or first retry delivery a certain number of times before giving up.
 
 **Note:** Due to the nature of Node.js and to avoid blocking the main thread, this method always sends messages with the `ZMQ_DONTWAIT` flag. It polls asynchronously if sending is not currently possible. This means that all functionality related to timeouts and blocking behaviour is reimplemented in the Node.js bindings. Any differences in behaviour with the native ZMQ library is considered a bug.
 

@@ -8,6 +8,7 @@
     "ts-node": ">= 0"
   },
   "scripts": {
-    "majordomo": "ts-node majordomo"
+    "majordomo": "ts-node majordomo",
+    "queue": "ts-node queue"
   }
 }
