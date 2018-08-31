@@ -433,6 +433,8 @@ After this method is called, it is no longer possible to call any other methods 
 
 Sockets that go out of scope and have no `receive()` or `send()` operations in progress will automatically be closed. Therefore it is not necessary in most applications to call `close()` manually.
 
+Calling this method on a socket that is already closed is a no-op.
+
 * **Arguments** <br/>
   (none)
 
