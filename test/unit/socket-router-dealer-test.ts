@@ -5,16 +5,20 @@ import {testProtos, uniqAddress} from "./helpers"
 
 for (const proto of testProtos("tcp", "ipc", "inproc")) {
   describe(`socket with ${proto} router/dealer`, function() {
+    let router: zmq.Router
+    let dealerA: zmq.Dealer
+    let dealerB: zmq.Dealer
+
     beforeEach(function() {
-      this.router = new zmq.Router
-      this.dealerA = new zmq.Dealer
-      this.dealerB = new zmq.Dealer
+      router = new zmq.Router
+      dealerA = new zmq.Dealer
+      dealerB = new zmq.Dealer
     })
 
     afterEach(function() {
-      this.router.close()
-      this.dealerA.close()
-      this.dealerB.close()
+      router.close()
+      dealerA.close()
+      dealerB.close()
       global.gc()
     })
 
@@ -25,33 +29,33 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
         const receivedA: string[] = []
         const receivedB: string[] = []
 
-        await this.router.bind(address)
-        this.dealerA.connect(address)
-        this.dealerB.connect(address)
+        await router.bind(address)
+        dealerA.connect(address)
+        dealerB.connect(address)
 
         const echo = async () => {
-          for await (const [sender, msg] of this.router) {
-            await this.router.send([sender, msg])
+          for await (const [sender, msg] of router) {
+            await router.send([sender, msg])
           }
         }
 
         const send = async () => {
           for (const msg of messages) {
-            await this.dealerA.send(msg)
-            await this.dealerB.send(msg)
+            await dealerA.send(msg)
+            await dealerB.send(msg)
           }
 
-          for await (const msg of this.dealerA) {
+          for await (const msg of dealerA) {
             receivedA.push(msg.toString())
             if (receivedA.length == messages.length) break
           }
 
-          for await (const msg of this.dealerB) {
+          for await (const msg of dealerB) {
             receivedB.push(msg.toString())
             if (receivedB.length == messages.length) break
           }
 
-          this.router.close()
+          router.close()
         }
 
         await Promise.all([echo(), send()])
@@ -62,10 +66,10 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
       /* This only works reliably with ZMQ 4.2.3+ */
       if (semver.satisfies(zmq.version, ">= 4.2.3")) {
         it("should fail unroutable message if mandatory", async function() {
-          this.router.mandatory = true
-          this.router.sendTimeout = 0
+          router.mandatory = true
+          router.sendTimeout = 0
           try {
-            await this.router.send(["fooId", "foo"])
+            await router.send(["fooId", "foo"])
             assert.ok(false)
           } catch (err) {
             assert.instanceOf(err, Error)

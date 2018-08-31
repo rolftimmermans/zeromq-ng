@@ -4,14 +4,17 @@ import {testProtos, uniqAddress} from "./helpers"
 
 for (const proto of testProtos("tcp", "ipc", "inproc")) {
   describe(`socket with ${proto} pair/pair`, function() {
+    let sockA: zmq.Dealer
+    let sockB: zmq.Dealer
+
     beforeEach(function() {
-      this.sockA = new zmq.Dealer
-      this.sockB = new zmq.Dealer
+      sockA = new zmq.Dealer
+      sockB = new zmq.Dealer
     })
 
     afterEach(function() {
-      this.sockA.close()
-      this.sockB.close()
+      sockA.close()
+      sockB.close()
       global.gc()
     })
 
@@ -31,26 +34,26 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
         const messages = ["foo", "bar", "baz", "qux"]
         const received: string[] = []
 
-        await this.sockA.bind(address)
-        await this.sockB.connect(address)
+        await sockA.bind(address)
+        await sockB.connect(address)
 
         const echo = async () => {
-          for await (const msg of this.sockB) {
-            await this.sockB.send(msg)
+          for await (const msg of sockB) {
+            await sockB.send(msg)
           }
         }
 
         const send = async () => {
           for (const msg of messages) {
-            await this.sockA.send(msg)
+            await sockA.send(msg)
           }
 
-          for await (const msg of this.sockA) {
+          for await (const msg of sockA) {
             received.push(msg.toString())
             if (received.length == messages.length) break
           }
 
-          this.sockB.close()
+          sockB.close()
         }
 
         await Promise.all([echo(), send()])

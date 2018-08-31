@@ -4,14 +4,17 @@ import {testProtos, uniqAddress} from "./helpers"
 
 for (const proto of testProtos("tcp", "ipc", "inproc")) {
   describe(`socket with ${proto} pub/sub`, function() {
+    let pub: zmq.Publisher
+    let sub: zmq.Subscriber
+    
     beforeEach(function() {
-      this.pub = new zmq.Publisher
-      this.sub = new zmq.Subscriber
+      pub = new zmq.Publisher
+      sub = new zmq.Subscriber
     })
 
     afterEach(function() {
-      this.pub.close()
-      this.sub.close()
+      pub.close()
+      sub.close()
       global.gc()
     })
 
@@ -28,21 +31,21 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
         const received: string[] = []
 
         /* Subscribe to all. */
-        this.sub.subscribe()
+        sub.subscribe()
 
-        await this.sub.bind(address)
-        await this.pub.connect(address)
+        await sub.bind(address)
+        await pub.connect(address)
 
         const send = async () => {
           /* Wait briefly before publishing to avoid slow joiner syndrome. */
           await new Promise(resolve => setTimeout(resolve, 25))
           for (const msg of messages) {
-            await this.pub.send(msg)
+            await pub.send(msg)
           }
         }
 
         const receive = async () => {
-          for await (const [msg] of this.sub) {
+          for await (const [msg] of sub) {
             assert.instanceOf(msg, Buffer)
             received.push(msg.toString())
             if (received.length == messages.length) break
@@ -66,22 +69,22 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
         const messages = ["foo", "bar", "baz", "qux"]
         const received: string[] = []
 
-        this.sub.subscribe("fo", "ba", "qu")
-        this.sub.unsubscribe("fo", "qu")
+        sub.subscribe("fo", "ba", "qu")
+        sub.unsubscribe("fo", "qu")
 
-        await this.sub.bind(address)
-        await this.pub.connect(address)
+        await sub.bind(address)
+        await pub.connect(address)
 
         const send = async () => {
           /* Wait briefly before publishing to avoid slow joiner syndrome. */
           await new Promise(resolve => setTimeout(resolve, 25))
           for (const msg of messages) {
-            await this.pub.send(msg)
+            await pub.send(msg)
           }
         }
 
         const receive = async () => {
-          for await (const [msg] of this.sub) {
+          for await (const [msg] of sub) {
             assert.instanceOf(msg, Buffer)
             received.push(msg.toString())
             if (received.length == 2) break

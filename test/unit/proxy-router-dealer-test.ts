@@ -5,26 +5,34 @@ import {testProtos, uniqAddress} from "./helpers"
 
 for (const proto of testProtos("tcp", "ipc", "inproc")) {
   describe(`proxy with ${proto} router/dealer`, function() {
+    let proxy: zmq.Proxy
+
+    let frontAddress: string
+    let backAddress: string
+
+    let req: zmq.Request
+    let rep: zmq.Reply
+
     beforeEach(async function() {
       /* ZMQ < 4.0.5 has no steerable proxy support. */
       if (semver.satisfies(zmq.version, "< 4.0.5")) this.skip()
 
-      this.proxy = new zmq.Proxy(new zmq.Router, new zmq.Dealer)
+      proxy = new zmq.Proxy(new zmq.Router, new zmq.Dealer)
 
-      this.frontAddress = uniqAddress(proto)
-      this.backAddress = uniqAddress(proto)
+      frontAddress = uniqAddress(proto)
+      backAddress = uniqAddress(proto)
 
-      this.req = new zmq.Request
-      this.rep = new zmq.Reply
+      req = new zmq.Request
+      rep = new zmq.Reply
     })
 
     afterEach(function() {
       /* Closing proxy sockets is only necessary if run() fails. */
-      this.proxy.frontEnd.close()
-      this.proxy.backEnd.close()
+      proxy.frontEnd.close()
+      proxy.backEnd.close()
 
-      this.req.close()
-      this.rep.close()
+      req.close()
+      rep.close()
       global.gc()
     })
 
@@ -42,44 +50,44 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
                 <- qux <-                     <- qux <-
          */
 
-        await this.proxy.frontEnd.bind(this.frontAddress)
-        await this.proxy.backEnd.bind(this.backAddress)
+        await proxy.frontEnd.bind(frontAddress)
+        await proxy.backEnd.bind(backAddress)
 
-        const done = this.proxy.run()
+        const done = proxy.run()
 
         const messages = ["foo", "bar", "baz", "qux"]
         const received: string[] = []
 
-        await this.req.connect(this.frontAddress)
-        await this.rep.connect(this.backAddress)
+        await req.connect(frontAddress)
+        await rep.connect(backAddress)
 
         const echo = async () => {
-          for await (const msg of this.rep) {
-            await this.rep.send(msg)
+          for await (const msg of rep) {
+            await rep.send(msg)
           }
         }
 
         const send = async () => {
-          for (const req of messages) {
+          for (const msg of messages) {
             if (received.length == 2) {
-              this.proxy.pause()
-              this.proxy.resume()
+              proxy.pause()
+              proxy.resume()
             }
 
-            await this.req.send(Buffer.from(req))
+            await req.send(Buffer.from(msg))
 
-            const [rep] = await this.req.receive()
+            const [rep] = await req.receive()
             received.push(rep.toString())
             if (received.length == messages.length) break
           }
 
-          this.rep.close()
+          rep.close()
         }
 
         await Promise.all([echo(), send()])
         assert.deepEqual(received, messages)
 
-        this.proxy.terminate()
+        proxy.terminate()
         await done
       })
     })

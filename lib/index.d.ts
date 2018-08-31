@@ -25,7 +25,7 @@ interface CurveKeyPair {
 export function curveKeyPair(): CurveKeyPair
 
 
-export type Message = Buffer | string | null
+export type Message = TypedArray | ArrayBuffer | string | null
 
 interface ContextOptions {
   blocky?: boolean,
@@ -351,10 +351,16 @@ export class Stream extends Socket {
 }
 
 
-type Event = "connect" | "connectDelay" | "connectRetry" | "listening" |
-  "bindError" | "accept" | "acceptError" | "close" | "closeError" |
-  "disconnect" | "stop" | "handshake" | "handshakeError" |
-  "handshakeProtocolError" | "handshakeAuthError" | "unknown"
+type Event = (
+  "accept" | "accept:error" |
+  "bind" | "bind:error" |
+  "connect" | "connect:delay" | "connect:retry" |
+  "close" | "close:error" |
+  "disconnect" |
+  "end" |
+  "handshake" | "handshake:error:protocol" | "handshake:error:auth" | "handshake:error:other" |
+  "unknown"
+)
 
 export class ErrnoError extends Error {
   code?: string

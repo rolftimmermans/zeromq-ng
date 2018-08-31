@@ -4,20 +4,23 @@ import {testProtos, uniqAddress} from "./helpers"
 
 for (const proto of testProtos("tcp", "ipc", "inproc")) {
   describe(`socket with ${proto} curve send/receive`, function() {
+    let sockA: zmq.Pair
+    let sockB: zmq.Pair
+
     beforeEach(function() {
       if (!zmq.capability.curve) this.skip()
 
       const serverKeypair = zmq.curveKeyPair()
       const clientKeypair = zmq.curveKeyPair()
 
-      this.sockA = new zmq.Pair({
+      sockA = new zmq.Pair({
         linger: 0,
         curveServer: true,
         curvePublicKey: serverKeypair.publicKey,
         curveSecretKey: serverKeypair.secretKey,
       })
 
-      this.sockB = new zmq.Pair({
+      sockB = new zmq.Pair({
         linger: 0,
         curveServerKey: serverKeypair.publicKey,
         curvePublicKey: clientKeypair.publicKey,
@@ -26,8 +29,8 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
     })
 
     afterEach(function() {
-      this.sockA.close()
-      this.sockB.close()
+      sockA.close()
+      sockB.close()
       global.gc()
     })
 
@@ -36,15 +39,15 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
         if (!zmq.capability.curve) this.skip()
 
         const address = uniqAddress(proto)
-        await this.sockB.bind(address)
-        await this.sockA.connect(address)
+        await sockB.bind(address)
+        await sockA.connect(address)
       })
 
       it("should deliver single string message", async function() {
         const sent = "foo"
-        await this.sockA.send(sent)
+        await sockA.send(sent)
 
-        const recv = await this.sockB.receive()
+        const recv = await sockB.receive()
         assert.deepEqual([sent], recv.map((buf: Buffer) => buf.toString()))
       })
     })

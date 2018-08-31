@@ -4,14 +4,17 @@ import {testProtos, uniqAddress} from "./helpers"
 
 for (const proto of testProtos("tcp", "ipc", "inproc")) {
   describe(`socket with ${proto} push/pull`, function() {
+    let push: zmq.Push
+    let pull: zmq.Pull
+
     beforeEach(function() {
-      this.push = new zmq.Push
-      this.pull = new zmq.Pull
+      push = new zmq.Push
+      pull = new zmq.Pull
     })
 
     afterEach(function() {
-      this.push.close()
-      this.pull.close()
+      push.close()
+      pull.close()
       global.gc()
     })
 
@@ -27,14 +30,14 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
         const messages = ["foo", "bar", "baz", "qux"]
         const received: string[] = []
 
-        await this.pull.bind(address)
-        await this.push.connect(address)
+        await pull.bind(address)
+        await push.connect(address)
 
         for (const msg of messages) {
-          await this.push.send(msg)
+          await push.send(msg)
         }
 
-        for await (const [msg] of this.pull) {
+        for await (const [msg] of pull) {
           assert.instanceOf(msg, Buffer)
           received.push(msg.toString())
           if (received.length == messages.length) break
@@ -49,19 +52,19 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
           const messages = ["foo", "bar", "baz", "qux"]
           const received: string[] = []
 
-          await this.pull.bind(address)
+          await pull.bind(address)
 
-          this.push.immediate = true
-          await this.push.connect(address)
+          push.immediate = true
+          await push.connect(address)
 
           /* Never connected, without immediate: true it would cause lost msgs. */
-          await this.push.connect(uniqAddress(proto))
+          await push.connect(uniqAddress(proto))
 
           for (const msg of messages) {
-            await this.push.send(msg)
+            await push.send(msg)
           }
 
-          for await (const [msg] of this.pull) {
+          for await (const [msg] of pull) {
             assert.instanceOf(msg, Buffer)
             received.push(msg.toString())
             if (received.length == messages.length) break

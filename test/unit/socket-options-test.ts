@@ -4,14 +4,16 @@ import {assert} from "chai"
 import {uniqAddress} from "./helpers"
 
 describe("socket options", function() {
+  let warningListeners: Function[]
+
   beforeEach(function() {
-    this.warningListeners = process.listeners("warning")
+    warningListeners = process.listeners("warning")
   })
 
   afterEach(function() {
     process.removeAllListeners("warning")
-    for (const listener of this.warningListeners) {
-      process.on("warning", listener)
+    for (const listener of warningListeners) {
+      process.on("warning", listener as (warning: Error) => void)
     }
 
     global.gc()
@@ -167,13 +169,13 @@ describe("socket options", function() {
          See: https://github.com/zeromq/libzmq/pull/2123/files */
       if (semver.satisfies(zmq.version, "< 4.2")) this.skip()
 
-      this.warningListeners = process.listeners("warning")
+      warningListeners = process.listeners("warning")
     })
 
     afterEach(function() {
       process.removeAllListeners("warning")
-      for (const listener of this.warningListeners) {
-        process.on("warning", listener)
+      for (const listener of warningListeners) {
+        process.on("warning", listener as (warning: Error) => void)
       }
     })
 

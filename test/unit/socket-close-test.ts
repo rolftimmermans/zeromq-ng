@@ -4,27 +4,29 @@ import {testProtos, uniqAddress} from "./helpers"
 
 for (const proto of testProtos("tcp", "ipc", "inproc")) {
   describe(`socket with ${proto} close`, function() {
+    let sock: zmq.Dealer
+
     beforeEach(function() {
-      this.sock = new zmq.Dealer
+      sock = new zmq.Dealer
     })
 
     afterEach(function() {
-      this.sock.close()
+      sock.close()
       global.gc()
     })
 
     describe("with explicit call", function() {
       it("should close socket", function() {
-        assert.equal(this.sock.closed, false)
-        this.sock.close()
-        assert.equal(this.sock.closed, true)
+        assert.equal(sock.closed, false)
+        sock.close()
+        assert.equal(sock.closed, true)
       })
 
       it("should close socket and cancel send", async function() {
-        assert.equal(this.sock.closed, false)
-        const promise = this.sock.send(Buffer.from("foo"))
-        this.sock.close()
-        assert.equal(this.sock.closed, true)
+        assert.equal(sock.closed, false)
+        const promise = sock.send(Buffer.from("foo"))
+        sock.close()
+        assert.equal(sock.closed, true)
         try {
           await promise
         } catch (err) {
@@ -36,10 +38,10 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
       })
 
       it("should close socket and cancel receive", async function() {
-        assert.equal(this.sock.closed, false)
-        const promise = this.sock.receive()
-        this.sock.close()
-        assert.equal(this.sock.closed, true)
+        assert.equal(sock.closed, false)
+        const promise = sock.receive()
+        sock.close()
+        assert.equal(sock.closed, true)
         try {
           await promise
         } catch (err) {
@@ -51,46 +53,46 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
       })
 
       it("should close after successful bind", async function() {
-        const promise = this.sock.bind(uniqAddress(proto))
-        this.sock.close()
-        assert.equal(this.sock.closed, false)
+        const promise = sock.bind(uniqAddress(proto))
+        sock.close()
+        assert.equal(sock.closed, false)
         await promise
-        assert.equal(this.sock.closed, true)
+        assert.equal(sock.closed, true)
       })
 
       it("should close after unsuccessful bind", async function() {
         const address = uniqAddress(proto)
-        await this.sock.bind(address)
-        const promise = this.sock.bind(address)
-        this.sock.close()
-        assert.equal(this.sock.closed, false)
+        await sock.bind(address)
+        const promise = sock.bind(address)
+        sock.close()
+        assert.equal(sock.closed, false)
         try {
           await promise
           assert.ok(false)
         } catch (err) { /* Ignore */ }
-        assert.equal(this.sock.closed, true)
+        assert.equal(sock.closed, true)
       })
 
       it("should close after successful unbind", async function() {
         const address = uniqAddress(proto)
-        await this.sock.bind(address)
-        const promise = this.sock.unbind(address)
-        this.sock.close()
-        assert.equal(this.sock.closed, false)
+        await sock.bind(address)
+        const promise = sock.unbind(address)
+        sock.close()
+        assert.equal(sock.closed, false)
         await promise
-        assert.equal(this.sock.closed, true)
+        assert.equal(sock.closed, true)
       })
 
       it("should close after unsuccessful unbind", async function() {
         const address = uniqAddress(proto)
-        const promise = this.sock.unbind(address)
-        this.sock.close()
-        assert.equal(this.sock.closed, false)
+        const promise = sock.unbind(address)
+        sock.close()
+        assert.equal(sock.closed, false)
         try {
           await promise
           assert.ok(false)
         } catch (err) { /* Ignore */ }
-        assert.equal(this.sock.closed, true)
+        assert.equal(sock.closed, true)
       })
 
       if (process.env.INCLUDE_GC_TESTS) {

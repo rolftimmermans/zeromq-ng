@@ -4,19 +4,21 @@ import {testProtos, uniqAddress} from "./helpers"
 
 for (const proto of testProtos("tcp", "ipc", "inproc")) {
   describe(`socket with ${proto} connect/disconnect`, function() {
+    let sock: zmq.Dealer
+
     beforeEach(function() {
-      this.sock = new zmq.Dealer
+      sock = new zmq.Dealer
     })
 
     afterEach(function() {
-      this.sock.close()
+      sock.close()
       global.gc()
     })
 
     describe("connect", function() {
       it("should throw error for invalid uri", async function() {
         try {
-          await this.sock.connect("foo-bar")
+          await sock.connect("foo-bar")
           assert.ok(false)
         } catch (err) {
           assert.instanceOf(err, Error)
@@ -29,7 +31,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
 
       it("should throw error for invalid protocol", async function() {
         try {
-          await this.sock.connect("foo://bar")
+          await sock.connect("foo://bar")
           assert.ok(false)
         } catch (err) {
           assert.instanceOf(err, Error)
@@ -41,9 +43,9 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
       })
 
       it("should allow setting routing id on router", async function() {
-        this.sock = new zmq.Router({mandatory: true})
-        await this.sock.connect(uniqAddress(proto), {routingId: "remoteId"})
-        await this.sock.send(["remoteId", "hi"])
+        const sock = new zmq.Router({mandatory: true})
+        await sock.connect(uniqAddress(proto), {routingId: "remoteId"})
+        await sock.send(["remoteId", "hi"])
       })
     })
 
@@ -51,7 +53,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
       it("should throw error if not connected to endpoint", async function() {
         const address = uniqAddress(proto)
         try {
-          await this.sock.disconnect(address)
+          await sock.disconnect(address)
           assert.ok(false)
         } catch (err) {
           assert.instanceOf(err, Error)
@@ -64,7 +66,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
 
       it("should throw error for invalid uri", async function() {
         try {
-          await this.sock.disconnect("foo-bar")
+          await sock.disconnect("foo-bar")
           assert.ok(false)
         } catch (err) {
           assert.instanceOf(err, Error)
@@ -77,7 +79,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
 
       it("should throw error for invalid protocol", async function() {
         try {
-          await this.sock.disconnect("foo://bar")
+          await sock.disconnect("foo://bar")
           assert.ok(false)
         } catch (err) {
           assert.instanceOf(err, Error)

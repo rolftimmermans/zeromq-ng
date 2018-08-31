@@ -74,14 +74,14 @@ describe("typings", function() {
 
         socket.close()
 
-        socket.events.on("listening", details => {
+        socket.events.on("bind", details => {
           console.log(details.address)
           console.log(details.interval)
           console.log(details.error)
         })
 
         for await (const [event, details] of socket.events) {
-          if (event == "listening") {
+          if (event == "bind") {
             console.log(details.address)
             console.log(details.interval)
             console.log(details.error)

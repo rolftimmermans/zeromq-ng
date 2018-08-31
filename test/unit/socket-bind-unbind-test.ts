@@ -4,25 +4,27 @@ import {testProtos, uniqAddress} from "./helpers"
 
 for (const proto of testProtos("tcp", "ipc", "inproc")) {
   describe(`socket with ${proto} bind/unbind`, function() {
+    let sock: zmq.Dealer
+
     beforeEach(function() {
-      this.sock = new zmq.Dealer
+      sock = new zmq.Dealer
     })
 
     afterEach(function() {
-      this.sock.close()
+      sock.close()
       global.gc()
     })
 
     describe("bind", function() {
       it("should resolve", async function() {
-        await this.sock.bind(uniqAddress(proto))
+        await sock.bind(uniqAddress(proto))
         assert.ok(true)
       })
 
       it("should throw error if not bound to endpoint", async function() {
         const address = uniqAddress(proto)
         try {
-          await this.sock.unbind(address)
+          await sock.unbind(address)
           assert.ok(false)
         } catch (err) {
           assert.instanceOf(err, Error)
@@ -35,7 +37,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
 
       it("should throw error for invalid uri", async function() {
         try {
-          await this.sock.bind("foo-bar")
+          await sock.bind("foo-bar")
           assert.ok(false)
         } catch (err) {
           assert.instanceOf(err, Error)
@@ -48,7 +50,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
 
       it("should throw error for invalid protocol", async function() {
         try {
-          await this.sock.bind("foo://bar")
+          await sock.bind("foo://bar")
           assert.ok(false)
         } catch (err) {
           assert.instanceOf(err, Error)
@@ -62,8 +64,8 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
       it("should fail during other bind", async function() {
         let promise
         try {
-          promise = this.sock.bind(uniqAddress(proto))
-          await this.sock.bind(uniqAddress(proto))
+          promise = sock.bind(uniqAddress(proto))
+          await sock.bind(uniqAddress(proto))
           assert.ok(false)
         } catch (err) {
           assert.instanceOf(err, Error)
@@ -78,14 +80,14 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
     describe("unbind", function() {
       it("should unbind", async function() {
         const address = uniqAddress(proto)
-        await this.sock.bind(address)
-        await this.sock.unbind(address)
+        await sock.bind(address)
+        await sock.unbind(address)
         assert.ok(true)
       })
 
       it("should throw error for invalid uri", async function() {
         try {
-          await this.sock.unbind("foo-bar")
+          await sock.unbind("foo-bar")
           assert.ok(false)
         } catch (err) {
           assert.instanceOf(err, Error)
@@ -98,7 +100,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
 
       it("should throw error for invalid protocol", async function() {
         try {
-          await this.sock.unbind("foo://bar")
+          await sock.unbind("foo://bar")
           assert.ok(false)
         } catch (err) {
           assert.instanceOf(err, Error)
@@ -112,10 +114,10 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
       it("should fail during other unbind", async function() {
         let promise
         const address = uniqAddress(proto)
-        await this.sock.bind(address)
+        await sock.bind(address)
         try {
-          promise = this.sock.unbind(address)
-          await this.sock.unbind(address)
+          promise = sock.unbind(address)
+          await sock.unbind(address)
           assert.ok(false)
         } catch (err) {
           assert.instanceOf(err, Error)

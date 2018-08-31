@@ -4,14 +4,17 @@ import {testProtos, uniqAddress} from "./helpers"
 
 for (const proto of testProtos("tcp", "ipc", "inproc")) {
   describe(`socket with ${proto} req/rep`, function() {
+    let req: zmq.Request
+    let rep: zmq.Reply
+
     beforeEach(function() {
-      this.req = new zmq.Request
-      this.rep = new zmq.Reply
+      req = new zmq.Request
+      rep = new zmq.Reply
     })
 
     afterEach(function() {
-      this.req.close()
-      this.rep.close()
+      req.close()
+      rep.close()
       global.gc()
     })
 
@@ -31,25 +34,25 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
         const messages = ["foo", "bar", "baz", "qux"]
         const received: string[] = []
 
-        await this.rep.bind(address)
-        await this.req.connect(address)
+        await rep.bind(address)
+        await req.connect(address)
 
         const echo = async () => {
-          for await (const msg of this.rep) {
-            await this.rep.send(msg)
+          for await (const msg of rep) {
+            await rep.send(msg)
           }
         }
 
         const send = async () => {
-          for (const req of messages) {
-            await this.req.send(Buffer.from(req))
+          for (const msg of messages) {
+            await req.send(Buffer.from(msg))
 
-            const [rep] = await this.req.receive()
+            const [rep] = await req.receive()
             received.push(rep.toString())
             if (received.length == messages.length) break
           }
 
-          this.rep.close()
+          rep.close()
         }
 
         await Promise.all([echo(), send()])
@@ -65,21 +68,21 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
         const address = uniqAddress(proto)
 
         /* FIXME: Also trigger EFSM without setting timeout. */
-        this.req.sendTimeout = 2
-        await this.rep.bind(address)
-        await this.req.connect(address)
+        req.sendTimeout = 2
+        await rep.bind(address)
+        await req.connect(address)
 
         const echo = async () => {
-          const msg = await this.rep.receive()
-          await this.rep.send(msg)
+          const msg = await rep.receive()
+          await rep.send(msg)
         }
 
         const send = async () => {
-          await this.req.send(Buffer.from("foo"))
-          assert.equal(this.req.writable, false)
+          await req.send(Buffer.from("foo"))
+          assert.equal(req.writable, false)
 
           try {
-            await this.req.send(Buffer.from("bar"))
+            await req.send(Buffer.from("bar"))
             assert.ok(false)
           } catch (err) {
             assert.instanceOf(err, Error)
@@ -88,10 +91,10 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
             assert.typeOf(err.errno, "number")
           }
 
-          const [msg] = await this.req.receive()
+          const [msg] = await req.receive()
           assert.deepEqual(msg, Buffer.from("foo"))
 
-          this.rep.close()
+          rep.close()
         }
 
         await Promise.all([echo(), send()])
