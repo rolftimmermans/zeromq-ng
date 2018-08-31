@@ -14,7 +14,6 @@ async function main() {
   const receiver = new Dealer
   receiver.connect("tcp://127.0.0.1:5555")
 
-  const received = []
   for await (const [msg] of receiver) {
     if (msg.length == 0) receiver.close()
     console.log(`received: ${msg}`)

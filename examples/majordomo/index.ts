@@ -54,7 +54,7 @@ async function main() {
   broker.start()
 
   /* Requests are issued in parallel. */
-  const beverages = await Promise.all([
+  await Promise.all([
     request("soda", "cola"),
     request("tea", "oolong"),
     request("tea", "sencha"),
