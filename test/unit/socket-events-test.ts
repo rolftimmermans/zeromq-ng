@@ -128,7 +128,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
         await done
 
         if (proto == "tcp") {
-          const [, details] = events.find(([ev]) => ev == "bind:error")
+          const [, details] = events.find(([ev]) => ev == "bind:error")!
           const data = details as zmq.EventDetails
           assert.equal("tcp://" + data.address, address)
           assert.instanceOf(data.error, Error)
