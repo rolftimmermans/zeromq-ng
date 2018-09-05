@@ -60,7 +60,7 @@
     "dev:configure": "node-pre-gyp configure --verbose --build-latest-napi-version-only",
     "dev:build": "node-pre-gyp build --verbose --build-latest-napi-version-only",
     "dev:test": "node-pre-gyp build --verbose --build-latest-napi-version-only && eslint lib && script/format.sh && mocha && rm -f tmp/*",
-    "dev:bench": "node-pre-gyp build --verbose --build-latest-napi-version-only && node --use_strict --harmony --expose-gc test/bench"
+    "dev:bench": "node-pre-gyp build --verbose --build-latest-napi-version-only && node --harmony --expose-gc --require ./test/ts test/bench"
   },
   "keywords": [
     "zeromq",

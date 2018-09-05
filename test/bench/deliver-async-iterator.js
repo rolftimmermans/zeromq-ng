@@ -1,4 +1,4 @@
-suite.add(`deliver for await proto=${proto} msgsize=${msgsize} n=${n} zmq=ng`, Object.assign({
+suite.add(`deliver async iterator proto=${proto} msgsize=${msgsize} n=${n} zmq=ng`, Object.assign({
   fn: async deferred => {
     const server = new zmq.ng.Dealer
     const client = new zmq.ng.Dealer
