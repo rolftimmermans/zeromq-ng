@@ -24,8 +24,7 @@ interface CurveKeyPair {
 
 export function curveKeyPair(): CurveKeyPair
 
-
-export type Message = TypedArray | ArrayBuffer | string | null
+export type Message = ArrayBufferView | ArrayBuffer | SharedArrayBuffer | string | null
 
 interface ContextOptions {
   blocky?: boolean,

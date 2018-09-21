@@ -1,3 +1,7 @@
+### v5.0.0-beta.16
+
+* Use ArrayBufferView instead of TypedArray in TypeScript definition.
+
 ### v5.0.0-beta.15
 
 * The node-pre-gyp dependency is now no longer bundled.

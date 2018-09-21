@@ -182,7 +182,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
       it("should deliver messages coercible to string", async function() {
         const messages = [null, function() {}, 16.19, true, {}, Promise.resolve()]
         for (const msg of messages) {
-          await sockA.send(msg)
+          await sockA.send(msg as any)
         }
 
         const received: string[] = []
