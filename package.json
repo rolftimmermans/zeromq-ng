@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "node-addon-api": "rolftimmermans/node-addon-api#deferred-env",
-    "node-gyp-build": "^3.4.0"
+    "node-gyp-build": "lgeiger/node-gyp-build#libc"
   },
   "devDependencies": {
     "@types/chai": ">= 4.1",
@@ -23,7 +23,7 @@
     "choma": ">= 1.2",
     "eslint": ">= 4.0",
     "mocha": ">= 4.0",
-    "prebuildify": "^2.8.0",
+    "prebuildify": "lgeiger/prebuildify#libc",
     "prebuildify-ci": "^1.0.2",
     "semver": ">= 0",
     "ts-node": ">= 7",
