@@ -39,7 +39,7 @@
       ],
 
       'defines': [
-        'NAPI_VERSION=3',
+        'NAPI_VERSION=1',
         'NAPI_DISABLE_CPP_EXCEPTIONS',
         'ZMQ_STATIC',
       ],
