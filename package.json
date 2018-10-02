@@ -42,11 +42,13 @@
     "lib",
     "src",
     "script/build.sh",
-    "script/format.sh"
+    "script/format.sh",
+    "prebuilds"
   ],
   "scripts": {
     "install": "node-gyp-build",
     "dev:prebuild": "prebuildify --napi --strip",
+    "dev:download-prebuild": "prebuildify-ci download",
     "dev:test": "eslint lib && script/format.sh && mocha && tsc --project test/tsconfig.json --noEmit && rm -f tmp/*",
     "dev:bench": "node --harmony --expose-gc --require ./test/ts test/bench"
   },

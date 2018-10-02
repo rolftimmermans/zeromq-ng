@@ -180,7 +180,6 @@ The test suite can be run with:
 
 ```sh
 npm install
-npm run dev:configure
 npm run dev:test
 ```
 
@@ -199,11 +198,19 @@ To publish a new version, run:
 
 ```sh
 npm version <new version>
-git push --tags
+git push && git push --tags
 ```
 
-After continuous integration successfully finishes running the tests, the prebuilt binaries will be automatically published. Afterwards a new library version will be pushed to NPM.
+Wait for continuous integration to finish. Once all the builds are done run:
+```sh
+npm run dev:download-prebuild
+```
 
+This will download all the prebuilds into `./prebuilds`. To publish the tarball to `npm` run:
+
+```sh
+npm publish
+```
 
 # API Documentation
 
