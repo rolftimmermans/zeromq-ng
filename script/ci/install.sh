@@ -31,10 +31,8 @@ export npm_config_build_from_source=true
 # via yarn but also via bin stubs in node_modules (even on Windows).
 if [ -n "${ALPINE_CHROOT}" ]; then
   /alpine/enter-chroot yarn global add node-gyp
-  /alpine/enter-chroot yarn install --ignore-scripts
-  /alpine/enter-chroot yarn dev:configure
+  /alpine/enter-chroot yarn install
 else
   yarn global add node-gyp
-  yarn install --ignore-scripts
-  yarn dev:configure
+  yarn install
 fi

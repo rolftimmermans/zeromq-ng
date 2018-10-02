@@ -1,6 +1,4 @@
 environment:
-  GH_TOKEN:
-    secure: 6V8UzhSBNiXKcwNF1cTFaqTZaX/YVUWutdbluQVdXPlUn1u9G+cd1XTgyZQDmD+4
   matrix:
   - node_js: "8.11"
   - node_js: "10.6"
@@ -18,9 +16,20 @@ install:
 test_script:
 - appveyor-retry call sh script/ci/test.sh
 
-for:
-- matrix:
-    only:
-    - node_js: "10.6"
-  deploy_script:
-  - IF "%appveyor_repo_tag%"=="true" sh script/ci/release.sh
+after_test:
+  - ps: If ($env:nodejs_version -eq "10.6" -And $env:appveyor_repo_tag -eq "true") { npm run dev:prebuild }
+
+artifacts:
+  - path: prebuilds
+    name: $(APPVEYOR_REPO_TAG_NAME)-win-$(PLATFORM)
+    type: zip
+deploy:
+  - provider: GitHub
+    artifact: /.*\\.zip/
+    draft: false
+    prerelease: true
+    auth_token:
+      secure: 6V8UzhSBNiXKcwNF1cTFaqTZaX/YVUWutdbluQVdXPlUn1u9G+cd1XTgyZQDmD+4
+    on:
+      appveyor_repo_tag: true
+      nodejs_version: "10.6"

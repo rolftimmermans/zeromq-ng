@@ -1,10 +1,6 @@
 language: node_js
 cache: yarn
 
-env:
-  global:
-    secure: wtBX98vubHC+/5aXLUB3fNZKmnrpLnpgZkbUrfWuq01fEKk/CmL64ArkoqrGOffUhFKRemjgXVPGLF118AZuyS/dW4o05v7KOuBHt7SehhdgO8AVlQ5DVrEQm3gVFNYcusaMRP1eJpSwekHqF7grHk1VTr/uNj01OyAExKynmn6rHJNa/KijRuHsTBEQL7drLOyAHUvodq0c2fclW71H85cTaHXC+NPzydWCWn3k4Z6sGEkQCOIG+v0skWEnN1uyt5MJ89a9WPF8qz/LqVolXKmWHVowpagV2KUQpeZs8Kkao93reWs/MocTXm82gcffBdhqozv6xN55bC1BoJ0oB/S7RHk1dWRgTcPj1hkX5H4X5S8COT9/5FE2tw74jN6mLSKdRy3nNOQZPZuXOn2jlkl2n+b0IwwXBXLfn3ks18AX1Y4kAQBsfPGPM7zPX742Z8cR2rW41aVwWFDVhqI4ITBWOzUC6Cvlm8JT+eADYG5R9sodxS9jEDOH/9Gjx4xRPQK7+Q909x1XmGnVOSFlsCLHT8f7y1mPWTzPT5x57rhkD4BmX4bb0+RAVvDSiVIcko9QznK9lGSNgSX4+Y/sZHW2DHdbo2SdDmLxwUDGAgHXJ3mQNsI0ojAIb/b0d9Ybw4OuWgdMu8aaB+vZuqm1AD57oNomEXnHeMkFlVT42ho=
-
 jobs:
   include:
   # Test latest 10.x branch.
@@ -61,7 +57,6 @@ jobs:
     node_js: "10.9"
     os: osx
     osx_image: xcode9.3beta
-    script: script/ci/release.sh
 
   # Publish chroot cross-compiled binaries for Alpine Linux.
   - stage: publish binaries
@@ -69,7 +64,6 @@ jobs:
     os: linux
     env: ALPINE_CHROOT=true
     sudo: required
-    script: script/ci/release.sh
 
   # Publish cross-compiled binaries for arm & arm64.
   - stage: publish binaries
@@ -77,7 +71,6 @@ jobs:
     os: linux
     env: ARCH=arm TRIPLE=arm-linux-gnueabihf GCC=4.8
     install: script/ci/cross-install.sh
-    script: script/ci/cross-release.sh
     addons: {apt: {packages: [gcc-4.8-arm-linux-gnueabihf, g++-4.8-arm-linux-gnueabihf]}}
 
   - stage: publish binaries
@@ -85,26 +78,11 @@ jobs:
     os: linux
     env: ARCH=arm64 TRIPLE=aarch64-linux-gnu GCC=4.8
     install: script/ci/cross-install.sh
-    script: script/ci/cross-release.sh
     addons: {apt: {packages: [gcc-4.8-aarch64-linux-gnu, g++-4.8-aarch64-linux-gnu]}}
-
-  # Publish package to NPM.
-  - stage: publish package
-    script: skip
-    os: linux
-    deploy:
-      provider: npm
-      email: r.w.timmermans@gmail.com
-      api_key:
-        secure: JROQZBPmUPQL2zS+zDRl0Zg+BiwGQFy/5raJjHObABF77ysvdy5MNFg2TWUabLxrdhq9O84zSySrnWlPYW2kvt2PmtC4vR3RK2i6Yoz6+xd428aypG8HJlITL3aSW+1vV0NbjI0GhwvQBKJAk9+zWjt000b8N/y9tUrFe/ugKfbdJly2cpxg70TGT/pmhkQgJ2g5jTJ3tO5ONDRh+H4yfq/zzRT5FovlGzH3dNLddJJcEOas0WOkS8Lkl/4wx/FAWzzk+o6t9fJesPY3GMK53RvU43itviy2ID8ejkmeGe6a+f7mjODrkjIS5KPDAW9EdfXmZ3f2bX+R7b+9JJYrcDGykkwPQJUr9334zy2fK9xr5lvEYIApCK7HxoXVUU0O2QjCxJS7IrVlnFuMw2ehIRYv2YeBKWjHZG7MQhMUBujlkaum3rj5vEGZey+BBkFF04rC7n2xfWrjIiat2x3zAsfxh/Hrx0GPexHeopo1/GqL7nEuLd4Eq7rJwm+JFX5yxanyF50izmqN6NXnYcwuxn/6ErY6Wi9pGgG7uM6pYmy84ZBYZz+EBzraoePXgDuaz0xaJae57m/2UP8h8Lp6Dim8WSF6k2xUEcHC0W/4IENWwkN+DLhV75hXfFFRlh7ku0bMYtdRoE8/nEnjgSsJe4p8jhPWiqvEIi5bcrGW9W8=
-      on:
-        tags: true
 
 stages:
 - name: test
 - name: publish binaries
-  if: tag IS present
-- name: publish package
   if: tag IS present
 
 install:
@@ -112,3 +90,20 @@ install:
 
 script:
 - travis_retry script/ci/test.sh
+
+
+before_deploy:
+- ARCHIVE_NAME="\${TRAVIS_TAG:-latest}-$TRAVIS_OS_NAME-\`uname -m\`.tar"
+- npm run prebuild
+- tar --create --verbose --file="$ARCHIVE_NAME" --directory "$TRAVIS_BUILD_DIR/prebuilds"
+  .
+deploy:
+  provider: releases
+  draft: false
+  prerelease: true
+  file: "$ARCHIVE_NAME"
+  skip_cleanup: true
+  on:
+    condition: $TRAVIS_BUILD_STAGE_NAME = "PUBLISH BINARIES"
+  api_key:
+    secure: wtBX98vubHC+/5aXLUB3fNZKmnrpLnpgZkbUrfWuq01fEKk/CmL64ArkoqrGOffUhFKRemjgXVPGLF118AZuyS/dW4o05v7KOuBHt7SehhdgO8AVlQ5DVrEQm3gVFNYcusaMRP1eJpSwekHqF7grHk1VTr/uNj01OyAExKynmn6rHJNa/KijRuHsTBEQL7drLOyAHUvodq0c2fclW71H85cTaHXC+NPzydWCWn3k4Z6sGEkQCOIG+v0skWEnN1uyt5MJ89a9WPF8qz/LqVolXKmWHVowpagV2KUQpeZs8Kkao93reWs/MocTXm82gcffBdhqozv6xN55bC1BoJ0oB/S7RHk1dWRgTcPj1hkX5H4X5S8COT9/5FE2tw74jN6mLSKdRy3nNOQZPZuXOn2jlkl2n+b0IwwXBXLfn3ks18AX1Y4kAQBsfPGPM7zPX742Z8cR2rW41aVwWFDVhqI4ITBWOzUC6Cvlm8JT+eADYG5R9sodxS9jEDOH/9Gjx4xRPQK7+Q909x1XmGnVOSFlsCLHT8f7y1mPWTzPT5x57rhkD4BmX4bb0+RAVvDSiVIcko9QznK9lGSNgSX4+Y/sZHW2DHdbo2SdDmLxwUDGAgHXJ3mQNsI0ojAIb/b0d9Ybw4OuWgdMu8aaB+vZuqm1AD57oNomEXnHeMkFlVT42ho=

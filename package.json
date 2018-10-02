@@ -46,7 +46,7 @@
   ],
   "scripts": {
     "install": "node-gyp-build",
-    "dev:build": "prebuildify --napi --strip",
+    "dev:prebuild": "prebuildify --napi --strip",
     "dev:test": "eslint lib && script/format.sh && mocha && tsc --project test/tsconfig.json --noEmit && rm -f tmp/*",
     "dev:bench": "node --harmony --expose-gc --require ./test/ts test/bench"
   },
