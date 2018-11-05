@@ -7,6 +7,10 @@ env:
 
 jobs:
   include:
+  # Test latest 11.x branch.
+  - os: linux
+    node_js: "11.1"
+
   # Test latest 10.x branch.
   - os: linux
     env: INCLUDE_COMPAT_TESTS=true
@@ -25,6 +29,10 @@ jobs:
   - os: linux
     env: ALPINE_CHROOT=true INCLUDE_COMPAT_TESTS=true
     sudo: required
+
+  - os: osx
+    node_js: "11.1"
+    osx_image: xcode9.3beta
 
   - os: osx
     node_js: "10.9"
