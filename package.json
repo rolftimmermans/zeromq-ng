@@ -9,20 +9,9 @@
     "type": "git",
     "url": "https://github.com/rolftimmermans/zeromq-ng.git"
   },
-  "binary": {
-    "module_name": "zeromq-ng",
-    "module_path": "./lib/binary/napi-v{napi_build_version}",
-    "remote_path": "v{version}",
-    "package_name": "{module_name}-{version}-{platform}-{arch}-{libc}-napi-v{napi_build_version}.tar.gz",
-    "host": "https://github.com/rolftimmermans/zeromq-ng/releases/download/",
-    "napi_versions": [
-      1,
-      3
-    ]
-  },
   "dependencies": {
     "node-addon-api": "rolftimmermans/node-addon-api#deferred-env",
-    "node-pre-gyp": "^0.11"
+    "node-gyp-build": "lgeiger/node-gyp-build#libc"
   },
   "devDependencies": {
     "@types/chai": ">= 4.1",
@@ -34,7 +23,8 @@
     "choma": ">= 1.2",
     "eslint": ">= 4.0",
     "mocha": ">= 4.0",
-    "node-pre-gyp-github": "= 1.3.1",
+    "prebuildify": "lgeiger/prebuildify#libc",
+    "prebuildify-ci": "^1.0.2",
     "semver": ">= 0",
     "ts-node": ">= 7",
     "typescript": ">= 3",
@@ -52,15 +42,15 @@
     "lib",
     "src",
     "script/build.sh",
-    "script/format.sh"
+    "script/format.sh",
+    "prebuilds"
   ],
   "scripts": {
-    "install": "node-pre-gyp install --fallback-to-build",
-    "dev:clean": "node-pre-gyp clean && rm -rf build-tmp-napi-v*",
-    "dev:configure": "node-pre-gyp configure --verbose --build-latest-napi-version-only",
-    "dev:build": "node-pre-gyp build --verbose --build-latest-napi-version-only",
-    "dev:test": "node-pre-gyp build --verbose --build-latest-napi-version-only && eslint lib && script/format.sh && mocha && tsc --project test/tsconfig.json --noEmit && rm -f tmp/*",
-    "dev:bench": "node-pre-gyp build --verbose --build-latest-napi-version-only && node --harmony --expose-gc --require ./test/ts test/bench"
+    "install": "node-gyp-build",
+    "dev:prebuild": "prebuildify --napi --strip",
+    "dev:download-prebuild": "prebuildify-ci download",
+    "dev:test": "eslint lib && script/format.sh && mocha && tsc --project test/tsconfig.json --noEmit && rm -f tmp/*",
+    "dev:bench": "node --harmony --expose-gc --require ./test/ts test/bench"
   },
   "keywords": [
     "zeromq",

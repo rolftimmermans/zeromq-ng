@@ -39,7 +39,7 @@
       ],
 
       'defines': [
-        'NAPI_VERSION=<(napi_build_version)',
+        'NAPI_VERSION=1',
         'NAPI_DISABLE_CPP_EXCEPTIONS',
         'ZMQ_STATIC',
       ],
@@ -68,16 +68,6 @@
           ],
         }],
       ],
-    },
-
-    {
-      'target_name': 'install',
-      'type': 'none',
-      'dependencies': ['<(module_name)'],
-      'copies': [{
-        'files': ['<(PRODUCT_DIR)/<(module_name).node'],
-        'destination': '<(module_path)',
-      }],
     },
   ],
 
