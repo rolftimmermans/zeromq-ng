@@ -10,7 +10,7 @@
     "url": "https://github.com/rolftimmermans/zeromq-ng.git"
   },
   "dependencies": {
-    "node-addon-api": "rolftimmermans/node-addon-api#deferred-env",
+    "node-addon-api": "^1.7.1",
     "node-gyp-build": "^4.1.0"
   },
   "devDependencies": {
