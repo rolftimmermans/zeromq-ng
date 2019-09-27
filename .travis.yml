@@ -15,6 +15,9 @@ jobs:
   - os: osx
     node_js: "10.16"
 
+  - os: windows
+    node_js: "10.16"
+
   # Test shared libraries on Linux and macOS.
   - os: linux
     node_js: "10.16"
