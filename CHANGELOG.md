@@ -1,3 +1,9 @@
+### v5.0.0-beta.17
+
+* Drop support for Node 8.x.
+
+* Update bundled version of ZeroMQ to 4.3.2.
+
 ### v5.0.0-beta.16
 
 * Use ArrayBufferView instead of TypedArray in TypeScript definition.
