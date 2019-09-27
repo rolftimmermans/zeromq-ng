@@ -28,7 +28,7 @@
     "semver": ">= 0",
     "ts-node": ">= 7",
     "typescript": ">= 3",
-    "weak": ">= 1.0"
+    "weak-napi": ">= 1.0"
   },
   "engines": {
     "node": ">= 8.8"
