@@ -2,6 +2,8 @@
 
 * Drop support for Node 8.x.
 
+* Prebuilds are now included in the published NPM package.
+
 * Update bundled version of ZeroMQ to 4.3.2.
 
 ### v5.0.0-beta.16

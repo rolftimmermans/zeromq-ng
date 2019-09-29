@@ -1,6 +1,11 @@
 #!/bin/sh
 set -e
 
+if [ -n "${ZMQ_SKIP_BUILD}" ]; then
+  echo "Skipping libzmq build."
+  exit 0
+fi
+
 ZMQ_VERSION=${ZMQ_VERSION:-"4.3.2"}
 
 SRC_URL="https://github.com/zeromq/libzmq/releases/download/v${ZMQ_VERSION}/zeromq-${ZMQ_VERSION}.tar.gz"
@@ -9,22 +14,15 @@ TARBALL="zeromq-${ZMQ_VERSION}.tar.gz"
 BUILD_OPTIONS=""
 
 if [ -n "${WINDIR}" ]; then
-  # Give preference to all MSYS64 binaries. This solves issues with mkdir and
-  # other commands not working properly in many environments.
-  export PATH="/usr/bin:${PATH}"
-  export PYTHON="/c/Python27/python"
-
   # Working directory is NAPI temporary build directory.
   PATH_PREFIX="${PWD}/libzmq"
   ARTIFACT="${PATH_PREFIX}/lib/libzmq.lib"
-  CMAKE_GENERATOR="Visual Studio 14 2015"
-  TOOLSET_VERSION="140"
+  CMAKE_GENERATOR="Visual Studio 15 2017"
+  TOOLSET_VERSION="141"
 
-  if [ "${Platform}" = "x64" ]; then
+  if [ "${TRAVIS_ARCH}" = "amd64" ]; then
     CMAKE_GENERATOR="${CMAKE_GENERATOR} Win64"
   fi
-
-  BUILD_OPTIONS="-DCMAKE_CXX_FLAGS_RELEASE=\"/MT\" ${BUILD_OPTIONS}"
 else
   # Working directory is project root.
   PATH_PREFIX="${PWD}/build/libzmq"

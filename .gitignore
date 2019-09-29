@@ -8,3 +8,4 @@ lib/binary/*.node
 lib/binary/napi-v*/*.node
 build-tmp-napi-v*
 prebuilds
+test.js

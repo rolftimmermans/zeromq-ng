@@ -58,7 +58,7 @@
             }],
 
             ['OS == "win"', {
-              'msbuild_toolset': 'v140',
+              'msbuild_toolset': 'v141',
               'libraries': [
                 '<(PRODUCT_DIR)/../libzmq/lib/libzmq',
                 'ws2_32.lib',
@@ -68,82 +68,94 @@
           ],
         }],
       ],
-    },
-  ],
 
-  'target_defaults': {
-
-    'configurations': {
-      'Debug': {
-        'conditions': [
-          ['OS == "linux" or OS == "freebsd" or OS == "openbsd" or OS == "solaris"', {
-            'cflags_cc!': [
-              '-std=gnu++0x',
-              '-std=gnu++1y'
-            ],
-            'cflags_cc+': [
-              '-std=c++11',
-              '-Wno-missing-field-initializers',
-            ],
-          }],
-
-          ['OS == "mac"', {
-            'xcode_settings': {
-              # https://pewpewthespells.com/blog/buildsettings.html
-              'CLANG_CXX_LIBRARY': 'libc++',
-              'CLANG_CXX_LANGUAGE_STANDARD': 'c++11',
-              'MACOSX_DEPLOYMENT_TARGET': '10.9',
-              'WARNING_CFLAGS': [
-                '-Wextra',
-                '-Wno-unused-parameter',
+      'configurations': {
+        'Debug': {
+          'conditions': [
+            ['OS == "linux" or OS == "freebsd" or OS == "openbsd" or OS == "solaris"', {
+              'cflags_cc!': [
+                '-std=gnu++0x',
+                '-std=gnu++1y'
+              ],
+              'cflags_cc+': [
+                '-std=c++11',
                 '-Wno-missing-field-initializers',
               ],
-            },
-          }],
+            }],
 
-          ['OS == "win"', {
-            'msvs_settings': {},
-          }],
-        ],
-      },
-
-      'Release': {
-        'conditions': [
-          ['OS == "linux" or OS == "freebsd" or OS == "openbsd" or OS == "solaris"', {
-            'cflags_cc!': [
-              '-std=gnu++0x',
-              '-std=gnu++1y'
-            ],
-            'cflags_cc+': [
-              '-std=c++11',
-              '-flto',
-              '-Wno-missing-field-initializers',
-            ],
-          }],
-
-          ['OS == "mac"', {
-            # https://pewpewthespells.com/blog/buildsettings.html
-            'xcode_settings': {
-              'CLANG_CXX_LIBRARY': 'libc++',
-              'CLANG_CXX_LANGUAGE_STANDARD': 'c++11',
-              'MACOSX_DEPLOYMENT_TARGET': '10.9',
-              'LLVM_LTO': 'YES',
-              'GCC_OPTIMIZATION_LEVEL': '3',
-              'DEPLOYMENT_POSTPROCESSING': 'YES',
-              'GCC_SYMBOLS_PRIVATE_EXTERN': 'YES',
-              'DEAD_CODE_STRIPPING': 'YES',
-            },
-          }],
-
-          ['OS == "win"', {
-            'msvs_settings': {
-              'VCLinkerTool': {
-                'AdditionalOptions': ['/ignore:4099'],
+            ['OS == "mac"', {
+              'xcode_settings': {
+                # https://pewpewthespells.com/blog/buildsettings.html
+                'CLANG_CXX_LIBRARY': 'libc++',
+                'CLANG_CXX_LANGUAGE_STANDARD': 'c++11',
+                'MACOSX_DEPLOYMENT_TARGET': '10.9',
+                'WARNING_CFLAGS': [
+                  '-Wextra',
+                  '-Wno-unused-parameter',
+                  '-Wno-missing-field-initializers',
+                ],
               },
-            },
-          }],
-        ],
+            }],
+
+            ['OS == "win"', {
+              'msvs_settings': {
+                'VCCLCompilerTool': {
+                  # 0 - MultiThreaded (/MT)
+                  # 1 - MultiThreadedDebug (/MTd)
+                  # 2 - MultiThreadedDLL (/MD)
+                  # 3 - MultiThreadedDebugDLL (/MDd)
+                  'RuntimeLibrary': 3,
+                },
+              },
+            }],
+          ],
+        },
+
+        'Release': {
+          'conditions': [
+            ['OS == "linux" or OS == "freebsd" or OS == "openbsd" or OS == "solaris"', {
+              'cflags_cc!': [
+                '-std=gnu++0x',
+                '-std=gnu++1y'
+              ],
+              'cflags_cc+': [
+                '-std=c++11',
+                '-flto',
+                '-Wno-missing-field-initializers',
+              ],
+            }],
+
+            ['OS == "mac"', {
+              # https://pewpewthespells.com/blog/buildsettings.html
+              'xcode_settings': {
+                'CLANG_CXX_LIBRARY': 'libc++',
+                'CLANG_CXX_LANGUAGE_STANDARD': 'c++11',
+                'MACOSX_DEPLOYMENT_TARGET': '10.9',
+                'LLVM_LTO': 'YES',
+                'GCC_OPTIMIZATION_LEVEL': '3',
+                'DEPLOYMENT_POSTPROCESSING': 'YES',
+                'GCC_SYMBOLS_PRIVATE_EXTERN': 'YES',
+                'DEAD_CODE_STRIPPING': 'YES',
+              },
+            }],
+
+            ['OS == "win"', {
+              'msvs_settings': {
+                'VCCLCompilerTool': {
+                  # 0 - MultiThreaded (/MT)
+                  # 1 - MultiThreadedDebug (/MTd)
+                  # 2 - MultiThreadedDLL (/MD)
+                  # 3 - MultiThreadedDebugDLL (/MDd)
+                  'RuntimeLibrary': 2,
+                },
+                'VCLinkerTool': {
+                  'AdditionalOptions': ['/ignore:4099'],
+                },
+              },
+            }],
+          ],
+        },
       },
     },
-  },
+  ],
 }

@@ -1,11 +1,6 @@
 #!/bin/sh
 set -e
 
-if [ -n "${WINDIR}" ]; then
-  # Give preference to MSYS64 binaries to make timeout command work.
-  export PATH="/usr/bin:${PATH}"
-fi
-
 if [ -x "$(command -v gtimeout)" ]; then
   # On homebrew timeout is aliased as gtimeout.
   alias timeout=gtimeout

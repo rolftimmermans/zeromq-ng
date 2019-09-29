@@ -1,20 +1,6 @@
 #!/bin/sh
 set -e
 
-if [ -n "${WINDIR}" ]; then
-  # Give preference to all MSYS64 binaries. This solves issues with mkdir and
-  # other commands not working properly.
-  export PATH="/usr/bin:${PATH}"
-  export PYTHON="/c/Python27/python"
-elif [ "$TRAVIS_OS_NAME" = "osx" ]; then
-  # MacOS still needs a few things to be installed.
-  brew update && brew install yarn
-
-  if [ -n "${ZMQ_SHARED}" ]; then
-    brew install zeromq
-  fi
-fi
-
 echo "Installing dependencies..."
 
 if [ -n "${ALPINE_CHROOT}" ]; then

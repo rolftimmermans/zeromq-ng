@@ -1,6 +1,6 @@
 {
   "name": "zeromq-ng",
-  "version": "5.0.0-beta.16",
+  "version": "5.0.0-beta.17",
   "description": "Next-generation ZeroMQ bindings for Node.js",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -22,10 +22,13 @@
     "chai": ">= 4.1",
     "choma": ">= 1.2",
     "eslint": ">= 4.0",
+    "gunzip-maybe": "^1.4.1",
     "mocha": ">= 4.0",
+    "node-fetch": "^2.6.0",
     "prebuildify": "^3.0",
     "prebuildify-ci": "^1.0",
     "semver": ">= 0",
+    "tar-fs": "^2.0.0",
     "ts-node": ">= 7",
     "typescript": ">= 3",
     "weak-napi": ">= 1.0"
@@ -47,8 +50,7 @@
   ],
   "scripts": {
     "install": "node-gyp-build",
-    "dev:prebuild": "prebuildify --napi --strip",
-    "dev:download-prebuild": "prebuildify-ci download",
+    "ci:prebuild": "prebuildify --napi --strip",
     "dev:test": "eslint lib && script/format.sh && mocha && tsc --project test/tsconfig.json --noEmit && rm -f tmp/*",
     "dev:bench": "node --harmony --expose-gc --require ./test/ts test/bench"
   },
@@ -58,9 +60,16 @@
     "0mq",
     "ømq",
     "libzmq",
+    "zmtp",
+    "message",
+    "messaging",
+    "queue",
+    "async",
+    "sockets",
     "native",
     "binding",
-    "addon"
+    "addon",
+    "napi"
   ],
   "license": "MIT",
   "author": "Rolf Timmermans <rolf@zxcv.nl>"
