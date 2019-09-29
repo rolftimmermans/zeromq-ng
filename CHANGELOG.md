@@ -1,4 +1,4 @@
-### v5.0.0-beta.17
+### v5.0.0-beta.18
 
 * Drop support for Node 8.x.
 
