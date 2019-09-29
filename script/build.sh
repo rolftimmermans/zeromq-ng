@@ -1,11 +1,6 @@
 #!/bin/sh
 set -e
 
-if [ -n "${ZMQ_SKIP_BUILD}" ]; then
-  echo "Skipping libzmq build."
-  exit 0
-fi
-
 ZMQ_VERSION=${ZMQ_VERSION:-"4.3.2"}
 
 SRC_URL="https://github.com/zeromq/libzmq/releases/download/v${ZMQ_VERSION}/zeromq-${ZMQ_VERSION}.tar.gz"

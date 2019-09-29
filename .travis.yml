@@ -59,7 +59,7 @@ jobs:
   - stage: publish
     os: linux
     node_js: "10.16"
-    env: ZMQ_SKIP_BUILD=1
+    env: IGNORE_SCRIPTS=1
     script: script/ci/download.sh
 
   # # Publish chroot cross-compiled binaries for Alpine Linux.
