@@ -113,6 +113,7 @@ deploy:
 # Deploy package including all generated prebuilds to NPM.
 - provider: npm
   email: r.w.timmermans@gmail.com
+  skip_cleanup: true
   on:
     tags: true
     condition: "$TRAVIS_BUILD_STAGE_NAME = Publish"
