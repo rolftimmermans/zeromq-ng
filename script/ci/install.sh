@@ -4,7 +4,7 @@ set -e
 echo "Installing dependencies..."
 
 if [ -n "${ALPINE_CHROOT}" ]; then
-  sudo script/ci/alpine-chroot-install.sh -b v3.10 -p 'nodejs-dev yarn build-base git cmake curl python2 coreutils' -k 'CI TRAVIS_.* ZMQ_.* NODE_.* npm_.*'
+  sudo script/ci/alpine-chroot-install.sh -b v${ALPINE_CHROOT} -p 'nodejs-dev yarn build-base git cmake curl python2 coreutils' -k 'CI TRAVIS_.* ZMQ_.* NODE_.* npm_.*'
 fi
 
 if [ -n "${ZMQ_SHARED}" ]; then

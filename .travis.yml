@@ -5,13 +5,13 @@ jobs:
   include:
   ## TEST STAGE
 
-  # Test latest 10.x branch.
+  # Test main OSes on Node 10.x branch.
   - os: linux
     node_js: "10.16"
     env: INCLUDE_COMPAT_TESTS=true
 
   - os: linux
-    env: ALPINE_CHROOT=true INCLUDE_COMPAT_TESTS=true
+    env: ALPINE_CHROOT=3.10 INCLUDE_COMPAT_TESTS=true
     sudo: required
 
   - os: osx
@@ -45,6 +45,12 @@ jobs:
     script: script/ci/prebuild.sh
 
   - stage: prebuild
+    os: linux
+    env: ALPINE_CHROOT=3.10
+    sudo: required
+    script: script/ci/prebuild.sh
+
+  - stage: prebuild
     os: osx
     node_js: "10.16"
     script: script/ci/prebuild.sh
@@ -61,13 +67,6 @@ jobs:
     node_js: "10.16"
     env: IGNORE_SCRIPTS=1
     script: script/ci/download.sh
-
-  # # Publish chroot cross-compiled binaries for Alpine Linux.
-  # - stage: publish binaries
-  #   node_js: "10.16"
-  #   os: linux
-  #   env: ALPINE_CHROOT=true
-  #   sudo: required
 
   # # Publish cross-compiled binaries for arm & arm64.
   # - stage: publish binaries
