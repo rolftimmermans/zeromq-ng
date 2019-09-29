@@ -45,7 +45,13 @@ npm install zeromq-ng
 
 Requirements for prebuilt binaries:
 
-* Node.js 8.6+ (requires [N-API](https://nodejs.org/api/n-api.html))
+* Node.js 10+ (requires a [N-API](https://nodejs.org/api/n-api.html) version 3+)
+
+The following platforms have a prebuilt binary available:
+
+* Linux (x64) with either glibc or musl (e.g. Alpine)
+* MacOS (x64)
+* Windows (x64)
 
 To link against a shared library on your system:
 
@@ -55,10 +61,10 @@ npm install zeromq-ng --zmq-shared
 
 Make sure you have the following installed before attempting to build against a shared library:
 
+* Node.js 10+
 * A working C/C++ compiler toolchain with make
 * Python 2 (2.7 recommended, 3+ does not work)
 * ZeroMQ 4.0+ with development headers
-* Node.js 8.6+
 
 # Examples
 
