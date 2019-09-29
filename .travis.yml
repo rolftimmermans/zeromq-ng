@@ -89,7 +89,7 @@ stages:
 - name: prebuild
   if: tag IS present
 - name: publish
-  if: tag IS publish
+  if: tag IS present
 
 install:
 - travis_retry script/ci/install.sh
