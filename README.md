@@ -209,16 +209,7 @@ npm version <new version>
 git push && git push --tags
 ```
 
-Wait for continuous integration to finish. Once all the builds are done run:
-```sh
-npm run dev:download-prebuild
-```
-
-This will download all the prebuilds into `./prebuilds`. To publish the tarball to `npm` run:
-
-```sh
-npm publish
-```
+Wait for continuous integration to finish. Prebuilds will be generated for all supported platforms and attached to a Github release. Then, a new NPM package version will be automatically released.
 
 # API Documentation
 
