@@ -44,6 +44,11 @@ jobs:
     node_js: "10.16"
     env: ZMQ_VERSION=4.2.4
 
+  # Test recent Node versions.
+  - os: linux
+    node_js: "12"
+    env: INCLUDE_COMPAT_TESTS=true
+
   ## PREBUILD STAGE
 
   - stage: prebuild
