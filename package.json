@@ -26,7 +26,6 @@
     "mocha": ">= 4.0",
     "node-fetch": "^2.6.0",
     "prebuildify": "^3.0",
-    "prebuildify-ci": "^1.0",
     "semver": ">= 0",
     "tar-fs": "^2.0.0",
     "ts-node": ">= 7",
