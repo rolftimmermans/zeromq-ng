@@ -15,7 +15,11 @@ if [ -n "${WINDIR}" ]; then
   CMAKE_GENERATOR="Visual Studio 15 2017"
   TOOLSET_VERSION="141"
 
-  if [ "${TRAVIS_ARCH}" = "amd64" ]; then
+  # In Travis CI, Node paths are:
+  # - C:\ProgramData\nvs\node\<version>\x64\node.exe
+  # - C:\ProgramData\nvs\node\<version>\x86\node.exe
+  if [[ "${NODE}" != *"x86"* ]]; then
+    # Target Windows x64 platform.
     CMAKE_GENERATOR="${CMAKE_GENERATOR} Win64"
   fi
 else

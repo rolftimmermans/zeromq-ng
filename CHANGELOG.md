@@ -1,3 +1,7 @@
+### v5.0.0-beta.19
+
+* More platforms with bundled prebuilds.
+
 ### v5.0.0-beta.18
 
 * Drop support for Node 8.x.

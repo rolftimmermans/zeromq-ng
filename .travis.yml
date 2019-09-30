@@ -1,5 +1,6 @@
 language: node_js
 cache: yarn
+dist: bionic
 
 jobs:
   include:
@@ -19,6 +20,12 @@ jobs:
 
   - os: windows
     node_js: "10.16"
+    # https://travis-ci.community/t/build-doesnt-finish-after-completing-tests/288
+    env: YARN_GPG=no
+
+  - os: windows
+    node_js: "10.16/x86"
+    # https://travis-ci.community/t/build-doesnt-finish-after-completing-tests/288
     env: YARN_GPG=no
 
   # Test shared libraries on Linux and macOS.
@@ -41,13 +48,28 @@ jobs:
 
   - stage: prebuild
     os: linux
+    env: ARCHIVE_SUFFIX=-x64
     node_js: "10.16"
     script: script/ci/prebuild.sh
 
   - stage: prebuild
     os: linux
-    env: ALPINE_CHROOT=3.10
+    env: ALPINE_CHROOT=3.10 ARCHIVE_SUFFIX=-x64-musl
     sudo: required
+    script: script/ci/prebuild.sh
+
+  - stage: prebuild
+    os: linux
+    node_js: "10.16"
+    env: ARCH=arm TRIPLE=arm-linux-gnueabihf GCC=8 ARCHIVE_SUFFIX=-armv7
+    addons: {apt: {packages: [gcc-8-arm-linux-gnueabihf, g++-8-arm-linux-gnueabihf]}}
+    script: script/ci/prebuild.sh
+
+  - stage: prebuild
+    os: linux
+    node_js: "10.16"
+    env: ARCH=arm64 TRIPLE=aarch64-linux-gnu GCC=8 ARCHIVE_SUFFIX=-armv8
+    addons: {apt: {packages: [gcc-8-aarch64-linux-gnu, g++-8-aarch64-linux-gnu]}}
     script: script/ci/prebuild.sh
 
   - stage: prebuild
@@ -58,30 +80,24 @@ jobs:
   - stage: prebuild
     os: windows
     node_js: "10.16"
-    env: YARN_GPG=no
+    # https://travis-ci.community/t/build-doesnt-finish-after-completing-tests/288
+    env: YARN_GPG=no ARCHIVE_SUFFIX=-x64
+    script: script/ci/prebuild.sh
+
+  - stage: prebuild
+    os: windows
+    node_js: "10.16/x86"
+    # https://travis-ci.community/t/build-doesnt-finish-after-completing-tests/288
+    env: YARN_GPG=no ARCHIVE_SUFFIX=-x86
     script: script/ci/prebuild.sh
 
   ## PUBLISH STAGE
+
   - stage: publish
     os: linux
     node_js: "10.16"
     env: IGNORE_SCRIPTS=1
     script: script/ci/download.sh
-
-  # # Publish cross-compiled binaries for arm & arm64.
-  # - stage: publish binaries
-  #   node_js: "10.16"
-  #   os: linux
-  #   env: ARCH=arm TRIPLE=arm-linux-gnueabihf GCC=4.8
-  #   install: script/ci/cross-install.sh
-  #   addons: {apt: {packages: [gcc-4.8-arm-linux-gnueabihf, g++-4.8-arm-linux-gnueabihf]}}
-
-  # - stage: publish binaries
-  #   node_js: "10.16"
-  #   os: linux
-  #   env: ARCH=arm64 TRIPLE=aarch64-linux-gnu GCC=4.8
-  #   install: script/ci/cross-install.sh
-  #   addons: {apt: {packages: [gcc-4.8-aarch64-linux-gnu, g++-4.8-aarch64-linux-gnu]}}
 
 stages:
 - name: test
@@ -101,7 +117,7 @@ deploy:
 - provider: releases
   draft: false
   prerelease: true
-  file: "${TRAVIS_TAG:-latest}-${TRAVIS_OS_NAME}.tar.gz"
+  file: "${TRAVIS_TAG:-latest}-${TRAVIS_OS_NAME}${ARCHIVE_SUFFIX}.tar.gz"
   skip_cleanup: true
   on:
     tags: true

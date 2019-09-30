@@ -3,6 +3,16 @@ set -e
 
 echo "Installing dependencies..."
 
+if [ -n "${TRIPLE}" ]; then
+  export CC="${TRIPLE}-gcc-${GCC}"
+  export CXX="${TRIPLE}-g++-${GCC}"
+  export STRIP="${TRIPLE}-strip"
+  export ZMQ_BUILD_OPTIONS="--host=${TRIPLE}"
+
+  export npm_config_arch=${ARCH}
+  export npm_config_target_arch=${ARCH}
+fi
+
 if [ -n "${ALPINE_CHROOT}" ]; then
   sudo script/ci/alpine-chroot-install.sh -b v${ALPINE_CHROOT} -p 'nodejs-dev yarn build-base git cmake curl python2 coreutils' -k 'CI TRAVIS_.* ZMQ_.* NODE_.* npm_.*'
 fi
