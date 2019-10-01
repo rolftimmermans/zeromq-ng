@@ -1,4 +1,4 @@
-/* Copyright (c) 2017-2018 Rolf Timmermans */
+/* Copyright (c) 2017-2019 Rolf Timmermans */
 #include "outgoing_msg.h"
 
 namespace zmq {
