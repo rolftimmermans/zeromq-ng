@@ -50,7 +50,7 @@ jobs:
     env: INCLUDE_COMPAT_TESTS=true
 
   - os: linux
-    node_js: "13.0.0-rc.0"
+    node_js: "13"
 
   ## PREBUILD STAGE
 
@@ -110,7 +110,7 @@ jobs:
   fast_finish: true
   allow_failures:
   - os: linux
-    node_js: "13.0.0-rc.0"
+    node_js: "13"
 
 stages:
 - name: test
