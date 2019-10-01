@@ -19,7 +19,7 @@ T NumberCast(const Napi::Number& num) {
 }
 
 /* Specialization for uint64_t; check for out of bounds and warn on values
-   that cannot be represented accurately. */
+   that cannot be represented accurately. TODO: Use native JS BigInt. */
 template <>
 uint64_t NumberCast<uint64_t>(const Napi::Number& num) {
     auto value = num.DoubleValue();
