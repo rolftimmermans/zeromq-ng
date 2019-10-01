@@ -104,7 +104,7 @@ jobs:
   - stage: publish
     os: linux
     node_js: "10.16"
-    env: IGNORE_SCRIPTS=1
+    env: IGNORE_SCRIPTS=true
     script: script/ci/download.sh
 
   fast_finish: true
@@ -129,7 +129,6 @@ deploy:
 # Deploy prebuilds to Github releases.
 - provider: releases
   draft: false
-  prerelease: true
   file: "${TRAVIS_TAG:-latest}-${TRAVIS_OS_NAME}${ARCHIVE_SUFFIX}.tar.gz"
   skip_cleanup: true
   on:
