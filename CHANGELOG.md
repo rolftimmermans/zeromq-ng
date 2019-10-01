@@ -4,6 +4,8 @@
 
 * Deduplicate options from TypeScript definitions.
 
+* Add new socket options.
+
 ### v5.0.0-beta.19 / v5.0.0-beta.20
 
 * More platforms with bundled prebuilds.
