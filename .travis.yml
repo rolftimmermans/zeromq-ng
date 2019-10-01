@@ -49,6 +49,9 @@ jobs:
     node_js: "12"
     env: INCLUDE_COMPAT_TESTS=true
 
+  - os: linux
+    node_js: "13.0.0-rc.0"
+
   ## PREBUILD STAGE
 
   - stage: prebuild
@@ -103,6 +106,11 @@ jobs:
     node_js: "10.16"
     env: IGNORE_SCRIPTS=1
     script: script/ci/download.sh
+
+  fast_finish: true
+  allow_failures:
+  - os: linux
+    node_js: "13.0.0-rc.0"
 
 stages:
 - name: test
