@@ -1,6 +1,7 @@
 {
   'variables': {
     'zmq_shared%': 'false',
+    'zmq_draft%': 'false',
   },
 
   'targets': [
@@ -42,9 +43,16 @@
         'NAPI_VERSION=4',
         'NAPI_DISABLE_CPP_EXCEPTIONS',
         'ZMQ_STATIC',
+        'ZMQ_BUILD_DRAFT_API',
       ],
 
       'conditions': [
+        ["zmq_draft == 'true'", {
+          'defines': [
+            'ZMQ_BUILD_DRAFT_API',
+          ],
+        }],
+
         ["zmq_shared == 'true'", {
           'link_settings': {
             'libraries': ['-lzmq'],

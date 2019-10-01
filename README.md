@@ -595,10 +595,10 @@ The property names may differ somewhat from the native option names. This is int
 * **immediate** – ZMQ_IMMEDIATE <br/>
   <[boolean]> By default queues will fill on outgoing connections even if the connection has not completed. This can lead to "lost" messages on sockets with round-robin routing (`Req`, `Push`, `Dealer`). If this option is set to `true`, messages shall be queued only to completed connections. This will cause the socket to block if there are no other connections, but will prevent queues from filling on pipes awaiting connection.
 
-* **interface** – ZMQ_BINDTODEVICE
+* **interface** – ZMQ_BINDTODEVICE <br/>
   <[string] | [Buffer]> Binds the socket to the given network interface (Linux only). Allows to use Linux VRF, see: https://www.kernel.org/doc/Documentation/networking/vrf.txt. Requires the program to be ran as root **or** with `CAP_NET_RAW`.
 
-* **invertMatching** (on `Publisher`, `Subscriber` or `XPublisher` sockets only) – ZMQ_INVERT_MATCHING
+* **invertMatching** (on `Publisher`, `Subscriber` or `XPublisher` sockets only) – ZMQ_INVERT_MATCHING <br/>
   <[boolean]> On `Publisher` and `XPublisher` sockets, this causes messages to be sent to all connected sockets except those subscribed to a prefix that matches the message. On `Subscriber` sockets, this causes only incoming messages that do not match any of the socket's subscriptions to be received by the user.
 
   Whenever this is set to `true` on a `Publisher` socket, all `Subscriber` sockets connecting to it must also have the option set to `true`. Failure to do so will have the `Subsriber` sockets reject everything the `Publisher` socket sends them. `XSubscriber` sockets do not need to do this because they do not filter incoming messages.
@@ -611,6 +611,9 @@ The property names may differ somewhat from the native option names. This is int
 
 * **linger** – ZMQ_LINGER <br/>
   <[number]> Determines how long pending messages which have yet to be sent to a peer shall linger in memory after a socket is closed with `close()`.
+
+* **loopbackFastPath** (Windows only) – ZMQ_LOOPBACK_FASTPATH <br/>
+  <[boolean]> Enable faster TCP connections on loopback devices. An application can enable this option to reduce the latency and improve the performance of loopback operations on a TCP socket on Windows.
 
 * **mandatory** (on `Router` sockets only) – ZMQ_ROUTER_MANDATORY <br/>
   <[boolean]> A value of `false` is the default and discards the message silently when it cannot be routed or the peer's high water mark is reached. A value of `true` causes `send()` to fail if it cannot be routed, or wait asynchronously if the high water mark is reached.
@@ -633,7 +636,7 @@ The property names may differ somewhat from the native option names. This is int
 * **notify** (write only, on `Stream` sockets only) – ZMQ_STREAM_NOTIFY <br/>
   <[boolean]> Enables connect and disconnect notifications on a `Stream` when set to `true`. When notifications are enabled, the socket delivers a zero-length message when a peer connects or disconnects.
 
-* **probeRouter** (write only, on `Router`, `Dealer` or `Request` sockets only)– ZMQ_PROBE_ROUTER <br/>
+* **probeRouter** (write only, on `Router`, `Dealer` or `Request` sockets only) – ZMQ_PROBE_ROUTER <br/>
   <[boolean]> When set to `true`, the socket will automatically send an empty message when a new connection is made or accepted. You may set this on sockets connected to a `Router` socket. The application must filter such empty messages. This option provides the `Router` application with an event signaling the arrival of a new peer.
 
   **Warning:** Do not set this option on a socket that talks to any other socket type except `Router`: the results are undefined.
@@ -767,6 +770,9 @@ Listed below are all socket options that are related to setting and retrieving t
 
 * **zapDomain** – ZMQ_ZAP_DOMAIN <br/>
   <[string]> Sets the domain for ZAP (ZMQ RFC 27) authentication. For NULL security (the default on all tcp:// connections), ZAP authentication only happens if you set a non-empty domain. For PLAIN and CURVE security, ZAP requests are always made, if there is a ZAP handler present. See http://rfc.zeromq.org/spec:27 for more details.
+
+* **zapEnforceDomain** – ZMQ_ZAP_ENFORCE_DOMAIN <br/>
+  <[boolean]> The ZAP (ZMQ RFC 27) authentication protocol specifies that a domain must always be set. Older versions of libzmq did not follow the spec and allowed an empty domain to be set. This option can be used to enabled or disable the stricter, backward incompatible behaviour. For now it is disabled by default, but in a future version it will be enabled by default.
 
 
 ## Class: zmq.Context

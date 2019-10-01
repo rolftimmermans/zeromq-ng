@@ -6,15 +6,15 @@ export as namespace zmq
 
 export const version: string
 
-export const capability: {
-  ipc?: boolean,
-  pgm?: boolean,
-  tipc?: boolean,
-  norm?: boolean,
-  curve?: boolean,
-  gssapi?: boolean,
-  draft?: boolean,
-}
+export const capability: Partial<{
+  ipc: boolean,
+  pgm: boolean,
+  tipc: boolean,
+  norm: boolean,
+  curve: boolean,
+  gssapi: boolean,
+  draft: boolean,
+}>
 
 
 interface CurveKeyPair {
@@ -27,98 +27,32 @@ export function curveKeyPair(): CurveKeyPair
 export type Message = ArrayBufferView | ArrayBuffer | SharedArrayBuffer | string | null
 
 interface ContextOptions {
-  blocky?: boolean,
-  ioThreads?: number,
-  maxMessageSize?: number,
-  maxSockets?: number,
-  ipv6?: boolean,
-  threadPriority?: number,
-  threadSchedulingPolicy?: number,
+  blocky: boolean,
+  ioThreads: number,
+  maxMessageSize: number,
+  maxSockets: number,
+  ipv6: boolean,
+  threadPriority: number,
+  threadSchedulingPolicy: number,
+}
+
+interface Context extends ContextOptions {
+  readonly maxSocketsLimit: number
 }
 
 export class Context {
-  blocky: boolean
-  ioThreads: number
-  maxMessageSize: number
-  maxSockets: number
-  readonly maxSocketsLimit: number
-  ipv6: boolean
-  threadPriority: number
-  threadSchedulingPolicy: number
-
-  constructor(options?: ContextOptions)
+  constructor(options?: Partial<ContextOptions>)
 }
 
 
 interface SocketOptions {
-  context?: Context,
+  context: Context,
 
-  affinity?: number
-  rate?: number
-  recoveryInterval?: number
-  sendBufferSize?: number
-  receiveBufferSize?: number
-  linger?: number
-  reconnectInterval?: number
-  backlog?: number
-  reconnectMaxInterval?: number
-  maxMessageSize?: number
-  sendHighWaterMark?: number
-  receiveHighWaterMark?: number
-  multicastHops?: number
-  rcvtimeo?: number
-  receiveTimeout?: number
-  sndtimeo?: number
-  sendTimeout?: number
-  lastEndpoint?: string
-  tcpKeepalive?: number
-  tcpKeepaliveCount?: number
-  tcpKeepaliveIdle?: number
-  tcpKeepaliveInterval?: number
-  tcpAcceptFilter?: string
-  immediate?: boolean
-  ipv6?: boolean
-  plainServer?: boolean
-  plainUsername?: string
-  plainPassword?: string
-
-  curveServer?: boolean
-  curvePublicKey?: string
-  curveSecretKey?: string
-  curveServerKey?: string
-
-  gssapiServer?: boolean
-  gssapiPrincipal?: string
-  gssapiServicePrincipal?: string
-  gssapiPlainText?: boolean
-  gssapiPrincipalNameType?: "hostBased" | "userName" | "krb5Principal"
-  gssapiServicePrincipalNameType?: "hostBased" | "userName" | "krb5Principal"
-
-  zapDomain?: string
-  typeOfService?: number
-  handshakeInterval?: number
-  socksProxy?: string
-  heartbeatInterval?: number
-  heartbeatTimeToLive?: number
-  heartbeatTimeout?: number
-  connectTimeout?: number
-  tcpMaxRetransmitTimeout?: number
-  multicastMaxTransportDataUnit?: number
-  vmciBufferSize?: number
-  vmciBufferMinSize?: number
-  vmciBufferMaxSize?: number
-  vmciConnectTimeout?: number
-  useFd?: number
-  interface?: string
-}
-
-export class Socket {
   affinity: number
   rate: number
   recoveryInterval: number
   sendBufferSize: number
   receiveBufferSize: number
-  readonly type: number
   linger: number
   reconnectInterval: number
   backlog: number
@@ -127,51 +61,55 @@ export class Socket {
   sendHighWaterMark: number
   receiveHighWaterMark: number
   multicastHops: number
-  rcvtimeo: number
   receiveTimeout: number
-  sndtimeo: number
   sendTimeout: number
-  lastEndpoint?: string
   tcpKeepalive: number
   tcpKeepaliveCount: number
   tcpKeepaliveIdle: number
   tcpKeepaliveInterval: number
+  tcpAcceptFilter: string | null
   immediate: boolean
   ipv6: boolean
-  readonly securityMechanism: null | "plain" | "curve" | "gssapi"
   plainServer: boolean
-  plainUsername?: string
-  plainPassword?: string
+  plainUsername: string | null
+  plainPassword: string | null
 
-  curveServer?: boolean
-  curvePublicKey?: string
-  curveSecretKey?: string
-  curveServerKey?: string
+  curveServer: boolean
+  curvePublicKey: string | null
+  curveSecretKey: string | null
+  curveServerKey: string | null
 
-  gssapiServer?: boolean
-  gssapiPrincipal?: string
-  gssapiServicePrincipal?: string
-  gssapiPlainText?: boolean
-  gssapiPrincipalNameType?: "hostBased" | "userName" | "krb5Principal"
-  gssapiServicePrincipalNameType?: "hostBased" | "userName" | "krb5Principal"
+  gssapiServer: boolean
+  gssapiPrincipal: string | null
+  gssapiServicePrincipal: string | null
+  gssapiPlainText: boolean
+  gssapiPrincipalNameType: "hostBased" | "userName" | "krb5Principal"
+  gssapiServicePrincipalNameType: "hostBased" | "userName" | "krb5Principal"
 
-  zapDomain?: string
+  zapDomain: string | null
   typeOfService: number
   handshakeInterval: number
-  socksProxy?: string
+  socksProxy: string | null
   heartbeatInterval: number
   heartbeatTimeToLive: number
   heartbeatTimeout: number
   connectTimeout: number
   tcpMaxRetransmitTimeout: number
-  readonly threadSafe: boolean
   multicastMaxTransportDataUnit: number
   vmciBufferSize: number
   vmciBufferMinSize: number
   vmciBufferMaxSize: number
   vmciConnectTimeout: number
-  useFd: number
-  interface?: string
+  interface: string | null
+  zapEnforceDomain: boolean
+  loopbackFastPath: boolean
+}
+
+interface Socket extends SocketOptions {
+  readonly type: number
+  readonly lastEndpoint: string | null
+  readonly securityMechanism: null | "plain" | "curve" | "gssapi"
+  readonly threadSafe: boolean
 
   readonly events: Observer
   readonly context: Context
@@ -179,8 +117,6 @@ export class Socket {
   readonly closed: boolean
   readonly readable: boolean
   readonly writable: boolean
-
-  constructor(type: number, options?: SocketOptions)
 
   close(): void
   bind(address: string): Promise<void>
@@ -193,160 +129,151 @@ export class Socket {
   [Symbol.asyncIterator](): AsyncIterator<Buffer[]>
 }
 
+export class Socket {
+  constructor(type: number, options?: Partial<SocketOptions>)
+}
+
 export class Pair extends Socket {
-  constructor(options?: SocketOptions)
+  constructor(options?: Partial<SocketOptions>)
 }
 
 interface PublisherOptions {
-  noDrop?: boolean
-  conflate?: boolean
-  invertMatching?: boolean
-}
-
-export class Publisher extends Socket {
   noDrop: boolean
   conflate: boolean
   invertMatching: boolean
+}
 
-  constructor(options?: SocketOptions & PublisherOptions)
+interface Publisher extends Socket, PublisherOptions {}
+
+export class Publisher {
+  constructor(options?: Partial<SocketOptions> & Partial<PublisherOptions>)
 }
 
 interface SubscriberOptions {
-  conflate?: boolean
-  invertMatching?: boolean
-}
-
-export class Subscriber extends Socket {
   conflate: boolean
   invertMatching: boolean
+}
 
-  constructor(options?: SocketOptions & SubscriberOptions)
-
+interface Subscriber extends Socket, SubscriberOptions {
   subscribe(...topics: string[]): void
   unsubscribe(...topics: string[]): void
 }
 
-interface RequestOptions {
-  routingId?: string
-  probeRouter?: boolean
-  correlate?: boolean
-  relaxed?: boolean
+export class Subscriber {
+  constructor(options?: Partial<SocketOptions> & Partial<SubscriberOptions>)
 }
 
-export class Request extends Socket {
-  routingId?: string
+interface RequestOptions {
+  routingId: string | null
   probeRouter: boolean
   correlate: boolean
   relaxed: boolean
+}
 
-  constructor(options?: SocketOptions & RequestOptions)
+interface Request extends Socket, RequestOptions {}
+
+export class Request {
+  constructor(options?: Partial<SocketOptions> & Partial<RequestOptions>)
 }
 
 interface ReplyOptions {
-  routingId?: string
+  routingId: string | null
 }
 
-export class Reply extends Socket {
-  routingId?: string
+interface Reply extends Socket, ReplyOptions {}
 
-  constructor(options?: SocketOptions & ReplyOptions)
+export class Reply {
+  constructor(options?: Partial<SocketOptions> & Partial<ReplyOptions>)
 }
 
 interface DealerOptions {
-  routingId?: string
-  probeRouter?: boolean
-  conflate?: boolean
-}
-
-export class Dealer extends Socket {
-  routingId?: string
+  routingId: string | null
   probeRouter: boolean
   conflate: boolean
+}
 
-  constructor(options?: SocketOptions & DealerOptions)
+interface Dealer extends Socket, DealerOptions {}
+
+export class Dealer {
+  constructor(options?: Partial<SocketOptions> & Partial<DealerOptions>)
 }
 
 interface RouterOptions {
-  routingId?: string
-  mandatory?: boolean
-  probeRouter?: boolean
-  handover?: boolean
-}
-
-interface RouterConnectOptions {
-  routingId?: string
-}
-
-export class Router extends Socket {
-  routingId?: string
+  routingId: string | null
   mandatory: boolean
   probeRouter: boolean
   handover: boolean
+}
 
-  constructor(options?: SocketOptions & RouterOptions)
-  connect(address: string, options?: RouterConnectOptions): void
+interface RouterConnectOptions {
+  routingId: string
+}
+
+interface Router extends Socket, RouterOptions {
+  connect(address: string, options?: Partial<RouterConnectOptions>): void
+}
+
+export class Router {
+  constructor(options?: Partial<SocketOptions> & Partial<RouterOptions>)
 }
 
 interface PullOptions {
-  conflate?: boolean
+  conflate: boolean
 }
 
-export class Pull extends Socket {
-  conflate: boolean
+interface Pull extends Socket, PullOptions {}
 
-  constructor(options?: SocketOptions & PullOptions)
+export class Pull {
+  constructor(options?: Partial<SocketOptions> & Partial<PullOptions>)
 }
 
 interface PushOptions {
-  conflate?: boolean
+  conflate: boolean
 }
 
-export class Push extends Socket {
-  conflate: boolean
+interface Push extends Socket, PushOptions {}
 
-  constructor(options?: SocketOptions & PushOptions)
+export class Push {
+  constructor(options?: Partial<SocketOptions> & Partial<PushOptions>)
 }
 
 interface XPublisherOptions {
-  verbose?: boolean
-  verboser?: boolean
-  noDrop?: boolean
-  manual?: boolean
-  welcomeMessage?: string
-  invertMatching?: boolean
-}
-
-export class XPublisher extends Socket {
   verbose: boolean
   verboser: boolean
   noDrop: boolean
   manual: boolean
-  welcomeMessage?: string
+  welcomeMessage: string | null
   invertMatching: boolean
-
-  constructor(options?: SocketOptions & XPublisherOptions)
 }
 
-interface XSubscriberOptions {
+interface XPublisher extends Socket, XPublisherOptions {}
+
+export class XPublisher {
+  constructor(options?: Partial<SocketOptions> & Partial<XPublisherOptions>)
 }
 
-export class XSubscriber extends Socket {
-  constructor(options?: SocketOptions & XSubscriberOptions)
+interface XSubscriberOptions {}
+
+interface XSubscriber extends Socket, XSubscriberOptions {}
+
+export class XSubscriber {
+  constructor(options?: Partial<SocketOptions> & Partial<XSubscriberOptions>)
 }
 
 interface StreamOptions {
-  notify?: boolean
+  notify: boolean
 }
 
 interface StreamConnectOptions {
-  routingId?: string
+  routingId: string
 }
 
-export class Stream extends Socket {
-  notify: boolean
+interface Stream extends Socket, StreamOptions {
+  connect(address: string, options?: Partial<StreamConnectOptions>): void
+}
 
-  constructor(options?: SocketOptions & StreamOptions)
-  connect(address: string, options?: StreamConnectOptions): void
+export class Stream {
+  constructor(options?: Partial<SocketOptions> & Partial<StreamOptions>)
 }
 
 

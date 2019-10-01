@@ -47,7 +47,7 @@ else
 
   echo "Building libzmq..."
 
-  if [ "${npm_config_zmq_draft}" = "true" ] || [ "${ZMQ_DRAFT}" = "true" ]; then
+  if [ "${npm_config_zmq_draft}" = "true" ] || [ -n "${ZMQ_DRAFT}" ]; then
     BUILD_OPTIONS="-DENABLE_DRAFTS=ON ${BUILD_OPTIONS}"
   fi
 
@@ -64,6 +64,4 @@ else
   else
     cmake --build . --config Release --target install -- -j5
   fi
-
-  rm -rf "${SRC_DIR}" "${TARBALL}"
 fi

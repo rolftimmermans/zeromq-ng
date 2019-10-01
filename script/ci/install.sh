@@ -21,6 +21,10 @@ if [ -n "${ZMQ_SHARED}" ]; then
   export npm_config_zmq_shared=true
 fi
 
+if [ -n "${ZMQ_DRAFT}" ]; then
+  export npm_config_zmq_draft=true
+fi
+
 export npm_config_build_from_source=true
 
 # Installing node-gyp globally facilitates calling it in various ways, not just
