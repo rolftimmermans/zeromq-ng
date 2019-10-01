@@ -1,7 +1,7 @@
 /* Copyright (c) 2017-2018 Rolf Timmermans */
 #pragma once
 
-#include "napi_compat.h"
+#include "napi_util.h"
 
 namespace zmq {
 /* Pending https://github.com/nodejs/node-addon-api/issues/223 */

@@ -3,7 +3,7 @@
 #include "socket.h"
 
 #include "util/callback_scope.h"
-#include "util/napi_compat.h"
+#include "util/napi_util.h"
 #include "util/uvwork.h"
 
 #include <unordered_set>

@@ -4,7 +4,7 @@
 #include "observer.h"
 
 #include "incoming_msg.h"
-#include "util/napi_compat.h"
+#include "util/napi_util.h"
 #include "util/uvloop.h"
 #include "util/uvwork.h"
 
