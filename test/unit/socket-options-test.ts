@@ -141,9 +141,9 @@ describe("socket options", function() {
   it("should throw for readonly option", function() {
     const sock = new zmq.Dealer
     assert.throws(
-      () => (sock as any).mechanism = 1,
+      () => (sock as any).securityMechanism = 1,
       TypeError,
-      "Cannot set property mechanism of #<Socket> which has only a getter"
+      "Cannot set property securityMechanism of #<Socket> which has only a getter"
     )
   })
 

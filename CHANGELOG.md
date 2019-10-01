@@ -1,3 +1,9 @@
+### v5.0.0-beta.21
+
+* BREAKING: Removed all socket option aliases so that all options only have a single accessor.
+
+* Deduplicate options from TypeScript definitions.
+
 ### v5.0.0-beta.19 / v5.0.0-beta.20
 
 * More platforms with bundled prebuilds.
