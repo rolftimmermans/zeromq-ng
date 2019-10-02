@@ -1,4 +1,4 @@
-### v5.0.0-beta.22
+### v5.0.0-beta.23
 
 * BREAKING: Ported all library code to TypeScript so that the typings are easier to match to the actual implementation. The typings may be slightly stricter as a result.
 
@@ -14,7 +14,7 @@
 
 * Add new socket options.
 
-### v5.0.0-beta.19 / v5.0.0-beta.20
+### v5.0.0-beta.20
 
 * More platforms with bundled prebuilds.
 
