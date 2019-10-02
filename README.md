@@ -176,7 +176,7 @@ In order to develop and test the library, you'll need the following:
 
 * A working C/C++ compiler toolchain with make
 * Python 2.7
-* Node.js 8.6+
+* Node.js 10+
 * CMake 2.8+
 * curl
 * clang-format is strongly recommended
