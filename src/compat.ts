@@ -567,18 +567,18 @@ function proxy(frontend: Socket, backend: Socket, capture?: Socket) {
   case "push/pull":
   case "pull/push":
   case "xpub/xsub":
-    frontend.on("message", () => {
-      backend.send([].slice.call(arguments))
+    frontend.on("message", (...args: zmq.Message[]) => {
+      backend.send(args)
     })
 
     if (capture) {
-      backend.on("message", () => {
-        frontend.send([].slice.call(arguments))
-        capture.send([].slice.call(arguments))
+      backend.on("message", (...args: zmq.Message[]) => {
+        frontend.send(args)
+        capture.send(args)
       })
     } else {
-      backend.on("message", () => {
-        frontend.send([].slice.call(arguments))
+      backend.on("message", (...args: zmq.Message[]) => {
+        frontend.send(args)
       })
     }
     break

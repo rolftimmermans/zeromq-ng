@@ -53,7 +53,7 @@
   "scripts": {
     "install": "node-gyp-build",
     "ci:prebuild": "prebuildify --napi --strip",
-    "dev:test": "script/format.sh && tslint -t stylish --project . && tsc --project . && mocha && rm -f tmp/*",
+    "dev:test": "script/format.sh && tsc --project . && mocha && tslint -t stylish --project . && rm -f tmp/*",
     "dev:bench": "node --harmony --expose-gc --require ./test/ts test/bench"
   },
   "keywords": [
