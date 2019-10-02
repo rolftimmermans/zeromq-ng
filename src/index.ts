@@ -24,10 +24,8 @@ function asyncIterator(this: Socket | Observer): AsyncIterator<any[], undefined>
   }
 }
 
-if (Symbol.asyncIterator) {
-  Socket.prototype[Symbol.asyncIterator] = asyncIterator as () => AsyncIterator<Buffer[], undefined>
-  Observer.prototype[Symbol.asyncIterator] = asyncIterator as () => AsyncIterator<[Event, EventDetails], undefined>
-}
+Socket.prototype[Symbol.asyncIterator] = asyncIterator as () => AsyncIterator<Buffer[], undefined>
+Observer.prototype[Symbol.asyncIterator] = asyncIterator as () => AsyncIterator<[Event, EventDetails], undefined>
 
 Object.defineProperty(Observer.prototype, "emitter", {
   get: function emitter() {
