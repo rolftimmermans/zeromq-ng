@@ -1,0 +1,16 @@
+{
+  "include": ["src/*.ts"],
+  "compilerOptions": {
+    "target": "es2017",
+    "outDir": "lib",
+    "declaration": true,
+    "module": "commonjs",
+    "types": ["node", "mocha"],
+    "lib": ["es2017", "esnext.asynciterable"],
+    "downlevelIteration": true,
+    "strict": true,
+    "strictPropertyInitialization": false,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+  }
+}

@@ -41,16 +41,19 @@
     "README.md",
     "binding.gyp",
     "compat.js",
-    "lib",
-    "src",
+    "compat.d.ts",
+    "lib/*.d.ts",
+    "lib/*.js",
+    "src/util/*.h",
+    "src/*.cc",
+    "src/*.h",
     "script/build.sh",
-    "script/format.sh",
     "prebuilds"
   ],
   "scripts": {
     "install": "node-gyp-build",
     "ci:prebuild": "prebuildify --napi --strip",
-    "dev:test": "eslint lib && script/format.sh && mocha && tsc --project test/tsconfig.json --noEmit && rm -f tmp/*",
+    "dev:test": "script/format.sh && tsc --project tsconfig.json && mocha && rm -f tmp/*",
     "dev:bench": "node --harmony --expose-gc --require ./test/ts test/bench"
   },
   "keywords": [

@@ -1,5 +1,5 @@
-const zmq = require(".")
-const {EventEmitter} = require("events")
+import * as zmq from "."
+import {EventEmitter} from "events"
 
 
 let count = 1
@@ -27,6 +27,7 @@ const longOptions = {
   ZMQ_UNSUBSCRIBE: 7,
   ZMQ_RATE: 8,
   ZMQ_RECOVERY_IVL: 9,
+  ZMQ_RECOVERY_IVL_MSEC: 9,
   ZMQ_SNDBUF: 11,
   ZMQ_RCVBUF: 12,
   ZMQ_RCVMORE: 13,
@@ -132,7 +133,7 @@ class Context {
     throw new Error("Context cannot be instantiated in compatibility mode")
   }
 
-  static setMaxThreads(value) {
+  static setMaxThreads(value: number) {
     zmq.global.ioThreads = value
   }
 
@@ -140,7 +141,7 @@ class Context {
     return zmq.global.ioThreads
   }
 
-  static setMaxSockets(value) {
+  static setMaxSockets(value: number) {
     zmq.global.maxSockets = value
   }
 
@@ -149,15 +150,35 @@ class Context {
   }
 }
 
+type SocketType = (
+  "pair" |
+  "req" |
+  "rep" |
+  "pub" |
+  "sub" |
+  "dealer" | "xreq" |
+  "router" | "xrep" |
+  "pull" |
+  "push" |
+  "xpub" |
+  "xsub" |
+  "stream"
+)
+
 class Socket extends EventEmitter {
-  constructor(type) {
+  [key: string]: any
+
+  type: SocketType
+  private _msg: zmq.Message[] = []
+  private _recvQueue: Array<Buffer[]> = []
+  private _sendQueue: Array<[zmq.Message[], ((err?: Error) => void) | undefined]> = []
+  private _paused = false
+  private _socket: zmq.Socket
+  private _count: number = 0
+
+  constructor(type: SocketType) {
     super()
     this.type = type
-
-    this._msg = []
-    this._recvQueue = []
-    this._sendQueue = []
-    this._paused = false
 
     switch (type) {
     case "pair": this._socket = new zmq.Pair; break
@@ -203,7 +224,7 @@ class Socket extends EventEmitter {
   async _recv() {
     try {
       if (this._recvQueue.length) {
-        const msg = this._recvQueue.shift()
+        const msg = this._recvQueue.shift()!
         process.nextTick(() => this.emit("message", ...msg))
       }
 
@@ -221,20 +242,22 @@ class Socket extends EventEmitter {
   }
 
   async _send() {
-    const [msg, cb] = this._sendQueue.shift()
-    try {
-      await this._socket.send(msg)
-      if (cb) cb()
-    } catch (err) {
-      if (cb) {
-        cb(err)
-      } else {
-        this.emit("error", err)
+    if (this._sendQueue.length) {
+      const [msg, cb] = this._sendQueue.shift()!
+      try {
+        await this._socket.send(msg)
+        if (cb) cb()
+      } catch (err) {
+        if (cb) {
+          cb(err)
+        } else {
+          this.emit("error", err)
+        }
       }
     }
   }
 
-  bind(address, cb) {
+  bind(address: string, cb?: (err?: Error) => void) {
     this._socket.bind(address).then(() => {
       process.nextTick(() => {
         this.emit("bind", address)
@@ -253,7 +276,7 @@ class Socket extends EventEmitter {
     return this
   }
 
-  unbind(address, cb) {
+  unbind(address: string, cb?: (err?: Error) => void) {
     this._socket.unbind(address).then(() => {
       process.nextTick(() => {
         this.emit("unbind", address)
@@ -272,17 +295,17 @@ class Socket extends EventEmitter {
     return this
   }
 
-  connect(address) {
+  connect(address: string) {
     this._socket.connect(address)
     return this
   }
 
-  disconnect(address) {
+  disconnect(address: string) {
     this._socket.disconnect(address)
     return this
   }
 
-  send(message, flags, cb) {
+  send(message: zmq.Message[], flags: number = 0, cb?: (err?: Error) => void) {
     flags = flags | 0
     this._msg = this._msg.concat(message)
     if ((flags & sendOptions.ZMQ_SNDMORE) === 0) {
@@ -324,8 +347,9 @@ class Socket extends EventEmitter {
     return this._socket.closed
   }
 
-  monitor(interval, num) {
+  monitor(interval: number, num: number) {
     this._count = count++
+    (this._count)
 
     if (interval || num) {
       process.emitWarning("Arguments to monitor() are ignored in compatibility mode; all events are read automatically")
@@ -336,8 +360,8 @@ class Socket extends EventEmitter {
     const read = async () => {
       while (!events.closed) {
         try {
-          let [event, data] = await events.receive()
-          if (event == "stop") return
+          let [event, data]: [string, zmq.EventDetails] = await events.receive()
+          if (event == "end") return
 
           switch (event) {
           case "connect": break
@@ -372,24 +396,32 @@ class Socket extends EventEmitter {
     return this
   }
 
-  subscribe(filter) {
-    this._socket.subscribe(filter)
-    return this
+  subscribe(filter: string) {
+    if (this._socket instanceof zmq.Subscriber) {
+      this._socket.subscribe(filter)
+      return this
+    } else {
+      throw new Error("Subscriber socket required")
+    }
   }
 
-  unsubscribe(filter) {
-    this._socket.unsubscribe(filter)
-    return this
+  unsubscribe(filter: string) {
+    if (this._socket instanceof zmq.Subscriber) {
+      this._socket.unsubscribe(filter)
+      return this
+    } else {
+      throw new Error("Subscriber socket required")
+    }
   }
 
-  setsockopt(option, value) {
-    option = shortOptions[option] || option
+  setsockopt(option: number | keyof typeof shortOptions, value: any) {
+    option = typeof option != "number" ? shortOptions[option] : option
 
     switch (option) {
     case longOptions.ZMQ_AFFINITY: this._socket.affinity = value; break
-    case longOptions.ZMQ_IDENTITY: this._socket.routingId = value; break
-    case longOptions.ZMQ_SUBSCRIBE: this._socket.subscribe(value); break
-    case longOptions.ZMQ_UNSUBSCRIBE: this._socket.unsubscribe(value); break
+    case longOptions.ZMQ_IDENTITY: (this._socket as zmq.Router).routingId = value; break
+    case longOptions.ZMQ_SUBSCRIBE: (this._socket as zmq.Subscriber).subscribe(value); break
+    case longOptions.ZMQ_UNSUBSCRIBE: (this._socket as zmq.Subscriber).unsubscribe(value); break
     case longOptions.ZMQ_RATE: this._socket.rate = value; break
     case longOptions.ZMQ_RECOVERY_IVL: this._socket.recoveryInterval = value; break
     case longOptions.ZMQ_SNDBUF: this._socket.sendBufferSize = value; break
@@ -406,15 +438,15 @@ class Socket extends EventEmitter {
     case longOptions.ZMQ_RCVTIMEO: this._socket.receiveTimeout = value; break
     case longOptions.ZMQ_SNDTIMEO: this._socket.sendTimeout = value; break
     case longOptions.ZMQ_IPV4ONLY: this._socket.ipv6 = !value; break
-    case longOptions.ZMQ_ROUTER_MANDATORY: this._socket.mandatory = !!value; break
+    case longOptions.ZMQ_ROUTER_MANDATORY: (this._socket as zmq.Router).mandatory = !!value; break
     case longOptions.ZMQ_TCP_KEEPALIVE: this._socket.tcpKeepalive = value; break
     case longOptions.ZMQ_TCP_KEEPALIVE_CNT: this._socket.tcpKeepaliveCount = value; break
     case longOptions.ZMQ_TCP_KEEPALIVE_IDLE: this._socket.tcpKeepaliveIdle = value; break
     case longOptions.ZMQ_TCP_KEEPALIVE_INTVL: this._socket.tcpKeepaliveInterval = value; break
     case longOptions.ZMQ_TCP_ACCEPT_FILTER: this._socket.tcpAcceptFilter = value; break
     case longOptions.ZMQ_DELAY_ATTACH_ON_CONNECT: this._socket.immediate = !!value; break
-    case longOptions.ZMQ_XPUB_VERBOSE: this._socket.verbose = !!value; break
-    case longOptions.ZMQ_ROUTER_RAW: this._socket.raw = !!value; break
+    case longOptions.ZMQ_XPUB_VERBOSE: (this._socket as zmq.XPublisher).verbose = !!value; break
+    case longOptions.ZMQ_ROUTER_RAW: throw new Error("ZMQ_ROUTER_RAW is not supported in compatibility mode")
     case longOptions.ZMQ_IPV6: this._socket.ipv6 = !!value; break
     case longOptions.ZMQ_PLAIN_SERVER: this._socket.plainServer = !!value; break
     case longOptions.ZMQ_PLAIN_USERNAME: this._socket.plainUsername = value; break
@@ -428,19 +460,19 @@ class Socket extends EventEmitter {
     case longOptions.ZMQ_HEARTBEAT_TTL: this._socket.heartbeatTimeToLive = value; break
     case longOptions.ZMQ_HEARTBEAT_TIMEOUT: this._socket.heartbeatTimeout = value; break
     case longOptions.ZMQ_CONNECT_TIMEOUT: this._socket.connectTimeout = value; break
-    case longOptions.ZMQ_ROUTER_HANDOVER: this._socket.handover = !!value; break
+    case longOptions.ZMQ_ROUTER_HANDOVER: (this._socket as zmq.Router).handover = !!value; break
     default: throw new Error("Unknown option")
     }
 
     return this
   }
 
-  getsockopt(option) {
-    option = shortOptions[option] || option
+  getsockopt(option: number | keyof typeof shortOptions) {
+    option = typeof option != "number" ? shortOptions[option] : option
 
     switch (option) {
     case longOptions.ZMQ_AFFINITY: return this._socket.affinity
-    case longOptions.ZMQ_IDENTITY: return this._socket.routingId
+    case longOptions.ZMQ_IDENTITY: return (this._socket as zmq.Router).routingId
     case longOptions.ZMQ_RATE: return this._socket.rate
     case longOptions.ZMQ_RECOVERY_IVL: return this._socket.recoveryInterval
     case longOptions.ZMQ_SNDBUF: return this._socket.sendBufferSize
@@ -462,14 +494,14 @@ class Socket extends EventEmitter {
     case longOptions.ZMQ_SNDTIMEO: return this._socket.sendTimeout
     case longOptions.ZMQ_IPV4ONLY: return !this._socket.ipv6
     case longOptions.ZMQ_LAST_ENDPOINT: return this._socket.lastEndpoint
-    case longOptions.ZMQ_ROUTER_MANDATORY: return this._socket.mandatory ? 1 : 0
+    case longOptions.ZMQ_ROUTER_MANDATORY: return (this._socket as zmq.Router).mandatory ? 1 : 0
     case longOptions.ZMQ_TCP_KEEPALIVE: return this._socket.tcpKeepalive
     case longOptions.ZMQ_TCP_KEEPALIVE_CNT: return this._socket.tcpKeepaliveCount
     case longOptions.ZMQ_TCP_KEEPALIVE_IDLE: return this._socket.tcpKeepaliveIdle
     case longOptions.ZMQ_TCP_KEEPALIVE_INTVL: return this._socket.tcpKeepaliveInterval
     case longOptions.ZMQ_DELAY_ATTACH_ON_CONNECT: return this._socket.immediate ? 1 : 0
-    case longOptions.ZMQ_XPUB_VERBOSE: return this._socket.verbose ? 1 : 0
-    case longOptions.ZMQ_ROUTER_RAW: return this._socket.raw ? 1 : 0
+    case longOptions.ZMQ_XPUB_VERBOSE: return (this._socket as zmq.XPublisher).verbose ? 1 : 0
+    case longOptions.ZMQ_ROUTER_RAW: throw new Error("ZMQ_ROUTER_RAW is not supported in compatibility mode")
     case longOptions.ZMQ_IPV6: return this._socket.ipv6 ? 1 : 0
     case longOptions.ZMQ_MECHANISM:
       switch (this._socket.securityMechanism) {
@@ -495,20 +527,23 @@ class Socket extends EventEmitter {
   }
 }
 
-Object.keys(shortOptions).forEach(function(name) {
-  Socket.prototype.__defineGetter__(name, function() {
-    return this.getsockopt(shortOptions[name])
+for (const key in shortOptions) {
+  Object.defineProperty(Socket.prototype, key, {
+    get: function(this: Socket) {
+      return this.getsockopt(shortOptions[key as keyof typeof shortOptions])
+    },
+    set: function(this: Socket, val: string | Buffer) {
+      if ("string" == typeof val) val = Buffer.from(val, "utf8")
+      return this.setsockopt(shortOptions[key as keyof typeof shortOptions], val)
+    },
   })
+}
 
-  Socket.prototype.__defineSetter__(name, function(val) {
-    if ("string" == typeof val) val = Buffer.from(val, "utf8")
-    return this.setsockopt(shortOptions[name], val)
-  })
-})
-
-function createSocket(type, options = {}) {
+function createSocket(type: SocketType, options: {[key: string]: any} = {}) {
   const sock = new Socket(type)
-  for (const key in options) sock[key] = options[key]
+  for (const key in options) {
+    sock[key] = options[key]
+  }
   return sock
 }
 
@@ -517,7 +552,7 @@ function curveKeypair() {
   return {public: publicKey, secret: secretKey}
 }
 
-function proxy(frontend, backend, capture) {
+function proxy(frontend: Socket, backend: Socket, capture?: Socket) {
   switch (frontend.type + "/" + backend.type) {
   case "push/pull":
   case "pull/push":
@@ -561,17 +596,23 @@ function proxy(frontend, backend, capture) {
   }
 }
 
-Object.assign(module.exports, {
-  version: zmq.version,
+const version = zmq.version
+const socket = createSocket
+const options = shortOptions
+
+export {
+  version,
   Context,
   Socket,
-  socket: createSocket,
+  socket,
   createSocket,
   curveKeypair,
   proxy,
-  options: shortOptions,
-})
+  options,
+}
 
+/* Unfortunately there is no easy way to include these in the resulting
+   TS definitions. */
 Object.assign(module.exports, longOptions)
 Object.assign(module.exports, types)
 Object.assign(module.exports, pollStates)

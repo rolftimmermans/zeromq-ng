@@ -184,30 +184,36 @@ In order to develop and test the library, you'll need the following:
 
 ## Defining new options
 
-Socket and context options can be defined at runtime. By design, this requires no recompilation. This allows library users to test and use options that have been introduced in recent versions of ZeroMQ without having to modify this library. Of course we'd love to include support for new options in an idiomatic way.
+Socket and context options can be set at runtime, even if they are not implemented by this library. By design, this requires no recompilation if the built version of ZeroMQ has support for them. This allows library users to test and use options that have been introduced in recent versions of ZeroMQ without having to modify this library. Of course we'd love to include support for new options in an idiomatic way.
 
-Options can be defined as follows:
+Options can be set as follows:
 
 ```js
-const {Socket} = require("zeromq-ng")
+const {Dealer} = require("zeromq-ng")
 
 /* This defines an accessor named 'sendHighWaterMark', which corresponds to
    the constant ZMQ_SNDHWM, which is defined as '23' in zmq.h. The option takes
    integers. The accessor name has been converted to idiomatic JavaScript.
    Of course, this particular option already exists in this library. */
-Socket.defineOption(23, "Int32", "sendHighWaterMark")
+class MyDealer extends Dealer {
+  get sendHighWaterMark(): number {
+    return this.getInt32Option(23)
+  }
 
-const sock = new Socket({sendHighWaterMark: 123})
+  set sendHighWaterMark(value: number) {
+    this.setInt32Option(23, value)
+  }
+}
+
+const sock = new MyDealer({sendHighWaterMark: 456})
 ```
 
-Unfortunately defining options at runtime is not supported in TypeScript due to its design goal of having all types available at compile time. You can hack around this by doing things like `(Socket as any).defineOption(...)`.
-
-ZeroMQ socket and context options are crazy. They allow you to do anything. In this library we prefer to keep them a bit saner where possible. If you wish to send a pull request for a new option, please make sure that:
+ZeroMQ socket and context option names & functionality are crazy. There is an option for everything. In this library we prefer to keep them a bit saner where possible. If you wish to send a pull request for a new option, please make sure that:
 
 * The option is documented in README.md.
 * The option is only added to relevant socket types, and if the ZMQ_ constant has a prefix indicating which type it applies to, it is stripped from the name as it is exposed in JavaScript.
 * The name as exposed in this library is idiomatic for JavaScript, spelling out any abbreviations and using proper `camelCase` naming conventions.
-* TypeScript definitions have been implemented.
+* TypeScript definitions have been updated.
 * The option is a value that can be set on a socket, and you don't think it should actually be a method.
 
 

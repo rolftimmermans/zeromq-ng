@@ -73,15 +73,21 @@ describe("socket construction", function() {
     })
 
     it("should create socket with default context", function() {
-      const sock1 = new zmq.Socket(1)
-      const sock2 = new zmq.Socket(1)
+      class MySocket extends zmq.Socket {
+        constructor() { super(1) }
+      }
+      const sock1 = new MySocket()
+      const sock2 = new MySocket()
       assert.instanceOf(sock1, zmq.Socket)
       assert.equal(sock1.context, sock2.context)
     })
 
     it("should create socket with given context", function() {
+      class MySocket extends zmq.Socket {
+        constructor(opts: zmq.SocketOptions<MySocket>) { super(1, opts) }
+      }
       const context = new zmq.Context
-      const socket = new zmq.Socket(1, {context})
+      const socket = new MySocket({context})
       assert.instanceOf(socket, zmq.Socket)
       assert.equal(socket.context, context)
     })

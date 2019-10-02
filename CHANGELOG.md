@@ -1,3 +1,11 @@
+### v5.0.0-beta.22
+
+* BREAKING: Ported all library code to TypeScript so that the typings are easier to match to the actual implementation. The typings may be slightly stricter as a result.
+
+* BREAKING: Socket.defineOption()/Context.defineOption() have been made private. The alternative is to inherit from these classes instead, and define custom getters/setters. This solution works in TypeScript as well.
+
+* Fixed a few bugs in the compatibility layer due to the TypeScript port.
+
 ### v5.0.0-beta.21
 
 * BREAKING: Removed all socket option aliases so that all options only have a single accessor.
