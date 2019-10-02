@@ -21,7 +21,6 @@
     "benchmark": ">= 0",
     "chai": ">= 4.1",
     "choma": ">= 1.2",
-    "eslint": ">= 4.0",
     "gunzip-maybe": "^1.4.1",
     "mocha": ">= 4.0",
     "node-fetch": "^2.6.0",
@@ -29,6 +28,7 @@
     "semver": ">= 0",
     "tar-fs": "^2.0.0",
     "ts-node": ">= 7",
+    "tslint": "^5.20.0",
     "typescript": ">= 3",
     "weak-napi": ">= 1.0"
   },
@@ -53,7 +53,7 @@
   "scripts": {
     "install": "node-gyp-build",
     "ci:prebuild": "prebuildify --napi --strip",
-    "dev:test": "script/format.sh && tsc --project tsconfig.json && mocha && rm -f tmp/*",
+    "dev:test": "script/format.sh && tslint -t stylish --project . && tsc --project . && mocha && rm -f tmp/*",
     "dev:bench": "node --harmony --expose-gc --require ./test/ts test/bench"
   },
   "keywords": [

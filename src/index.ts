@@ -1,6 +1,6 @@
 export * from "./native"
 
-import {capability, Context, Event, EventDetails, Socket, SocketOptions, SocketType, Observer} from "./native"
+import {capability, Context, Event, EventDetails, Observer, Socket, SocketOptions, SocketType} from "./native"
 
 /* Support async iteration over received messages. Implementing this in JS
    is faster as long as there is no C++ native API to chain promises. */
@@ -14,7 +14,7 @@ function asyncIterator(this: Socket | Observer): AsyncIterator<any[], undefined>
       try {
         return {value: await this.receive(), done: false}
       } catch (err) {
-        if (this.closed && err.code == "EAGAIN") {
+        if (this.closed && err.code === "EAGAIN") {
           return {done: true} as IteratorReturnResult<undefined>
         } else {
           throw err
@@ -32,14 +32,14 @@ if (Symbol.asyncIterator) {
 Object.defineProperty(Observer.prototype, "emitter", {
   get: function emitter() {
     const {EventEmitter} = require("events")
-    const value = new EventEmitter
+    const value = new EventEmitter()
 
     const receive = this.receive.bind(this)
     Object.defineProperty(this, "receive", {
-      get: function receive() {
+      get: () => {
         throw new Error(
           "Observer is in event emitter mode. " +
-          "After a call to events.on() it is not possible to read events with events.receive()."
+          "After a call to events.on() it is not possible to read events with events.receive().",
         )
       },
     })
@@ -177,7 +177,7 @@ export class Subscriber extends Socket {
   }
 
   subscribe(...values: string[]) {
-    if (values.length == 0) {
+    if (values.length === 0) {
       this.setStringOption(6, null)
     } else {
       for (const value of values) {
@@ -187,7 +187,7 @@ export class Subscriber extends Socket {
   }
 
   unsubscribe(...values: string[]) {
-    if (values.length == 0) {
+    if (values.length === 0) {
       this.setStringOption(7, null)
     } else {
       for (const value of values) {
@@ -325,15 +325,15 @@ type OptionType = (
 function defineOption(id: number, type: OptionType, name: string, options: DefineOptions = {}) {
   const {on = [Socket], read = true, write = true, values} = options
 
-  let get, set
+  const desc: PropertyDescriptor = {}
 
   if (read) {
     if (values) {
-      get = function get(this: any) {
+      desc.get = function get(this: any) {
         return values[this[`get${type}Option`](id)]
       }
     } else {
-      get = function get(this: any) {
+      desc.get = function get(this: any) {
         return this[`get${type}Option`](id)
       }
     }
@@ -341,18 +341,18 @@ function defineOption(id: number, type: OptionType, name: string, options: Defin
 
   if (write) {
     if (values) {
-      set = function set(this: any, val: any) {
+      desc.set = function set(this: any, val: any) {
         this[`set${type}Option`](id, values.indexOf(val))
       }
     } else {
-      set = function set(this: any, val: any) {
+      desc.set = function set(this: any, val: any) {
         this[`set${type}Option`](id, val)
       }
     }
   }
 
   for (const target of Array.isArray(on) ? on : [on]) {
-    Object.defineProperty(target.prototype, name, {get, set})
+    Object.defineProperty(target.prototype, name, desc)
   }
 }
 

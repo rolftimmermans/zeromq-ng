@@ -1,5 +1,6 @@
-import * as zmq from "."
+/* tslint:disable: variable-name no-bitwise */
 import {EventEmitter} from "events"
+import * as zmq from "."
 
 
 let count = 1
@@ -129,10 +130,6 @@ const shortOptions = {
 }
 
 class Context {
-  constructor() {
-    throw new Error("Context cannot be instantiated in compatibility mode")
-  }
-
   static setMaxThreads(value: number) {
     zmq.global.ioThreads = value
   }
@@ -147,6 +144,10 @@ class Context {
 
   static getMaxSockets() {
     return zmq.global.maxSockets
+  }
+
+  constructor() {
+    throw new Error("Context cannot be instantiated in compatibility mode")
   }
 }
 
@@ -170,7 +171,7 @@ class Socket extends EventEmitter {
 
   type: SocketType
   private _msg: zmq.Message[] = []
-  private _recvQueue: Array<Buffer[]> = []
+  private _recvQueue: Buffer[][] = []
   private _sendQueue: Array<[zmq.Message[], ((err?: Error) => void) | undefined]> = []
   private _paused = false
   private _socket: zmq.Socket
@@ -181,18 +182,18 @@ class Socket extends EventEmitter {
     this.type = type
 
     switch (type) {
-    case "pair": this._socket = new zmq.Pair; break
-    case "req": this._socket = new zmq.Request; break
-    case "rep": this._socket = new zmq.Reply; break
-    case "pub": this._socket = new zmq.Publisher; break
-    case "sub": this._socket = new zmq.Subscriber; break
-    case "dealer": case "xreq": this._socket = new zmq.Dealer; break
-    case "router": case "xrep": this._socket = new zmq.Router; break
-    case "pull": this._socket = new zmq.Pull; break
-    case "push": this._socket = new zmq.Push; break
-    case "xpub": this._socket = new zmq.XPublisher; break
-    case "xsub": this._socket = new zmq.XSubscriber; break
-    case "stream": this._socket = new zmq.Stream; break
+    case "pair": this._socket = new zmq.Pair(); break
+    case "req": this._socket = new zmq.Request(); break
+    case "rep": this._socket = new zmq.Reply(); break
+    case "pub": this._socket = new zmq.Publisher(); break
+    case "sub": this._socket = new zmq.Subscriber(); break
+    case "dealer": case "xreq": this._socket = new zmq.Dealer(); break
+    case "router": case "xrep": this._socket = new zmq.Router(); break
+    case "pull": this._socket = new zmq.Pull(); break
+    case "push": this._socket = new zmq.Push(); break
+    case "xpub": this._socket = new zmq.XPublisher(); break
+    case "xsub": this._socket = new zmq.XSubscriber(); break
+    case "stream": this._socket = new zmq.Stream(); break
     }
 
     const recv = async () => {
@@ -215,7 +216,7 @@ class Socket extends EventEmitter {
       })
     }
 
-    if (type != "push" && type != "pub") recv()
+    if (type !== "push" && type !== "pub") recv()
     send()
 
     this.emit("_flushRecv")
@@ -228,14 +229,16 @@ class Socket extends EventEmitter {
         process.nextTick(() => this.emit("message", ...msg))
       }
 
-      const msg = await this._socket.receive()
-      if (this._paused) {
-        this._recvQueue.push(msg)
-      } else {
-        process.nextTick(() => this.emit("message", ...msg))
+      {
+        const msg = await this._socket.receive()
+        if (this._paused) {
+          this._recvQueue.push(msg)
+        } else {
+          process.nextTick(() => this.emit("message", ...msg))
+        }
       }
     } catch (err) {
-      if (!this._socket.closed && err.code != "EBUSY") {
+      if (!this._socket.closed && err.code !== "EBUSY") {
         process.nextTick(() => this.emit("error", err))
       }
     }
@@ -263,7 +266,7 @@ class Socket extends EventEmitter {
         this.emit("bind", address)
         if (cb) cb()
       })
-    }).catch(err => {
+    }).catch((err) => {
       process.nextTick(() => {
         if (cb) {
           cb(err)
@@ -282,7 +285,7 @@ class Socket extends EventEmitter {
         this.emit("unbind", address)
         if (cb) cb()
       })
-    }).catch(err => {
+    }).catch((err) => {
       process.nextTick(() => {
         if (cb) {
           cb(err)
@@ -349,6 +352,8 @@ class Socket extends EventEmitter {
 
   monitor(interval: number, num: number) {
     this._count = count++
+
+    /* tslint:disable-next-line: no-unused-expression */
     (this._count)
 
     if (interval || num) {
@@ -361,7 +366,7 @@ class Socket extends EventEmitter {
       while (!events.closed) {
         try {
           let [event, data]: [string, zmq.EventDetails] = await events.receive()
-          if (event == "end") return
+          if (event === "end") return
 
           switch (event) {
           case "connect": break
@@ -415,7 +420,7 @@ class Socket extends EventEmitter {
   }
 
   setsockopt(option: number | keyof typeof shortOptions, value: any) {
-    option = typeof option != "number" ? shortOptions[option] : option
+    option = typeof option !== "number" ? shortOptions[option] : option
 
     switch (option) {
     case longOptions.ZMQ_AFFINITY: this._socket.affinity = value; break
@@ -468,7 +473,7 @@ class Socket extends EventEmitter {
   }
 
   getsockopt(option: number | keyof typeof shortOptions) {
-    option = typeof option != "number" ? shortOptions[option] : option
+    option = typeof option !== "number" ? shortOptions[option] : option
 
     switch (option) {
     case longOptions.ZMQ_AFFINITY: return this._socket.affinity
@@ -479,7 +484,8 @@ class Socket extends EventEmitter {
     case longOptions.ZMQ_RCVBUF: return this._socket.receiveBufferSize
     case longOptions.ZMQ_RCVMORE: throw new Error("ZMQ_RCVMORE is not supported in compatibility mode")
     case longOptions.ZMQ_FD: throw new Error("ZMQ_FD is not supported in compatibility mode")
-    case longOptions.ZMQ_EVENTS: return (this._socket.readable ? pollStates.ZMQ_POLLIN : 0) | (this._socket.writable ? pollStates.ZMQ_POLLOUT : 0)
+    case longOptions.ZMQ_EVENTS: return (this._socket.readable ? pollStates.ZMQ_POLLIN : 0) |
+      (this._socket.writable ? pollStates.ZMQ_POLLOUT : 0)
     case longOptions.ZMQ_TYPE: return this._socket.type
     case longOptions.ZMQ_LINGER: return this._socket.linger
     case longOptions.ZMQ_RECONNECT_IVL: return this._socket.reconnectInterval
@@ -528,21 +534,25 @@ class Socket extends EventEmitter {
 }
 
 for (const key in shortOptions) {
-  Object.defineProperty(Socket.prototype, key, {
-    get: function(this: Socket) {
-      return this.getsockopt(shortOptions[key as keyof typeof shortOptions])
-    },
-    set: function(this: Socket, val: string | Buffer) {
-      if ("string" == typeof val) val = Buffer.from(val, "utf8")
-      return this.setsockopt(shortOptions[key as keyof typeof shortOptions], val)
-    },
-  })
+  if (shortOptions.hasOwnProperty(key)) {
+    Object.defineProperty(Socket.prototype, key, {
+      get(this: Socket) {
+        return this.getsockopt(shortOptions[key as keyof typeof shortOptions])
+      },
+      set(this: Socket, val: string | Buffer) {
+        if ("string" === typeof val) val = Buffer.from(val, "utf8")
+        return this.setsockopt(shortOptions[key as keyof typeof shortOptions], val)
+      },
+    })
+  }
 }
 
 function createSocket(type: SocketType, options: {[key: string]: any} = {}) {
   const sock = new Socket(type)
   for (const key in options) {
-    sock[key] = options[key]
+    if (options.hasOwnProperty(key)) {
+      sock[key] = options[key]
+    }
   }
   return sock
 }
@@ -557,17 +567,17 @@ function proxy(frontend: Socket, backend: Socket, capture?: Socket) {
   case "push/pull":
   case "pull/push":
   case "xpub/xsub":
-    frontend.on("message", function() {
+    frontend.on("message", () => {
       backend.send([].slice.call(arguments))
     })
 
     if (capture) {
-      backend.on("message", function() {
+      backend.on("message", () => {
         frontend.send([].slice.call(arguments))
         capture.send([].slice.call(arguments))
       })
     } else {
-      backend.on("message", function() {
+      backend.on("message", () => {
         frontend.send([].slice.call(arguments))
       })
     }
@@ -575,17 +585,17 @@ function proxy(frontend: Socket, backend: Socket, capture?: Socket) {
 
   case "router/dealer":
   case "xrep/xreq":
-    frontend.on("message", function(id, delimiter, msg) {
+    frontend.on("message", (id, delimiter, msg) => {
       backend.send([id, delimiter, msg])
     })
 
     if (capture) {
-      backend.on("message", function(id, delimiter, msg) {
+      backend.on("message", (id, delimiter, msg) => {
         frontend.send([id, delimiter, msg])
         capture.send(msg)
       })
     } else {
-      backend.on("message", function(id, delimiter, msg) {
+      backend.on("message", (id, delimiter, msg) => {
         frontend.send([id, delimiter, msg])
       })
     }
@@ -597,18 +607,16 @@ function proxy(frontend: Socket, backend: Socket, capture?: Socket) {
 }
 
 const version = zmq.version
-const socket = createSocket
-const options = shortOptions
 
 export {
   version,
   Context,
   Socket,
-  socket,
+  createSocket as socket,
   createSocket,
   curveKeypair,
   proxy,
-  options,
+  shortOptions as options,
 }
 
 /* Unfortunately there is no easy way to include these in the resulting

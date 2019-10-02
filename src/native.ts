@@ -1,3 +1,4 @@
+/* tslint:disable: no-var-requires */
 /* Declare all native C++ classes and methods in this file. */
 const path = require("path")
 module.exports = require("node-gyp-build")(path.join(__dirname, ".."))
@@ -51,9 +52,10 @@ export declare function curveKeyPair(): CurveKeyPair
 export declare class Context {
   /**
    * Creates a new ØMQ context and sets any provided context options.
-
+   *
    * It is usually not necessary to instantiate a new context – the global
-   * context is used for new sockets by default. */
+   * context is used for new sockets by default.
+   */
   constructor(options?: Options<Context>)
 
   protected getBoolOption(option: number): boolean
@@ -69,17 +71,17 @@ export declare const global: Context
 export type SocketOptions<T extends Socket> = Options<T, {context: Context}>
 
 export declare class Socket {
-  /**
-   * Creates a new ØMQ socket of the given type and sets any provided socket options.
-   */
-  protected constructor(type: SocketType, options?: Options<Socket, {context: Context}>)
-
   readonly events: Observer
   readonly context: Context
 
   readonly closed: boolean
   readonly readable: boolean
   readonly writable: boolean
+
+  /**
+   * Creates a new ØMQ socket of the given type and sets any provided socket options.
+   */
+  protected constructor(type: SocketType, options?: Options<Socket, {context: Context}>)
 
   close(): void
   bind(address: string): Promise<void>
@@ -163,6 +165,7 @@ type IfEquals<X, Y, A, B = never> =
   (<T>() => T extends Y ? 1 : 2) ? A : B
 
 type WritableKeys<T> = {
+  /* tslint:disable-next-line: ban-types */
   [P in keyof T]-?: T[P] extends Function ? never : IfEquals<{[Q in P]: T[P]}, {-readonly [Q in P]: T[P]}, P>
 }[keyof T]
 

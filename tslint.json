@@ -1,0 +1,17 @@
+{
+  "defaultSeverity": "error",
+  "extends": [
+    "tslint:recommended"
+  ],
+  "rules": {
+    "curly": [true, "ignore-same-line"],
+    "interface-name": [true, "never-prefix"],
+    "linebreak-style": [true, "LF"],
+    "member-access": [true, "no-public"],
+    "max-classes-per-file": [true, 20],
+    "prefer-const": [true, {"destructuring": "all"}],
+    "no-consecutive-blank-lines": [true, 2],
+    "object-literal-sort-keys": [true, "match-declaration-order-only"],
+    "semicolon": [true, "never"]
+  }
+}
