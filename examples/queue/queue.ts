@@ -30,5 +30,3 @@ export class Queue {
     this.sending = false
   }
 }
-
-

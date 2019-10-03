@@ -15,8 +15,12 @@ async function main() {
   receiver.connect("tcp://127.0.0.1:5555")
 
   for await (const [msg] of receiver) {
-    if (msg.length == 0) receiver.close()
-    console.log(`received: ${msg}`)
+    if (msg.length == 0) {
+      receiver.close()
+      console.log("received: <empty message>")
+    } else {
+      console.log(`received: ${msg}`)
+    }
   }
 }
 

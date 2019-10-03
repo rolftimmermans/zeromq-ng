@@ -20,5 +20,5 @@ The example will start a queue, send messages onto it, and only afterwards conne
 ```
 received: hello
 received: world!
-received:
+received: <empty message>
 ```
