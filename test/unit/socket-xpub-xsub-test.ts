@@ -55,7 +55,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
         }
 
         let subbed = 0
-        const subscribe = async () => {
+        const forward = async () => {
           for await (const [msg] of xpub) {
             assert.instanceOf(msg, Buffer)
             await xsub.send(msg)
@@ -80,7 +80,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
           }
         }
 
-        await Promise.all([send(), subscribe(), publish(), receive()])
+        await Promise.all([send(), forward(), publish(), receive()])
         assert.deepEqual(received, messages)
       })
     })
@@ -117,7 +117,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
         }
 
         let subbed = 0
-        const subscribe = async () => {
+        const forward = async () => {
           for await (const [msg] of xpub) {
             assert.instanceOf(msg, Buffer)
             await xsub.send(msg)
@@ -142,7 +142,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
           }
         }
 
-        await Promise.all([send(), subscribe(), publish(), receive()])
+        await Promise.all([send(), forward(), publish(), receive()])
         assert.deepEqual(received, ["bar", "baz"])
       })
     })
@@ -161,11 +161,14 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
         await sub1.connect(address)
         await sub2.connect(address)
 
-        sub1.subscribe("fo")
-        sub2.subscribe("fo")
-        sub2.unsubscribe("fo")
-
         const subscribe = async () => {
+          await new Promise(resolve => setTimeout(resolve, 25))
+          sub1.subscribe("fo")
+          sub2.subscribe("fo")
+          sub2.unsubscribe("fo")
+        }
+
+        const forward = async () => {
           for await (const [msg] of xpub) {
             assert.instanceOf(msg, Buffer)
             await xsub.send(msg)
@@ -174,7 +177,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
           }
         }
 
-        await Promise.all([subscribe()])
+        await Promise.all([subscribe(), forward()])
         assert.sameDeepMembers(subs, [Buffer.from("\x01fo")])
 
         sub2.close()
@@ -193,11 +196,14 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
         await sub1.connect(address)
         await sub2.connect(address)
 
-        sub1.subscribe("fo")
-        sub2.subscribe("fo")
-        sub2.unsubscribe("fo")
-
         const subscribe = async () => {
+          await new Promise(resolve => setTimeout(resolve, 25))
+          sub1.subscribe("fo")
+          sub2.subscribe("fo")
+          sub2.unsubscribe("fo")
+        }
+
+        const forward = async () => {
           for await (const [msg] of xpub) {
             assert.instanceOf(msg, Buffer)
             await xsub.send(msg)
@@ -206,7 +212,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
           }
         }
 
-        await Promise.all([subscribe()])
+        await Promise.all([subscribe(), forward()])
         assert.sameDeepMembers(subs, [
           Buffer.from("\x01fo"),
           Buffer.from("\x01fo"),
@@ -228,11 +234,14 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
         await sub1.connect(address)
         await sub2.connect(address)
 
-        sub1.subscribe("fo")
-        sub2.subscribe("fo")
-        sub2.unsubscribe("fo")
-
         const subscribe = async () => {
+          await new Promise(resolve => setTimeout(resolve, 25))
+          sub1.subscribe("fo")
+          sub2.subscribe("fo")
+          sub2.unsubscribe("fo")
+        }
+
+        const forward = async () => {
           for await (const [msg] of xpub) {
             assert.instanceOf(msg, Buffer)
             await xsub.send(msg)
@@ -241,7 +250,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
           }
         }
 
-        await Promise.all([subscribe()])
+        await Promise.all([subscribe(), forward()])
         assert.sameDeepMembers(subs, [
           Buffer.from("\x01fo"),
           Buffer.from("\x01fo"),

@@ -36,8 +36,8 @@ if (process.env.INCLUDE_COMPAT_TESTS) {
           sockA.bind(address2, async err => {
             if (err) throw err
             sockB.connect(address1)
-            sockB.send("Hello from sockB.")
             sockC.connect(address2)
+            sockB.send("Hello from sockB.")
             sockC.send("Hello from sockC.")
           })
         })
