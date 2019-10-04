@@ -97,30 +97,25 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
 
       if (process.env.INCLUDE_GC_TESTS) {
         it("should release reference to context", async function() {
-          const weak = require("weak")
+          const weak = require("weak-napi")
 
           let released = false
-          let completed = false
-          const release = () => {
-            if (completed) released = true
-          }
-
           const task = async () => {
             let context: zmq.Context|undefined = new zmq.Context
             const socket = new zmq.Dealer({context, linger: 0})
 
-            weak(context, release)
+            weak(context, () => {released = true})
             context = undefined
 
             global.gc()
             socket.connect(uniqAddress(proto))
             await socket.send(Buffer.from("foo"))
             socket.close()
-            completed = true
           }
 
           await task()
           global.gc()
+          await new Promise(resolve => setTimeout(resolve, 5))
           assert.equal(released, true)
         })
       }
@@ -129,22 +124,21 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
     if (process.env.INCLUDE_GC_TESTS) {
       describe("in gc finalizer", function() {
         it("should release reference to context", async function() {
-          const weak = require("weak")
+          const weak = require("weak-napi")
 
           let released = false
-          const release = () => released = true
-
           const task = async () => {
             let context: zmq.Context|undefined = new zmq.Context
             new zmq.Dealer({context, linger: 0})
 
-            weak(context, release)
+            weak(context, () => {released = true})
             context = undefined
             global.gc()
           }
 
           await task()
           global.gc()
+          await new Promise(resolve => setTimeout(resolve, 5))
           assert.equal(released, true)
         })
       })
