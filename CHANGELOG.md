@@ -2,6 +2,8 @@
 
 * BREAKING: Reimplemented two interacting boolean properties XPublisher.verbose/verboser as XPublisher.verbosity to make actual the behaviour more obvious.
 
+* Prevent segmentation fault when the Node.js process exits gracefully and messages larger than 32 bytes were queued on sockets that had the linger option disabled.
+
 * Include newer ZeroMQ.js improvements to compatibility layer.
 
 ### v5.0.0-beta.23

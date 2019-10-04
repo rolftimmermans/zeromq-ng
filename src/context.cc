@@ -193,6 +193,8 @@ void Context::SetCtxOpt(const Napi::CallbackInfo& info) {
 }
 
 void TerminateAll(void*) {
+    OutgoingMsg::Terminate();
+
     /* Close all currently open sockets. */
     for (auto socket : Socket::ActivePtrs) {
         auto err = zmq_close(socket);

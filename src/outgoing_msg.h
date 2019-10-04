@@ -12,6 +12,7 @@ public:
     class Parts;
 
     static void Initialize(Napi::Env env);
+    static void Terminate();
 
     /* Avoid copying outgoing messages, since the destructor is not copy safe,
        nor should we have to copy messages with the right STL containers. */

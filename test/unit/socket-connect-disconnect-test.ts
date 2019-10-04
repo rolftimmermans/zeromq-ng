@@ -45,7 +45,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
 
       if (semver.satisfies(zmq.version, ">= 4.1")) {
         it("should allow setting routing id on router", async function() {
-          const sock = new zmq.Router({mandatory: true})
+          const sock = new zmq.Router({mandatory: true, linger: 0})
           await sock.connect(uniqAddress(proto), {routingId: "remoteId"})
           await sock.send(["remoteId", "hi"])
         })

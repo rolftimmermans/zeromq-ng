@@ -4,4 +4,4 @@ test/unit/*-test.{ts,js} test/unit/compat/*-test.{ts,js}
 --harmony
 --expose-gc
 --reporter list
---exit
+

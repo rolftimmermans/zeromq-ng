@@ -95,6 +95,10 @@ void OutgoingMsg::Initialize(Napi::Env env) {
     trash.Initialize(env);
 }
 
+void OutgoingMsg::Terminate() {
+    trash.Terminate();
+}
+
 OutgoingMsg::Parts::Parts(Napi::Value value) {
     if (value.IsArray()) {
         /* Reverse insert parts into outgoing message list. */
