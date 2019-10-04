@@ -275,12 +275,24 @@ export class Push extends Socket {
 }
 
 export class XPublisher extends Socket {
-  verbose: boolean
-  verboser: boolean
   noDrop: boolean
   manual: boolean
   welcomeMessage: string | null
   invertMatching: boolean
+
+  set verbosity(value: null | "allSubs" | "allSubsUnsubs") {
+    /* ZMQ_XPUB_VERBOSE and ZMQ_XPUB_VERBOSER interact, so we normalize the
+       situation by making it a single property. */
+    switch (value) {
+      case null:
+        /* This disables ZMQ_XPUB_VERBOSE + ZMQ_XPUB_VERBOSER: */
+        this.setBoolOption(40 /* ZMQ_XPUB_VERBOSE */, false); break
+      case "allSubs":
+        this.setBoolOption(40 /* ZMQ_XPUB_VERBOSE */, true); break
+      case "allSubsUnsubs":
+        this.setBoolOption(78 /* ZMQ_XPUB_VERBOSER */, true); break
+    }
+  }
 
   constructor(options?: SocketOptions<XPublisher>) {
     super(SocketType.XPublisher, options)
@@ -415,7 +427,7 @@ defineOption(36, "Int32", "tcpKeepaliveIdle")
 defineOption(37, "Int32", "tcpKeepaliveInterval")
 defineOption(38, "String", "tcpAcceptFilter")
 defineOption(39, "Bool", "immediate")
-defineOption(40, "Bool", "verbose", {read: false, on: XPublisher})
+/* Option 'verbose' is implemented as verbosity on XPublisher. */
 defineOption(42, "Bool", "ipv6")
 defineOption(43, "Int32", "securityMechanism", {
   write: false,
@@ -471,7 +483,7 @@ defineOption(74, "Bool", "invertMatching", {
 defineOption(75, "Int32", "heartbeatInterval")
 defineOption(76, "Int32", "heartbeatTimeToLive")
 defineOption(77, "Int32", "heartbeatTimeout")
-defineOption(78, "Bool", "verboser", {read: false, on: XPublisher})
+/* Option 'verboser' is implemented as verbosity on XPublisher. */
 defineOption(79, "Int32", "connectTimeout")
 defineOption(80, "Int32", "tcpMaxRetransmitTimeout")
 defineOption(81, "Bool", "threadSafe", {read: false})
@@ -480,9 +492,6 @@ defineOption(85, "Uint64", "vmciBufferSize")
 defineOption(86, "Uint64", "vmciBufferMinSize")
 defineOption(87, "Uint64", "vmciBufferMaxSize")
 defineOption(88, "Int32", "vmciConnectTimeout")
-
-/* TODO: verbose/verboser might be better represented as one option that can
-   have three states. */
 
 /* Not sure if ZMQ_USE_FD option can be used with Node.js? Haven't been able
    to get it to work in any meaningful way. Feel free to suggest a test case

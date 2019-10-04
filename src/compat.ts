@@ -492,7 +492,7 @@ class Socket extends EventEmitter {
     case longOptions.ZMQ_DELAY_ATTACH_ON_CONNECT:
       this._socket.immediate = !!value; break
     case longOptions.ZMQ_XPUB_VERBOSE:
-      (this._socket as zmq.XPublisher).verbosity = value ? "subscribe" : null; break
+      (this._socket as zmq.XPublisher).verbosity = value ? "allSubs" : null; break
     case longOptions.ZMQ_ROUTER_RAW:
       throw new Error("ZMQ_ROUTER_RAW is not supported in compatibility mode")
     case longOptions.ZMQ_IPV6:
