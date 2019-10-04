@@ -95,53 +95,49 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
         assert.equal(sock.closed, true)
       })
 
-      if (process.env.INCLUDE_GC_TESTS) {
-        it("should release reference to context", async function() {
-          const weak = require("weak-napi")
+      it("should release reference to context", async function() {
+        const weak = require("weak-napi")
 
-          let released = false
-          const task = async () => {
-            let context: zmq.Context|undefined = new zmq.Context
-            const socket = new zmq.Dealer({context, linger: 0})
+        let released = false
+        const task = async () => {
+          let context: zmq.Context|undefined = new zmq.Context
+          const socket = new zmq.Dealer({context, linger: 0})
 
-            weak(context, () => {released = true})
-            context = undefined
+          weak(context, () => {released = true})
+          context = undefined
 
-            global.gc()
-            socket.connect(uniqAddress(proto))
-            await socket.send(Buffer.from("foo"))
-            socket.close()
-          }
-
-          await task()
           global.gc()
-          await new Promise(resolve => setTimeout(resolve, 5))
-          assert.equal(released, true)
-        })
-      }
+          socket.connect(uniqAddress(proto))
+          await socket.send(Buffer.from("foo"))
+          socket.close()
+        }
+
+        await task()
+        global.gc()
+        await new Promise(resolve => setTimeout(resolve, 5))
+        assert.equal(released, true)
+      })
     })
 
-    if (process.env.INCLUDE_GC_TESTS) {
-      describe("in gc finalizer", function() {
-        it("should release reference to context", async function() {
-          const weak = require("weak-napi")
+    describe("in gc finalizer", function() {
+      it("should release reference to context", async function() {
+        const weak = require("weak-napi")
 
-          let released = false
-          const task = async () => {
-            let context: zmq.Context|undefined = new zmq.Context
-            new zmq.Dealer({context, linger: 0})
+        let released = false
+        const task = async () => {
+          let context: zmq.Context|undefined = new zmq.Context
+          new zmq.Dealer({context, linger: 0})
 
-            weak(context, () => {released = true})
-            context = undefined
-            global.gc()
-          }
-
-          await task()
+          weak(context, () => {released = true})
+          context = undefined
           global.gc()
-          await new Promise(resolve => setTimeout(resolve, 5))
-          assert.equal(released, true)
-        })
+        }
+
+        await task()
+        global.gc()
+        await new Promise(resolve => setTimeout(resolve, 5))
+        assert.equal(released, true)
       })
-    }
+    })
   })
 }

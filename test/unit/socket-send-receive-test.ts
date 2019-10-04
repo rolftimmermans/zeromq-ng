@@ -46,41 +46,39 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
         }
       })
 
-      if (process.env.INCLUDE_GC_TESTS) {
-        it("should copy and release small buffers", async function() {
-          const weak = require("weak-napi")
+      it("should copy and release small buffers", async function() {
+        const weak = require("weak-napi")
 
-          let released = false
-          sockA.connect(uniqAddress(proto))
-          const send = async (size: number) => {
-            const msg = Buffer.alloc(size)
-            weak(msg, () => {released = true})
-            await sockA.send(msg)
-          }
+        let released = false
+        sockA.connect(uniqAddress(proto))
+        const send = async (size: number) => {
+          const msg = Buffer.alloc(size)
+          weak(msg, () => {released = true})
+          await sockA.send(msg)
+        }
 
-          await send(16)
-          global.gc()
-          await new Promise(resolve => setTimeout(resolve, 5))
-          assert.equal(released, true)
-        })
+        await send(16)
+        global.gc()
+        await new Promise(resolve => setTimeout(resolve, 5))
+        assert.equal(released, true)
+      })
 
-        it("should retain large buffers", async function() {
-          const weak = require("weak-napi")
+      it("should retain large buffers", async function() {
+        const weak = require("weak-napi")
 
-          let released = false
-          sockA.connect(uniqAddress(proto))
-          const send = async (size: number) => {
-            const msg = Buffer.alloc(size)
-            weak(msg, () => {released = true})
-            await sockA.send(msg)
-          }
+        let released = false
+        sockA.connect(uniqAddress(proto))
+        const send = async (size: number) => {
+          const msg = Buffer.alloc(size)
+          weak(msg, () => {released = true})
+          await sockA.send(msg)
+        }
 
-          await send(1025)
-          global.gc()
-          await new Promise(resolve => setTimeout(resolve, 5))
-          assert.equal(released, false)
-        })
-      }
+        await send(1025)
+        global.gc()
+        await new Promise(resolve => setTimeout(resolve, 5))
+        assert.equal(released, false)
+      })
     })
 
     describe("when connected", function() {
@@ -254,39 +252,37 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
         }
       })
 
-      if (process.env.INCLUDE_GC_TESTS) {
-        it("should release buffers", async function() {
-          const weak = require("weak-napi")
+      it("should release buffers", async function() {
+        const weak = require("weak-napi")
 
-          const address = uniqAddress(proto)
-          await sockB.bind(address)
-          sockA.connect(address)
+        const address = uniqAddress(proto)
+        await sockB.bind(address)
+        sockA.connect(address)
 
-          let released = 0
+        let released = 0
 
-          const send = async (size: number) => {
-            const msg = Buffer.alloc(size)
-            weak(msg, () => {released++})
-            await sockA.send(msg)
-          }
+        const send = async (size: number) => {
+          const msg = Buffer.alloc(size)
+          weak(msg, () => {released++})
+          await sockA.send(msg)
+        }
 
-          const receive = async () => {
-            const msg = await sockB.receive()
-            weak(msg, () => {released++})
-          }
+        const receive = async () => {
+          const msg = await sockB.receive()
+          weak(msg, () => {released++})
+        }
 
-          await Promise.all([
-            send(2048),
-            receive(),
-          ])
+        await Promise.all([
+          send(2048),
+          receive(),
+        ])
 
-          await sockB.unbind(address)
+        await sockB.unbind(address)
 
-          global.gc()
-          await new Promise(resolve => setTimeout(resolve, 5))
-          assert.equal(released, proto == "inproc" ? 1 : 2)
-        })
-      }
+        global.gc()
+        await new Promise(resolve => setTimeout(resolve, 5))
+        assert.equal(released, proto == "inproc" ? 1 : 2)
+      })
 
       if (proto == "inproc") {
         it("should share memory of large buffers", async function() {

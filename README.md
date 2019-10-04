@@ -239,7 +239,6 @@ The test suite will validate and fix the coding style, run all unit tests and ve
 Some tests are not enabled by default:
 
 * API Compatibility tests from ZeroMQ 4.x have been disabled because they sometimes hang. There are likely a few timing issues in the tests or in the compatibility layer implementation. You can include the tests with `INCLUDE_COMPAT_TESTS=1 npm run dev:test`
-* Garbage collection tests that use the [weak](https://www.npmjs.com/package/weak) module have been disabled because they suffer from occasional crashes because of the unpredictable nature of the weak package. You can include the tests with `INCLUDE_GC_TESTS=1 npm run dev:test`.
 * Some transports are not reliable on some older versions of ZeroMQ, the relevant tests will be skipped for those versions automatically.
 
 
