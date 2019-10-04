@@ -41,9 +41,8 @@ public:
     inline void Add(T* item) {
         {
             std::lock_guard<std::mutex> guard(lock);
-            if (!terminated) {
-                values.emplace_back(std::unique_ptr<T>(item));
-            }
+            if (terminated) return;
+            values.emplace_back(std::unique_ptr<T>(item));
         }
 
         /* Call to uv_async_send() should never return nonzero. UV ensures
