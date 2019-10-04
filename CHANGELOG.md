@@ -2,6 +2,8 @@
 
 * BREAKING: Reimplemented two interacting boolean properties XPublisher.verbose/verboser as XPublisher.verbosity to make actual the behaviour more obvious.
 
+* Include newer ZeroMQ.js improvements to compatibility layer.
+
 ### v5.0.0-beta.23
 
 * BREAKING: Ported all library code to TypeScript so that the typings are easier to match to the actual implementation. The typings may be slightly stricter as a result.

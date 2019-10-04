@@ -259,7 +259,7 @@ Wait for continuous integration to finish. Prebuilds will be generated for all s
 
 ## Compatibility layer for ZeroMQ.js 4
 
-The next generation version of the library features an experimental compatibility layer for ZeroMQ.js 4. This is recommended for users upgrading from existing versions.
+The next generation version of the library features a compatibility layer for ZeroMQ.js versions 4 and 5. This is recommended for users upgrading from existing versions.
 
 Example:
 

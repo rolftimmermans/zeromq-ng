@@ -688,18 +688,18 @@ function proxy(frontend: Socket, backend: Socket, capture?: Socket) {
 
   case "router/dealer":
   case "xrep/xreq":
-    frontend.on("message", (id, delimiter, msg) => {
-      backend.send([id, delimiter, msg])
+    frontend.on("message", (...args: zmq.Message[]) => {
+      backend.send(args)
     })
 
     if (capture) {
-      backend.on("message", (id, delimiter, msg) => {
-        frontend.send([id, delimiter, msg])
-        capture.send(msg)
+      backend.on("message", (...args: zmq.Message[]) => {
+        frontend.send(args)
+        capture.send(args.slice(2))
       })
     } else {
-      backend.on("message", (id, delimiter, msg) => {
-        frontend.send([id, delimiter, msg])
+      backend.on("message", (...args: zmq.Message[]) => {
+        frontend.send(args)
       })
     }
     break
