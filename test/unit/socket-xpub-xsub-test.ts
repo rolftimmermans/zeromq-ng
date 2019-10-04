@@ -175,7 +175,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
         }
 
         await Promise.all([subscribe()])
-        assert.deepEqual(subs, [Buffer.from("\x01fo")])
+        assert.sameDeepMembers(subs, [Buffer.from("\x01fo")])
 
         sub2.close()
       })
@@ -207,7 +207,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
         }
 
         await Promise.all([subscribe()])
-        assert.deepEqual(subs, [
+        assert.sameDeepMembers(subs, [
           Buffer.from("\x01fo"),
           Buffer.from("\x01fo"),
         ])
@@ -242,7 +242,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
         }
 
         await Promise.all([subscribe()])
-        assert.deepEqual(subs, [
+        assert.sameDeepMembers(subs, [
           Buffer.from("\x01fo"),
           Buffer.from("\x01fo"),
           Buffer.from("\x00fo"),
