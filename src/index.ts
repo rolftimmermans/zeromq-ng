@@ -1,13 +1,22 @@
 export * from "./native"
 
-import {capability, Context, Event, EventDetails, Observer, Socket, SocketOptions, SocketType} from "./native"
+import {
+  capability,
+  Context,
+  Observer,
+  Readable,
+  Socket,
+  SocketOptions,
+  SocketType,
+} from "./native"
 
 /* Support async iteration over received messages. Implementing this in JS
    is faster as long as there is no C++ native API to chain promises. */
-function asyncIterator(this: Socket | Observer): AsyncIterator<any[], undefined> {
+function asyncIterator<T extends Readable<U>, U>(this: T): AsyncIterator<U> {
   return {
-    next: async (): Promise<IteratorResult<any[], undefined>> => {
+    next: async (): Promise<IteratorResult<U>> => {
       if (this.closed) {
+        /* Cast so we can omit 'value: undefined'. */
         return {done: true} as IteratorReturnResult<undefined>
       }
 
@@ -15,6 +24,7 @@ function asyncIterator(this: Socket | Observer): AsyncIterator<any[], undefined>
         return {value: await this.receive(), done: false}
       } catch (err) {
         if (this.closed && err.code === "EAGAIN") {
+          /* Cast so we can omit 'value: undefined'. */
           return {done: true} as IteratorReturnResult<undefined>
         } else {
           throw err
@@ -24,8 +34,8 @@ function asyncIterator(this: Socket | Observer): AsyncIterator<any[], undefined>
   }
 }
 
-Socket.prototype[Symbol.asyncIterator] = asyncIterator as () => AsyncIterator<Buffer[], undefined>
-Observer.prototype[Symbol.asyncIterator] = asyncIterator as () => AsyncIterator<[Event, EventDetails], undefined>
+Socket.prototype[Symbol.asyncIterator] = asyncIterator
+Observer.prototype[Symbol.asyncIterator] = asyncIterator
 
 Object.defineProperty(Observer.prototype, "emitter", {
   get: function emitter() {
@@ -37,7 +47,8 @@ Object.defineProperty(Observer.prototype, "emitter", {
       get: () => {
         throw new Error(
           "Observer is in event emitter mode. " +
-          "After a call to events.on() it is not possible to read events with events.receive().",
+          "After a call to events.on() it is not possible to read events " +
+          "with events.receive().",
         )
       },
     })
@@ -304,14 +315,14 @@ export class Stream extends Socket {
 
 
 /* Meta function to define new socket/context options without much boilerplate. */
-interface DefineOptions {
+interface DefineOpts {
   read?: boolean
   write?: boolean
   on?: any
   values?: any[]
 }
 
-type OptionType = (
+type OptType = (
   "Bool" |
   "Int32" |
   "Uint32" |
@@ -320,8 +331,8 @@ type OptionType = (
   "String"
 )
 
-function defineOption(id: number, type: OptionType, name: string, options: DefineOptions = {}) {
-  const {on = [Socket], read = true, write = true, values} = options
+function defineOption(id: number, type: OptType, name: string, opts: DefineOpts = {}) {
+  const {on = [Socket], read = true, write = true, values} = opts
 
   const desc: PropertyDescriptor = {}
 
@@ -378,7 +389,9 @@ defineOption(70, "Bool", "blocky", {on: Context})
 
 /* Socket options. ALSO include any options in the Socket interface above. */
 defineOption(4, "Uint64", "affinity")
-defineOption(5, "String", "routingId", {on: [Request, Reply, Router, Dealer]})
+defineOption(5, "String", "routingId", {
+  on: [Request, Reply, Router, Dealer],
+})
 defineOption(8, "Int32", "rate")
 defineOption(9, "Int32", "recoveryInterval")
 defineOption(11, "Int32", "sendBufferSize")
@@ -404,7 +417,10 @@ defineOption(38, "String", "tcpAcceptFilter")
 defineOption(39, "Bool", "immediate")
 defineOption(40, "Bool", "verbose", {read: false, on: XPublisher})
 defineOption(42, "Bool", "ipv6")
-defineOption(43, "Int32", "securityMechanism", {write: false, values: [null, "plain", "curve", "gssapi"]})
+defineOption(43, "Int32", "securityMechanism", {
+  write: false,
+  values: [null, "plain", "curve", "gssapi"],
+})
 defineOption(44, "Bool", "plainServer")
 defineOption(45, "String", "plainUsername")
 defineOption(46, "String", "plainPassword")
@@ -416,10 +432,14 @@ if (capability.curve) {
   defineOption(50, "String", "curveServerKey")
 }
 
-defineOption(51, "Bool", "probeRouter", {read: false, on: [Router, Dealer, Request]})
+defineOption(51, "Bool", "probeRouter", {read: false,
+  on: [Router, Dealer, Request],
+})
 defineOption(52, "Bool", "correlate", {read: false, on: Request})
 defineOption(53, "Bool", "relaxed", {read: false, on: Request})
-defineOption(54, "Bool", "conflate", {read: false, on: [Pull, Push, Subscriber, Publisher, Dealer]})
+defineOption(54, "Bool", "conflate", {read: false,
+  on: [Pull, Push, Subscriber, Publisher, Dealer],
+})
 defineOption(55, "String", "zapDomain")
 defineOption(56, "Bool", "handover", {read: false, on: Router})
 defineOption(57, "Uint32", "typeOfService")
@@ -429,17 +449,25 @@ if (capability.gssapi) {
   defineOption(63, "String", "gssapiPrincipal")
   defineOption(64, "String", "gssapiServicePrincipal")
   defineOption(65, "Bool", "gssapiPlainText")
-  defineOption(90, "Int32", "gssapiPrincipalNameType", {values: ["hostBased", "userName", "krb5Principal"]})
-  defineOption(91, "Int32", "gssapiServicePrincipalNameType", {values: ["hostBased", "userName", "krb5Principal"]})
+  defineOption(90, "Int32", "gssapiPrincipalNameType", {
+    values: ["hostBased", "userName", "krb5Principal"],
+  })
+  defineOption(91, "Int32", "gssapiServicePrincipalNameType", {
+    values: ["hostBased", "userName", "krb5Principal"],
+  })
 }
 
 defineOption(66, "Int32", "handshakeInterval")
 defineOption(68, "String", "socksProxy")
-defineOption(69, "Bool", "noDrop", {read: false, on: [XPublisher, Publisher]})
+defineOption(69, "Bool", "noDrop", {read: false,
+  on: [XPublisher, Publisher],
+})
 defineOption(71, "Bool", "manual", {read: false, on: XPublisher})
 defineOption(72, "String", "welcomeMessage", {read: false, on: XPublisher})
 defineOption(73, "Bool", "notify", {read: false, on: Stream})
-defineOption(74, "Bool", "invertMatching", {on: [Publisher, Subscriber, XPublisher]})
+defineOption(74, "Bool", "invertMatching", {
+  on: [Publisher, Subscriber, XPublisher],
+})
 defineOption(75, "Int32", "heartbeatInterval")
 defineOption(76, "Int32", "heartbeatTimeToLive")
 defineOption(77, "Int32", "heartbeatTimeout")

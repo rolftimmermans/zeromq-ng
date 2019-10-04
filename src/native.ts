@@ -1,4 +1,5 @@
 /* tslint:disable: no-var-requires */
+
 /* Declare all native C++ classes and methods in this file. */
 const path = require("path")
 module.exports = require("node-gyp-build")(path.join(__dirname, ".."))
@@ -70,7 +71,7 @@ export declare const global: Context
 
 export type SocketOptions<T extends Socket> = Options<T, {context: Context}>
 
-export declare class Socket {
+export declare class Socket implements Readable<Buffer[]> {
   readonly events: Observer
   readonly context: Context
 
@@ -124,7 +125,8 @@ export type Event = (
   "close" | "close:error" |
   "disconnect" |
   "end" |
-  "handshake" | "handshake:error:protocol" | "handshake:error:auth" | "handshake:error:other" |
+  "handshake" | "handshake:error:protocol" |
+  "handshake:error:auth" | "handshake:error:other" |
   "unknown"
 )
 
@@ -134,7 +136,7 @@ export interface EventDetails {
   error?: ErrnoError,
 }
 
-export declare class Observer {
+export declare class Observer implements Readable<[Event, EventDetails]> {
   readonly closed: boolean
 
   protected constructor(socket: Socket)
@@ -156,6 +158,13 @@ export declare class Proxy {
   terminate(): void
 }
 
+export interface Readable<T> {
+  readonly closed: boolean
+
+  close(): void
+  receive(): Promise<T>
+}
+
 
 /* Unexported utility types. */
 
@@ -166,7 +175,8 @@ type IfEquals<X, Y, A, B = never> =
 
 type WritableKeys<T> = {
   /* tslint:disable-next-line: ban-types */
-  [P in keyof T]-?: T[P] extends Function ? never : IfEquals<{[Q in P]: T[P]}, {-readonly [Q in P]: T[P]}, P>
+  [P in keyof T]-?: T[P] extends Function ?
+    never : IfEquals<{[Q in P]: T[P]}, {-readonly [Q in P]: T[P]}, P>
 }[keyof T]
 
 type WritableProperties<T> = Pick<T, WritableKeys<T>>
