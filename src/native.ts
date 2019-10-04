@@ -165,23 +165,25 @@ export interface Readable<T> {
   receive(): Promise<T>
 }
 
-
-/* Unexported utility types. */
+/* Utility types. */
 
 /* https://stackoverflow.com/questions/49579094 */
 type IfEquals<X, Y, A, B = never> =
   (<T>() => T extends X ? 1 : 2) extends
   (<T>() => T extends Y ? 1 : 2) ? A : B
 
-type WritableKeys<T> = {
+/* https://stackoverflow.com/questions/57683303 */
+type Expand<T> = T extends infer O ? { [K in keyof O]: O[K] } : never
+
+export type ReadableKeys<T> = {
+  /* tslint:disable-next-line: ban-types */
+  [P in keyof T]-?: T[P] extends Function ? never : P
+}[keyof T]
+
+export type WritableKeys<T> = {
   /* tslint:disable-next-line: ban-types */
   [P in keyof T]-?: T[P] extends Function ?
     never : IfEquals<{[Q in P]: T[P]}, {-readonly [Q in P]: T[P]}, P>
 }[keyof T]
 
-type WritableProperties<T> = Pick<T, WritableKeys<T>>
-
-/* https://stackoverflow.com/questions/57683303 */
-type Expand<T> = T extends infer O ? { [K in keyof O]: O[K] } : never
-
-type Options<T, E = {}> = Expand<Partial<E & WritableProperties<T>>>
+export type Options<T, E = {}> = Expand<Partial<E & Pick<T, WritableKeys<T>>>>

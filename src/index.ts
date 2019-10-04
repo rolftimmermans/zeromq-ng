@@ -5,9 +5,11 @@ import {
   Context,
   Observer,
   Readable,
+  ReadableKeys,
   Socket,
   SocketOptions,
   SocketType,
+  WritableKeys,
 } from "./native"
 
 /* Support async iteration over received messages. Implementing this in JS
@@ -38,9 +40,9 @@ Socket.prototype[Symbol.asyncIterator] = asyncIterator
 Observer.prototype[Symbol.asyncIterator] = asyncIterator
 
 Object.defineProperty(Observer.prototype, "emitter", {
-  get: function emitter() {
+  get: function emitter(this: Observer) {
     const {EventEmitter} = require("events")
-    const value = new EventEmitter()
+    const value: NodeJS.EventEmitter = new EventEmitter()
 
     const receive = this.receive.bind(this)
     Object.defineProperty(this, "receive", {
@@ -326,29 +328,61 @@ export class Stream extends Socket {
 }
 
 
-/* Meta function to define new socket/context options without much boilerplate. */
-interface DefineOpts {
-  read?: boolean
-  write?: boolean
-  on?: any
-  values?: any[]
+/* Meta functionality to define new socket/context options. */
+const enum Type {
+  Bool = "Bool",
+  Int32 = "Int32",
+  Uint32 = "Uint32",
+  Int64 = "Int64",
+  Uint64 = "Uint64",
+  String = "String",
 }
 
-type OptType = (
-  "Bool" |
-  "Int32" |
-  "Uint32" |
-  "Int64" |
-  "Uint64" |
-  "String"
-)
+/* Defines the accessibility of options. */
+const enum Acc {
+  Read = 1,
+  ReadOnly = 1,
 
-function defineOption(id: number, type: OptType, name: string, opts: DefineOpts = {}) {
-  const {on = [Socket], read = true, write = true, values} = opts
+  Write = 2,
+  WriteOnly = 2,
 
+  ReadWrite = 3,
+}
+
+/* Readable properties may be set as readonly. */
+function defineOpt<T, K extends ReadableKeys<T>>(
+  target: T,
+  name: K,
+  id: number,
+  type: Type,
+  acc: Acc.ReadOnly,
+  values?: any[],
+): void
+
+/* Writable properties may be set as writeable or readable & writable. */
+function defineOpt<T, K extends WritableKeys<T>>(
+  target: T,
+  name: K,
+  id: number,
+  type: Type,
+  acc?: Acc.ReadWrite | Acc.WriteOnly,
+  values?: any[],
+): void
+
+/* The default is to use R/w. The overloads above ensure the correct flag is
+   set if the property has been defined as readonly in the interface/class. */
+function defineOpt<T, K extends ReadableKeys<T>>(
+  target: T,
+  name: K,
+  id: number,
+  type: Type,
+  acc: Acc = Acc.ReadWrite,
+  values?: any[],
+): void {
   const desc: PropertyDescriptor = {}
 
-  if (read) {
+  /* tslint:disable-next-line: no-bitwise */
+  if (acc & Acc.Read) {
     if (values) {
       desc.get = function get(this: any) {
         return values[this[`get${type}Option`](id)]
@@ -360,7 +394,8 @@ function defineOption(id: number, type: OptType, name: string, opts: DefineOpts 
     }
   }
 
-  if (write) {
+  /* tslint:disable-next-line: no-bitwise */
+  if (acc & Acc.Write) {
     if (values) {
       desc.set = function set(this: any, val: any) {
         this[`set${type}Option`](id, values.indexOf(val))
@@ -372,140 +407,143 @@ function defineOption(id: number, type: OptType, name: string, opts: DefineOpts 
     }
   }
 
-  for (const target of Array.isArray(on) ? on : [on]) {
-    Object.defineProperty(target.prototype, name, desc)
-  }
+  Object.defineProperty(target, name, desc)
 }
 
 /* Context options. ALSO include any options in the Context interface above. */
-defineOption(1, "Int32", "ioThreads", {on: Context})
-defineOption(2, "Int32", "maxSockets", {on: Context})
-defineOption(3, "Int32", "maxSocketsLimit", {write: false, on: Context})
-defineOption(3, "Int32", "threadPriority", {read: false, on: Context})
-defineOption(4, "Int32", "threadSchedulingPolicy", {read: false, on: Context})
-defineOption(5, "Int32", "maxMessageSize", {on: Context})
+defineOpt(Context.prototype, "ioThreads", 1, Type.Int32)
+defineOpt(Context.prototype, "maxSockets", 2, Type.Int32)
+defineOpt(Context.prototype, "maxSocketsLimit", 3, Type.Int32, Acc.ReadOnly)
+defineOpt(Context.prototype, "threadPriority", 3, Type.Int32, Acc.WriteOnly)
+defineOpt(Context.prototype, "threadSchedulingPolicy", 4, Type.Int32, Acc.WriteOnly)
+defineOpt(Context.prototype, "maxMessageSize", 5, Type.Int32)
 /* This option is fairly useless in JS. */
-/* Context.defineOption(6, "Int32", "msgTSize") */
+/* defineOpt(Context.prototype, "msgTSize", 6, Type.Int32) */
 /* These options should be methods. */
-/* Context.defineOption(7, "Int32", "threadAffinityCpuAdd") */
-/* Context.defineOption(8, "Int32", "threadAffinityCpuRemove") */
+/* defineOpt(Context.prototype, "threadAffinityCpuAdd", 7, Type.Int32) */
+/* defineOpt(Context.prototype, "threadAffinityCpuRemove", 8, Type.Int32) */
 /* To be released in a new ZeroMQ version. */
 /* if (Context.prototype.setStringOption) {
-  Context.defineOption(9, "String", "threadNamePrefix")
+  defineOpt(Context.prototype, "threadNamePrefix", 9, Type.String)
 } */
 /* There should be no reason to change this in JS. */
-/* Context.defineOption(10, "Bool", "zeroCopyRecv") */
+/* defineOpt(Context.prototype, "zeroCopyRecv", 10, Type.Bool) */
 
-defineOption(42, "Bool", "ipv6", {on: Context})
-defineOption(70, "Bool", "blocky", {on: Context})
+defineOpt(Context.prototype, "ipv6", 42, Type.Bool)
+defineOpt(Context.prototype, "blocky", 70, Type.Bool)
 
 /* Socket options. ALSO include any options in the Socket interface above. */
-defineOption(4, "Uint64", "affinity")
-defineOption(5, "String", "routingId", {
-  on: [Request, Reply, Router, Dealer],
-})
-defineOption(8, "Int32", "rate")
-defineOption(9, "Int32", "recoveryInterval")
-defineOption(11, "Int32", "sendBufferSize")
-defineOption(12, "Int32", "receiveBufferSize")
-defineOption(16, "Int32", "type", {write: false})
-defineOption(17, "Int32", "linger")
-defineOption(18, "Int32", "reconnectInterval")
-defineOption(19, "Int32", "backlog")
-defineOption(21, "Int32", "reconnectMaxInterval")
-defineOption(22, "Int64", "maxMessageSize")
-defineOption(23, "Int32", "sendHighWaterMark")
-defineOption(24, "Int32", "receiveHighWaterMark")
-defineOption(25, "Int32", "multicastHops")
-defineOption(27, "Int32", "receiveTimeout")
-defineOption(28, "Int32", "sendTimeout")
-defineOption(32, "String", "lastEndpoint", {write: false})
-defineOption(33, "Bool", "mandatory", {on: Router})
-defineOption(34, "Int32", "tcpKeepalive")
-defineOption(35, "Int32", "tcpKeepaliveCount")
-defineOption(36, "Int32", "tcpKeepaliveIdle")
-defineOption(37, "Int32", "tcpKeepaliveInterval")
-defineOption(38, "String", "tcpAcceptFilter")
-defineOption(39, "Bool", "immediate")
+defineOpt(Socket.prototype, "affinity", 4, Type.Uint64)
+
+for (const target of [Request, Reply, Router, Dealer]) {
+  defineOpt(target.prototype, "routingId", 5, Type.String)
+}
+
+defineOpt(Socket.prototype, "rate", 8, Type.Int32)
+defineOpt(Socket.prototype, "recoveryInterval", 9, Type.Int32)
+defineOpt(Socket.prototype, "sendBufferSize", 11, Type.Int32)
+defineOpt(Socket.prototype, "receiveBufferSize", 12, Type.Int32)
+defineOpt(Socket.prototype, "type", 16, Type.Int32, Acc.ReadOnly)
+defineOpt(Socket.prototype, "linger", 17, Type.Int32)
+defineOpt(Socket.prototype, "reconnectInterval", 18, Type.Int32)
+defineOpt(Socket.prototype, "backlog", 19, Type.Int32)
+defineOpt(Socket.prototype, "reconnectMaxInterval", 21, Type.Int32)
+defineOpt(Socket.prototype, "maxMessageSize", 22, Type.Int64)
+defineOpt(Socket.prototype, "sendHighWaterMark", 23, Type.Int32)
+defineOpt(Socket.prototype, "receiveHighWaterMark", 24, Type.Int32)
+defineOpt(Socket.prototype, "multicastHops", 25, Type.Int32)
+defineOpt(Socket.prototype, "receiveTimeout", 27, Type.Int32)
+defineOpt(Socket.prototype, "sendTimeout", 28, Type.Int32)
+defineOpt(Socket.prototype, "lastEndpoint", 32, Type.String, Acc.ReadOnly)
+defineOpt(Router.prototype, "mandatory", 33, Type.Bool)
+defineOpt(Socket.prototype, "tcpKeepalive", 34, Type.Int32)
+defineOpt(Socket.prototype, "tcpKeepaliveCount", 35, Type.Int32)
+defineOpt(Socket.prototype, "tcpKeepaliveIdle", 36, Type.Int32)
+defineOpt(Socket.prototype, "tcpKeepaliveInterval", 37, Type.Int32)
+defineOpt(Socket.prototype, "tcpAcceptFilter", 38, Type.String)
+defineOpt(Socket.prototype, "immediate", 39, Type.Bool)
 /* Option 'verbose' is implemented as verbosity on XPublisher. */
-defineOption(42, "Bool", "ipv6")
-defineOption(43, "Int32", "securityMechanism", {
-  write: false,
-  values: [null, "plain", "curve", "gssapi"],
-})
-defineOption(44, "Bool", "plainServer")
-defineOption(45, "String", "plainUsername")
-defineOption(46, "String", "plainPassword")
+defineOpt(Socket.prototype, "ipv6", 42, Type.Bool)
+defineOpt(Socket.prototype, "securityMechanism", 43, Type.Int32,
+  Acc.ReadOnly, [null, "plain", "curve", "gssapi"])
+defineOpt(Socket.prototype, "plainServer", 44, Type.Bool)
+defineOpt(Socket.prototype, "plainUsername", 45, Type.String)
+defineOpt(Socket.prototype, "plainPassword", 46, Type.String)
 
 if (capability.curve) {
-  defineOption(47, "Bool", "curveServer")
-  defineOption(48, "String", "curvePublicKey")
-  defineOption(49, "String", "curveSecretKey")
-  defineOption(50, "String", "curveServerKey")
+  defineOpt(Socket.prototype, "curveServer", 47, Type.Bool)
+  defineOpt(Socket.prototype, "curvePublicKey", 48, Type.String)
+  defineOpt(Socket.prototype, "curveSecretKey", 49, Type.String)
+  defineOpt(Socket.prototype, "curveServerKey", 50, Type.String)
 }
 
-defineOption(51, "Bool", "probeRouter", {read: false,
-  on: [Router, Dealer, Request],
-})
-defineOption(52, "Bool", "correlate", {read: false, on: Request})
-defineOption(53, "Bool", "relaxed", {read: false, on: Request})
-defineOption(54, "Bool", "conflate", {read: false,
-  on: [Pull, Push, Subscriber, Publisher, Dealer],
-})
-defineOption(55, "String", "zapDomain")
-defineOption(56, "Bool", "handover", {read: false, on: Router})
-defineOption(57, "Uint32", "typeOfService")
+for (const target of [Router, Dealer, Request]) {
+  defineOpt(target.prototype, "probeRouter", 51, Type.Bool, Acc.WriteOnly)
+}
+
+defineOpt(Request.prototype, "correlate", 52, Type.Bool, Acc.WriteOnly)
+defineOpt(Request.prototype, "relaxed", 53, Type.Bool, Acc.WriteOnly)
+
+for (const target of [Pull, Push, Subscriber, Publisher, Dealer]) {
+  defineOpt(target.prototype, "conflate", 54, Type.Bool, Acc.WriteOnly)
+}
+
+defineOpt(Socket.prototype, "zapDomain", 55, Type.String)
+defineOpt(Router.prototype, "handover", 56, Type.Bool, Acc.WriteOnly)
+defineOpt(Socket.prototype, "typeOfService", 57, Type.Uint32)
 
 if (capability.gssapi) {
-  defineOption(62, "Bool", "gssapiServer")
-  defineOption(63, "String", "gssapiPrincipal")
-  defineOption(64, "String", "gssapiServicePrincipal")
-  defineOption(65, "Bool", "gssapiPlainText")
-  defineOption(90, "Int32", "gssapiPrincipalNameType", {
-    values: ["hostBased", "userName", "krb5Principal"],
-  })
-  defineOption(91, "Int32", "gssapiServicePrincipalNameType", {
-    values: ["hostBased", "userName", "krb5Principal"],
-  })
+  defineOpt(Socket.prototype, "gssapiServer", 62, Type.Bool)
+  defineOpt(Socket.prototype, "gssapiPrincipal", 63, Type.String)
+  defineOpt(Socket.prototype, "gssapiServicePrincipal", 64, Type.String)
+  defineOpt(Socket.prototype, "gssapiPlainText", 65, Type.Bool)
+  defineOpt(Socket.prototype, "gssapiPrincipalNameType", 90, Type.Int32,
+    Acc.ReadWrite, ["hostBased", "userName", "krb5Principal"])
+  defineOpt(Socket.prototype, "gssapiServicePrincipalNameType", 91, Type.Int32,
+    Acc.ReadWrite, ["hostBased", "userName", "krb5Principal"])
 }
 
-defineOption(66, "Int32", "handshakeInterval")
-defineOption(68, "String", "socksProxy")
-defineOption(69, "Bool", "noDrop", {read: false,
-  on: [XPublisher, Publisher],
-})
-defineOption(71, "Bool", "manual", {read: false, on: XPublisher})
-defineOption(72, "String", "welcomeMessage", {read: false, on: XPublisher})
-defineOption(73, "Bool", "notify", {read: false, on: Stream})
-defineOption(74, "Bool", "invertMatching", {
-  on: [Publisher, Subscriber, XPublisher],
-})
-defineOption(75, "Int32", "heartbeatInterval")
-defineOption(76, "Int32", "heartbeatTimeToLive")
-defineOption(77, "Int32", "heartbeatTimeout")
+defineOpt(Socket.prototype, "handshakeInterval", 66, Type.Int32)
+defineOpt(Socket.prototype, "socksProxy", 68, Type.String)
+
+for (const target of [XPublisher, Publisher]) {
+  defineOpt(target.prototype, "noDrop", 69, Type.Bool, Acc.WriteOnly)
+}
+
+defineOpt(XPublisher.prototype, "manual", 71, Type.Bool, Acc.WriteOnly)
+defineOpt(XPublisher.prototype, "welcomeMessage", 72, Type.String, Acc.WriteOnly)
+defineOpt(Stream.prototype, "notify", 73, Type.Bool, Acc.WriteOnly)
+
+for (const target of [Publisher, Subscriber, XPublisher]) {
+  defineOpt(target.prototype, "invertMatching", 74, Type.Bool)
+}
+
+defineOpt(Socket.prototype, "heartbeatInterval", 75, Type.Int32)
+defineOpt(Socket.prototype, "heartbeatTimeToLive", 76, Type.Int32)
+defineOpt(Socket.prototype, "heartbeatTimeout", 77, Type.Int32)
 /* Option 'verboser' is implemented as verbosity on XPublisher. */
-defineOption(79, "Int32", "connectTimeout")
-defineOption(80, "Int32", "tcpMaxRetransmitTimeout")
-defineOption(81, "Bool", "threadSafe", {read: false})
-defineOption(84, "Int32", "multicastMaxTransportDataUnit")
-defineOption(85, "Uint64", "vmciBufferSize")
-defineOption(86, "Uint64", "vmciBufferMinSize")
-defineOption(87, "Uint64", "vmciBufferMaxSize")
-defineOption(88, "Int32", "vmciConnectTimeout")
+defineOpt(Socket.prototype, "connectTimeout", 79, Type.Int32)
+defineOpt(Socket.prototype, "tcpMaxRetransmitTimeout", 80, Type.Int32)
+defineOpt(Socket.prototype, "threadSafe", 81, Type.Bool, Acc.ReadOnly)
+defineOpt(Socket.prototype, "multicastMaxTransportDataUnit", 84, Type.Int32)
+defineOpt(Socket.prototype, "vmciBufferSize", 85, Type.Uint64)
+defineOpt(Socket.prototype, "vmciBufferMinSize", 86, Type.Uint64)
+defineOpt(Socket.prototype, "vmciBufferMaxSize", 87, Type.Uint64)
+defineOpt(Socket.prototype, "vmciConnectTimeout", 88, Type.Int32)
 
 /* Not sure if ZMQ_USE_FD option can be used with Node.js? Haven't been able
    to get it to work in any meaningful way. Feel free to suggest a test case
    and we can add it again. */
-/* defineOption(89, "Int32", "useFd", {read: false}) */
-defineOption(92, "String", "interface")
-defineOption(93, "Bool", "zapEnforceDomain")
-defineOption(94, "Bool", "loopbackFastPath")
+/* defineOpt(Socket.prototype, "useFd", 89, Type.Int32, Acc.Write) */
+defineOpt(Socket.prototype, "interface", 92, Type.String)
+defineOpt(Socket.prototype, "zapEnforceDomain", 93, Type.Bool)
+defineOpt(Socket.prototype, "loopbackFastPath", 94, Type.Bool)
 /* The following options are still in DRAFT. */
-/* defineOption(95, "String", "metadata") */
-/* defineOption(96, "String", "multicastLoop") */
-/* defineOption(97, "String", "notify", {on: Router}) */
-/* defineOption(98, "String", "manualLastValue", {on: XPublisher}) */
-/* defineOption(99, "String", "socksUsername") */
-/* defineOption(100, "String", "socksPassword") */
-/* defineOption(101, "String", "inBatchSize") */
-/* defineOption(102, "String", "outBatchSize") */
+/* defineOpt(Socket.prototype, "metadata", 95, Type.String) */
+/* defineOpt(Socket.prototype, "multicastLoop", 96, Type.String) */
+/* defineOpt(Router.prototype, "notify", 97, Type.String) */
+/* defineOpt(XPublisher.prototype, "manualLastValue", 98, Type.String) */
+/* defineOpt(Socket.prototype, "socksUsername", 99, Type.String) */
+/* defineOpt(Socket.prototype, "socksPassword", 100, Type.String) */
+/* defineOpt(Socket.prototype, "inBatchSize", 101, Type.String) */
+/* defineOpt(Socket.prototype, "outBatchSize", 102, Type.String) */
