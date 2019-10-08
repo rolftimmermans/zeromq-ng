@@ -1,12 +1,12 @@
 import {
   methods,
+  Socket,
 } from "./native"
 
 import {
   Message,
   MessageLike,
   Readable,
-  Socket,
   SocketOptions,
   SocketType,
   Writable,

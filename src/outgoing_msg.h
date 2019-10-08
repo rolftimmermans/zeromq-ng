@@ -59,8 +59,10 @@ public:
         return parts.end();
     }
 
+#ifdef ZMQ_HAS_THREAD_SAFE
     bool SetGroup(Napi::Value value);
     bool SetRoutingId(Napi::Value value);
+#endif
 
     inline void Clear() {
         parts.clear();
