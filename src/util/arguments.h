@@ -7,7 +7,7 @@ namespace zmq {
 class Argument {
     typedef bool (Napi::Value::*ArgValCb)() const;
 
-    std::function<bool(const Napi::Value&)> fn;
+    std::function<bool(const Napi::Value&)> fn = nullptr;
     const std::string msg;
 
 public:
@@ -49,7 +49,7 @@ inline bool ValidateArguments(
 
     if (info.Length() > args.size()) {
         auto msg = "Expected " + to_string(args.size()) + " argument"
-            + (args.size() != 0 ? "s" : "");
+            + (args.size() != 1 ? "s" : "");
         Napi::TypeError::New(info.Env(), msg).ThrowAsJavaScriptException();
         return false;
     }

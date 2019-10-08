@@ -1,5 +1,5 @@
 {
-  "include": ["src/*.ts"],
+  "exclude": ["*.d.ts", "test", "examples"],
   "compilerOptions": {
     "target": "es2017",
     "outDir": "lib",
@@ -9,8 +9,6 @@
     "lib": ["es2017", "esnext.asynciterable"],
     "downlevelIteration": true,
     "strict": true,
-    "strictPropertyInitialization": false,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true
+    "strictPropertyInitialization": false
   }
 }

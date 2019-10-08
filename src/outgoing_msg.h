@@ -59,6 +59,9 @@ public:
         return parts.end();
     }
 
+    bool SetGroup(Napi::Value value);
+    bool SetRoutingId(Napi::Value value);
+
     inline void Clear() {
         parts.clear();
     }

@@ -15,12 +15,14 @@ class Poller {
     UvHandle<uv_timer_t> writable_timer;
 
     int32_t events{0};
+    std::function<void()> finalize = nullptr;
 
 public:
     /* Initialize the poller with the given file descriptor. FD should be
        ZMQ style edge-triggered, with READABLE state indicating that ANY
        event may be present on the corresponding ZMQ socket. */
-    inline int32_t Initialize(Napi::Env env, uv_os_sock_t& fd) {
+    inline int32_t Initialize(
+        Napi::Env env, uv_os_sock_t& fd, std::function<void()> finalizer = nullptr) {
         int32_t err;
         auto loop = UvLoop(env);
 
@@ -43,6 +45,7 @@ public:
         if (err != 0) return err;
         uv_unref(writable_timer);
 
+        finalize = finalizer;
         return 0;
     }
 
@@ -74,6 +77,8 @@ public:
         poll.reset(nullptr);
         readable_timer.reset(nullptr);
         writable_timer.reset(nullptr);
+
+        if (finalize) finalize();
     }
 
     inline bool PollingReadable() const {

@@ -1,4 +1,4 @@
-import * as zmq from "../.."
+import * as zmq from "../../src"
 import * as semver from "semver"
 import {assert} from "chai"
 import {testProtos, uniqAddress} from "./helpers"
@@ -65,7 +65,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
 
       /* This only works reliably with ZMQ 4.2.3+ */
       if (semver.satisfies(zmq.version, ">= 4.2.3")) {
-        it("should fail unroutable message if mandatory", async function() {
+        it("should fail with unroutable message if mandatory", async function() {
           router.mandatory = true
           router.sendTimeout = 0
           try {

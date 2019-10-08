@@ -9,24 +9,25 @@ jobs:
   # Test main OSes on Node 10.x branch.
   - os: linux
     node_js: "10.16"
-    env: INCLUDE_COMPAT_TESTS=true
+    env: ZMQ_DRAFT=true INCLUDE_COMPAT_TESTS=true
 
   - os: linux
-    env: ALPINE_CHROOT=3.10 INCLUDE_COMPAT_TESTS=true
+    env: ALPINE_CHROOT=3.10 ZMQ_DRAFT=true INCLUDE_COMPAT_TESTS=true
     sudo: required
 
   - os: osx
+    env: ZMQ_DRAFT=true
     node_js: "10.16"
 
   - os: windows
     node_js: "10.16"
     # https://travis-ci.community/t/build-doesnt-finish-after-completing-tests/288
-    env: YARN_GPG=no
+    env: ZMQ_DRAFT=true YARN_GPG=no
 
   - os: windows
     node_js: "10.16/x86"
     # https://travis-ci.community/t/build-doesnt-finish-after-completing-tests/288
-    env: YARN_GPG=no
+    env: ZMQ_DRAFT=true YARN_GPG=no
 
   # Test shared libraries on Linux and macOS.
   - os: linux
@@ -47,10 +48,11 @@ jobs:
   # Test recent Node versions.
   - os: linux
     node_js: "12"
-    env: INCLUDE_COMPAT_TESTS=true
+    env: ZMQ_DRAFT=true INCLUDE_COMPAT_TESTS=true
 
   - os: linux
     node_js: "13"
+    env: ZMQ_DRAFT=true
 
   ## PREBUILD STAGE
 

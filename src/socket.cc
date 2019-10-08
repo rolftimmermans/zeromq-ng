@@ -63,7 +63,7 @@ Socket::Socket(const Napi::CallbackInfo& info)
 
     if (!ValidateArguments(info, args)) return;
 
-    auto type = info[0].As<Napi::Number>().Int32Value();
+    type = info[0].As<Napi::Number>().Uint32Value();
 
     if (info[1].IsObject()) {
         auto options = info[1].As<Napi::Object>();
@@ -89,14 +89,73 @@ Socket::Socket(const Napi::CallbackInfo& info)
     }
 
     uv_os_sock_t fd;
-    size_t length = sizeof(fd);
-    if (zmq_getsockopt(socket, ZMQ_FD, &fd, &length) < 0) {
-        ErrnoException(Env(), zmq_errno()).ThrowAsJavaScriptException();
+    std::function<void()> finalize = nullptr;
+
+#ifdef ZMQ_THREAD_SAFE
+    {
+        int value = 0;
+        size_t length = sizeof(value);
+        if (zmq_getsockopt(socket, ZMQ_THREAD_SAFE, &value, &length) < 0) {
+            ErrnoException(Env(), zmq_errno()).ThrowAsJavaScriptException();
+            zmq_close(socket);
+            return;
+        }
+
+        thread_safe = value;
+    }
+#endif
+
+    /* Currently only some DRAFT sockets are threadsafe. */
+    if (thread_safe) {
+#ifdef ZMQ_HAS_POLLER_FD
+        /* Threadsafe sockets do not expose an FD we can integrate into the
+           event loop, so we have to construct one by creating a zmq_poller. */
+        auto poll = zmq_poller_new();
+        if (poll == nullptr) {
+            ErrnoException(Env(), zmq_errno()).ThrowAsJavaScriptException();
+            zmq_close(socket);
+            return;
+        }
+
+        /* Callback to free the underlying poller. Move the poller to transfer
+           ownership after the constructor has completed. */
+        finalize = [=]() mutable {
+            auto err = zmq_poller_destroy(&poll);
+            assert(err == 0);
+        };
+
+        if (zmq_poller_add(poll, socket, nullptr, ZMQ_POLLIN | ZMQ_POLLOUT) < 0) {
+            ErrnoException(Env(), zmq_errno()).ThrowAsJavaScriptException();
+            finalize();
+            zmq_close(socket);
+            return;
+        }
+
+        if (zmq_poller_fd(poll, &fd) < 0) {
+            ErrnoException(Env(), zmq_errno()).ThrowAsJavaScriptException();
+            finalize();
+            zmq_close(socket);
+            return;
+        }
+#else
+        /* A thread safe socket was requested, but there is no support for
+           retrieving a poller FD, so we cannot construct them. */
+        ErrnoException(Env(), EINVAL).ThrowAsJavaScriptException();
+        zmq_close(socket);
         return;
+#endif
+    } else {
+        size_t length = sizeof(fd);
+        if (zmq_getsockopt(socket, ZMQ_FD, &fd, &length) < 0) {
+            ErrnoException(Env(), zmq_errno()).ThrowAsJavaScriptException();
+            zmq_close(socket);
+            return;
+        }
     }
 
-    if (poller.Initialize(info.Env(), fd) < 0) {
+    if (poller.Initialize(info.Env(), fd, finalize) < 0) {
         ErrnoException(Env(), errno).ThrowAsJavaScriptException();
+        zmq_close(socket);
         return;
     }
 
@@ -225,7 +284,9 @@ void Socket::Send(const Napi::Promise::Deferred& res, OutgoingMsg::Parts& parts)
 }
 
 void Socket::Receive(const Napi::Promise::Deferred& res) {
-    auto msg = Napi::Array::New(Env(), 1);
+    /* Return an array of message parts, or an array with a single message
+       followed by a metadata object. */
+    auto list = Napi::Array::New(Env(), 1);
 
     uint32_t i = 0;
     while (true) {
@@ -237,11 +298,28 @@ void Socket::Receive(const Napi::Promise::Deferred& res) {
             }
         }
 
-        msg[i++] = part.ToBuffer(Env());
+        list[i++] = part.ToBuffer(Env());
+
+#ifdef ZMQ_HAS_THREAD_SAFE
+        switch (type) {
+        case ZMQ_SERVER: {
+            auto meta = Napi::Object::New(Env());
+            meta.Set("routingId", zmq_msg_routing_id(part));
+            list[i++] = meta;
+            break;
+        }
+
+        case ZMQ_RADIO: {
+            // TODO
+            break;
+        }
+        }
+#endif
+
         if (!zmq_msg_more(part)) break;
     }
 
-    res.Resolve(msg);
+    res.Resolve(list);
 }
 
 Napi::Value Socket::Bind(const Napi::CallbackInfo& info) {
@@ -397,14 +475,55 @@ void Socket::Close(const Napi::CallbackInfo& info) {
     }
 }
 
-Napi::Value Socket::Send(const Napi::CallbackInfo& info) {
-    auto args = {Argument{"Message must be present",
-        [](const Napi::Value& value) { return !value.IsUndefined(); }}};
+inline bool IsNotUndefined(const Napi::Value& value) {
+    return !value.IsUndefined();
+}
 
-    if (!ValidateArguments(info, args)) return Env().Undefined();
+Napi::Value Socket::Send(const Napi::CallbackInfo& info) {
+    switch (type) {
+#ifdef ZMQ_HAS_THREAD_SAFE
+    case ZMQ_SERVER:
+    case ZMQ_RADIO: {
+        auto args = {
+            Argument{"Message must be present", &IsNotUndefined},
+            Argument{"Options must be an object", &Napi::Value::IsObject},
+        };
+
+        if (!ValidateArguments(info, args)) return Env().Undefined();
+        break;
+    }
+
+#endif
+    default: {
+        auto args = {
+            Argument{"Message must be present", &IsNotUndefined},
+        };
+
+        if (!ValidateArguments(info, args)) return Env().Undefined();
+    }
+    }
+
     if (!ValidateOpen()) return Env().Undefined();
 
     OutgoingMsg::Parts parts(info[0]);
+
+#ifdef ZMQ_HAS_THREAD_SAFE
+    switch (type) {
+    case ZMQ_SERVER: {
+        if (!parts.SetRoutingId(info[1].As<Napi::Object>().Get("routingId"))) {
+            return Env().Undefined();
+        }
+        break;
+    }
+
+    case ZMQ_RADIO: {
+        if (!parts.SetGroup(info[1].As<Napi::Object>().Get("group"))) {
+            return Env().Undefined();
+        }
+        break;
+    }
+    }
+#endif
 
     if (send_timeout == 0 || HasEvents(ZMQ_POLLOUT)) {
         /* We can send on the socket immediately. This is a separate code
@@ -456,6 +575,58 @@ Napi::Value Socket::Receive(const Napi::CallbackInfo& info) {
         }
 
         return poller.ReadPromise(receive_timeout);
+    }
+}
+
+void Socket::Join(const Napi::CallbackInfo& info) {
+    auto args = {
+        Argument{"Group must be a string or buffer", &Napi::Value::IsString,
+            &Napi::Value::IsBuffer},
+    };
+
+    if (!ValidateArguments(info, args)) return;
+    if (!ValidateOpen()) return;
+
+    auto str = [&]() {
+        if (info[0].IsString()) {
+            return std::string(info[0].As<Napi::String>());
+        } else {
+            Napi::Object buf = info[0].As<Napi::Object>();
+            auto length = buf.As<Napi::Buffer<char>>().Length();
+            auto value = buf.As<Napi::Buffer<char>>().Data();
+            return std::string(value, length);
+        }
+    }();
+
+    if (zmq_join(socket, str.c_str()) < 0) {
+        ErrnoException(Env(), zmq_errno()).ThrowAsJavaScriptException();
+        return;
+    }
+}
+
+void Socket::Leave(const Napi::CallbackInfo& info) {
+    auto args = {
+        Argument{"Group must be a string or buffer", &Napi::Value::IsString,
+            &Napi::Value::IsBuffer},
+    };
+
+    if (!ValidateArguments(info, args)) return;
+    if (!ValidateOpen()) return;
+
+    auto str = [&]() {
+        if (info[0].IsString()) {
+            return std::string(info[0].As<Napi::String>());
+        } else {
+            Napi::Object buf = info[0].As<Napi::Object>();
+            auto length = buf.As<Napi::Buffer<char>>().Length();
+            auto value = buf.As<Napi::Buffer<char>>().Data();
+            return std::string(value, length);
+        }
+    }();
+
+    if (zmq_leave(socket, str.c_str()) < 0) {
+        ErrnoException(Env(), zmq_errno()).ThrowAsJavaScriptException();
+        return;
     }
 }
 
@@ -637,14 +808,16 @@ void Socket::Initialize(Napi::Env& env, Napi::Object& exports) {
     auto proto = {
         InstanceMethod("bind", &Socket::Bind),
         InstanceMethod("unbind", &Socket::Unbind),
-
         InstanceMethod("connect", &Socket::Connect),
         InstanceMethod("disconnect", &Socket::Disconnect),
-
         InstanceMethod("close", &Socket::Close),
 
-        InstanceMethod("send", &Socket::Send),
-        InstanceMethod("receive", &Socket::Receive),
+        /* Marked 'configurable' so they can be removed from the base Socket
+           prototype and re-assigned to the sockets to which they apply. */
+        InstanceMethod("send", &Socket::Send, napi_configurable),
+        InstanceMethod("receive", &Socket::Receive, napi_configurable),
+        InstanceMethod("join", &Socket::Join, napi_configurable),
+        InstanceMethod("leave", &Socket::Leave, napi_configurable),
 
         InstanceMethod("getBoolOption", &Socket::GetSockOpt<bool>),
         InstanceMethod("setBoolOption", &Socket::SetSockOpt<bool>),

@@ -42,6 +42,8 @@
     "binding.gyp",
     "compat.js",
     "compat.d.ts",
+    "draft.js",
+    "draft.d.ts",
     "lib/*.d.ts",
     "lib/*.js",
     "src/util/*.h",
@@ -54,7 +56,7 @@
     "install": "node-gyp-build",
     "ci:prebuild": "prebuildify --napi --strip",
     "ci:compile": "tsc --project .",
-    "dev:test": "script/format.sh && tsc --project . && mocha && tslint -t stylish --project . && rm -f tmp/*",
+    "dev:test": "tsc --project tsconfig-build.json && mocha && tslint -t stylish --project . && script/format.sh && rm -f tmp/*",
     "dev:bench": "node --harmony --expose-gc --require ./test/ts test/bench"
   },
   "keywords": [

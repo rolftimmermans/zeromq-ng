@@ -43,7 +43,6 @@
         'NAPI_VERSION=4',
         'NAPI_DISABLE_CPP_EXCEPTIONS',
         'ZMQ_STATIC',
-        'ZMQ_BUILD_DRAFT_API',
       ],
 
       'conditions': [

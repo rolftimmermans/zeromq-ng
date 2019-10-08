@@ -1,54 +1,55 @@
 import * as zmq from "../../src"
+import * as draft from "../../src/draft"
+
 import {assert} from "chai"
 import {testProtos, uniqAddress} from "./helpers"
 
-for (const proto of testProtos("tcp", "ipc", "inproc")) {
-  describe(`socket with ${proto} pub/sub`, function() {
-    let pub: zmq.Publisher
-    let sub: zmq.Subscriber
+for (const proto of testProtos("tcp", "ipc", "inproc", "udp")) {
+  describe(`draft socket with ${proto} radio/dish`, function() {
+    let radio: draft.Radio
+    let dish: draft.Dish
 
     beforeEach(function() {
-      pub = new zmq.Publisher
-      sub = new zmq.Subscriber
+      radio = new draft.Radio
+      dish = new draft.Dish
     })
 
     afterEach(function() {
-      pub.close()
-      sub.close()
+      radio.close()
+      dish.close()
       global.gc()
     })
 
     describe("send", function() {
       it("should deliver messages", async function() {
-        /* PUB  -> foo ->  SUB
-                -> bar ->  subscribed to all
-                -> baz ->
-                -> qux ->
+        /* RADIO -> foo -> DISH
+                 -> bar -> joined all
+                 -> baz ->
+                 -> qux ->
          */
 
         const address = uniqAddress(proto)
         const messages = ["foo", "bar", "baz", "qux"]
         const received: string[] = []
 
-        /* Subscribe to all. */
-        sub.subscribe()
+        dish.join("test")
 
-        await sub.bind(address)
-        await pub.connect(address)
+        await dish.bind(address)
+        await radio.connect(address)
 
         const send = async () => {
           /* Wait briefly before publishing to avoid slow joiner syndrome. */
-          await new Promise(resolve => setTimeout(resolve, 25))
+          await new Promise((resolve) => setTimeout(resolve, 25))
           for (const msg of messages) {
-            await pub.send(msg)
+            await radio.send(msg, {group: "test"})
           }
         }
 
         const receive = async () => {
-          for await (const [msg] of sub) {
+          for await (const [msg] of dish) {
             assert.instanceOf(msg, Buffer)
             received.push(msg.toString())
-            if (received.length == messages.length) break
+            if (received.length === messages.length) break
           }
         }
 
@@ -57,37 +58,38 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
       })
     })
 
-    describe("subscribe/unsubscribe", function() {
+    describe("join/leave", function() {
       it("should filter messages", async function() {
-        /* PUB  -> foo -X  SUB
-                -> bar ->  subscribed to "ba"
-                -> baz ->
-                -> qux -X
+        /* RADIO -> foo -X  DISH
+                 -> bar ->  joined "ba"
+                 -> baz ->
+                 -> qux -X
          */
 
         const address = uniqAddress(proto)
         const messages = ["foo", "bar", "baz", "qux"]
         const received: string[] = []
 
-        sub.subscribe("fo", "ba", "qu")
-        sub.unsubscribe("fo", "qu")
+        /* Everything after null byte should be ignored. */
+        dish.join(Buffer.from("fo\x00ba"), Buffer.from("ba\x00fo"))
+        dish.leave(Buffer.from("fo"))
 
-        await sub.bind(address)
-        await pub.connect(address)
+        await dish.bind(address)
+        await radio.connect(address)
 
         const send = async () => {
           /* Wait briefly before publishing to avoid slow joiner syndrome. */
-          await new Promise(resolve => setTimeout(resolve, 25))
+          await new Promise((resolve) => setTimeout(resolve, 25))
           for (const msg of messages) {
-            await pub.send(msg)
+            await radio.send(msg, {group: msg.slice(0, 2)})
           }
         }
 
         const receive = async () => {
-          for await (const [msg] of sub) {
+          for await (const [msg] of dish) {
             assert.instanceOf(msg, Buffer)
             received.push(msg.toString())
-            if (received.length == 2) break
+            if (received.length === 2) break
           }
         }
 

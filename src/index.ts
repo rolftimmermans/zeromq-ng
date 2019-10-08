@@ -1,22 +1,66 @@
-export * from "./native"
+export {
+  capability,
+  curveKeyPair,
+  version,
+  global,
+  Context,
+  Event,
+  EventDetails,
+  Socket,
+  SocketType,
+  Observer,
+  Proxy,
+} from "./native"
 
 import {
   capability,
+  methods,
   Context,
   Observer,
-  Readable,
+  Options,
   ReadableKeys,
   Socket,
-  SocketOptions,
   SocketType,
   WritableKeys,
 } from "./native"
 
+import * as draft from "./draft"
+
+
+const {send, receive} = methods
+
+export type Message = (
+  Buffer
+)
+
+export type MessageLike = (
+  ArrayBufferView | /* Includes Node.js Buffer and all TypedArray types. */
+  ArrayBuffer | /* Backing buffer of TypedArrays. */
+  SharedArrayBuffer |
+  string |
+  null
+)
+
+export interface Writable<S extends [any, ...any[]] = [MessageLike | MessageLike[]]> {
+  send(...message: S): Promise<void>
+}
+
+export interface Readable<R extends any = Message[]> {
+  receive(): Promise<R>
+  [Symbol.asyncIterator](): AsyncIterator<R, undefined>
+}
+
+
+export type SocketOptions<T> = Options<T, {context: Context}>
+
+
+type SocketIterable<T> = Readable<T> & {closed: boolean}
+
 /* Support async iteration over received messages. Implementing this in JS
    is faster as long as there is no C++ native API to chain promises. */
-function asyncIterator<T extends Readable<U>, U>(this: T): AsyncIterator<U> {
+function asyncIterator<T extends SocketIterable<U>, U>(this: T) {
   return {
-    next: async (): Promise<IteratorResult<U>> => {
+    next: async (): Promise<IteratorResult<U, undefined>> => {
       if (this.closed) {
         /* Cast so we can omit 'value: undefined'. */
         return {done: true} as IteratorReturnResult<undefined>
@@ -36,15 +80,16 @@ function asyncIterator<T extends Readable<U>, U>(this: T): AsyncIterator<U> {
   }
 }
 
-Socket.prototype[Symbol.asyncIterator] = asyncIterator
+(Socket.prototype as any)[Symbol.asyncIterator] = asyncIterator
 Observer.prototype[Symbol.asyncIterator] = asyncIterator
+
 
 Object.defineProperty(Observer.prototype, "emitter", {
   get: function emitter(this: Observer) {
     const {EventEmitter} = require("events")
     const value: NodeJS.EventEmitter = new EventEmitter()
 
-    const receive = this.receive.bind(this)
+    const boundReceive = this.receive.bind(this)
     Object.defineProperty(this, "receive", {
       get: () => {
         throw new Error(
@@ -57,7 +102,7 @@ Object.defineProperty(Observer.prototype, "emitter", {
 
     const run = async () => {
       while (!this.closed) {
-        const [event, data] = await receive()
+        const [event, data] = await boundReceive()
         value.emit(event, data)
       }
     }
@@ -146,19 +191,16 @@ declare module "./native" {
     zapEnforceDomain: boolean
     loopbackFastPath: boolean
 
-    readonly type: number
+    readonly type: SocketType
     readonly lastEndpoint: string | null
     readonly securityMechanism: null | "plain" | "curve" | "gssapi"
     readonly threadSafe: boolean
-
-    [Symbol.asyncIterator](): AsyncIterator<Buffer[], undefined>
   }
 
-  interface Observer {
+  interface Observer extends Readable<[Event, EventDetails]> {
     readonly emitter: NodeJS.EventEmitter
 
     on(event: Event, callback: (details: EventDetails) => void): NodeJS.EventEmitter
-    [Symbol.asyncIterator](): AsyncIterator<[Event, EventDetails]>
   }
 }
 
@@ -168,6 +210,10 @@ export class Pair extends Socket {
     super(SocketType.Pair, options)
   }
 }
+
+export interface Pair extends Writable, Readable {}
+Object.assign(Pair.prototype, {send, receive})
+
 
 export class Publisher extends Socket {
   noDrop: boolean
@@ -179,6 +225,10 @@ export class Publisher extends Socket {
   }
 }
 
+export interface Publisher extends Writable {}
+Object.assign(Publisher.prototype, {send})
+
+
 export class Subscriber extends Socket {
   conflate: boolean
   invertMatching: boolean
@@ -187,7 +237,7 @@ export class Subscriber extends Socket {
     super(SocketType.Subscriber, options)
   }
 
-  subscribe(...values: string[]) {
+  subscribe(...values: Array<Buffer | string>) {
     if (values.length === 0) {
       this.setStringOption(6, null)
     } else {
@@ -197,7 +247,7 @@ export class Subscriber extends Socket {
     }
   }
 
-  unsubscribe(...values: string[]) {
+  unsubscribe(...values: Array<Buffer | string>) {
     if (values.length === 0) {
       this.setStringOption(7, null)
     } else {
@@ -207,6 +257,10 @@ export class Subscriber extends Socket {
     }
   }
 }
+
+export interface Subscriber extends Readable {}
+Object.assign(Subscriber.prototype, {receive})
+
 
 export class Request extends Socket {
   routingId: string | null
@@ -219,6 +273,10 @@ export class Request extends Socket {
   }
 }
 
+export interface Request extends Readable, Writable {}
+Object.assign(Request.prototype, {send, receive})
+
+
 export class Reply extends Socket {
   routingId: string | null
 
@@ -226,6 +284,10 @@ export class Reply extends Socket {
     super(SocketType.Reply, options)
   }
 }
+
+export interface Reply extends Readable, Writable {}
+Object.assign(Reply.prototype, {send, receive})
+
 
 export class Dealer extends Socket {
   routingId: string | null
@@ -236,6 +298,10 @@ export class Dealer extends Socket {
     super(SocketType.Dealer, options)
   }
 }
+
+export interface Dealer extends Readable, Writable {}
+Object.assign(Dealer.prototype, {send, receive})
+
 
 export interface RouterConnectOptions {
   routingId?: string
@@ -260,21 +326,39 @@ export class Router extends Socket {
   }
 }
 
-export class Pull extends Socket {
-  conflate: boolean
+export interface Router extends Readable, Writable {}
+Object.assign(Router.prototype, {send, receive})
 
+
+export class Pull extends Socket {
   constructor(options?: SocketOptions<Pull>) {
     super(SocketType.Pull, options)
   }
 }
 
-export class Push extends Socket {
+export interface Pull extends Readable {
   conflate: boolean
+}
 
+Object.assign(Pull.prototype, {receive})
+
+
+export class Push extends Socket {
   constructor(options?: SocketOptions<Push>) {
     super(SocketType.Push, options)
   }
 }
+
+export interface Push extends Writable {
+  conflate: boolean
+}
+
+Object.assign(Push.prototype, {send})
+
+
+// const RawSocket: Writable & Readable = Socket.prototype as any
+
+export type SubscriptionEvent = "subscribe" | "unsubscribe"
 
 export class XPublisher extends Socket {
   noDrop: boolean
@@ -299,13 +383,39 @@ export class XPublisher extends Socket {
   constructor(options?: SocketOptions<XPublisher>) {
     super(SocketType.XPublisher, options)
   }
+
+  // send(event: SubscriptionEvent, message: NonNullable<MessageLike>): Promise<void> {
+  //   const prefix = Buffer.from([event === "subscribe" ? 0x01 : 0x00])
+  // tslint:disable-next-line: max-line-length
+  //   return RawSocket.send.call(this, Buffer.concat([prefix, Buffer.from(message as any)]))
+  // }
 }
+
+export interface XPublisher extends
+  // tslint:disable-next-line: comment-format
+  Readable, Writable {} //<[SubscriptionEvent, NonNullable<MessageLike>]> {}
+
+Object.assign(XPublisher.prototype, {send, receive})
+
 
 export class XSubscriber extends Socket {
   constructor(options?: SocketOptions<XSubscriber>) {
     super(SocketType.XSubscriber, options)
   }
+
+  // async receive(): Promise<[SubscriptionEvent, Message]> {
+  //   const [message] = await RawSocket.receive.call(this)
+  //   const event = message[0] === 0x1 ? "subscribe" : "unsubscribe"
+  //   return [event, message.slice(1)]
+  // }
 }
+
+export interface XSubscriber extends
+  // tslint:disable-next-line: comment-format
+  Readable, Writable {} //Readable<[SubscriptionEvent, Message]>, Writable {}
+
+Object.assign(XSubscriber.prototype, {send, receive})
+
 
 export interface StreamConnectOptions {
   routingId?: string
@@ -326,6 +436,9 @@ export class Stream extends Socket {
     super.connect(address)
   }
 }
+
+export interface Stream extends Readable, Writable {}
+Object.assign(Stream.prototype, {send, receive})
 
 
 /* Meta functionality to define new socket/context options. */
@@ -381,7 +494,6 @@ function defineOpt<T, K extends ReadableKeys<T>>(
 ): void {
   const desc: PropertyDescriptor = {}
 
-  /* tslint:disable-next-line: no-bitwise */
   if (acc & Acc.Read) {
     if (values) {
       desc.get = function get(this: any) {
@@ -394,7 +506,6 @@ function defineOpt<T, K extends ReadableKeys<T>>(
     }
   }
 
-  /* tslint:disable-next-line: no-bitwise */
   if (acc & Acc.Write) {
     if (values) {
       desc.set = function set(this: any, val: any) {
@@ -484,7 +595,10 @@ for (const target of [Router, Dealer, Request]) {
 defineOpt(Request.prototype, "correlate", 52, Type.Bool, Acc.WriteOnly)
 defineOpt(Request.prototype, "relaxed", 53, Type.Bool, Acc.WriteOnly)
 
-for (const target of [Pull, Push, Subscriber, Publisher, Dealer]) {
+for (const target of [
+  Pull, Push, Subscriber, Publisher, Dealer,
+  draft.Scatter, draft.Gather,
+]) {
   defineOpt(target.prototype, "conflate", 54, Type.Bool, Acc.WriteOnly)
 }
 

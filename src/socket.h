@@ -36,6 +36,9 @@ protected:
     inline Napi::Value Send(const Napi::CallbackInfo& info);
     inline Napi::Value Receive(const Napi::CallbackInfo& info);
 
+    inline void Join(const Napi::CallbackInfo& info);
+    inline void Leave(const Napi::CallbackInfo& info);
+
     template <typename T>
     inline Napi::Value GetSockOpt(const Napi::CallbackInfo& info);
 
@@ -100,6 +103,8 @@ private:
 
     State state = State::Open;
     bool request_close = false;
+    bool thread_safe = false;
+    uint8_t type = 0;
 
     friend class Observer;
     friend class Proxy;

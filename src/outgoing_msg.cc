@@ -110,4 +110,51 @@ OutgoingMsg::Parts::Parts(Napi::Value value) {
         parts.emplace_front(value);
     }
 }
+
+bool OutgoingMsg::Parts::SetGroup(Napi::Value value) {
+    if (value.IsUndefined()) {
+        ErrnoException(value.Env(), EINVAL).ThrowAsJavaScriptException();
+        return false;
+    }
+
+    auto group = [&]() {
+        if (value.IsString()) {
+            return std::string(value.As<Napi::String>());
+        } else if (value.IsBuffer()) {
+            Napi::Object buf = value.As<Napi::Object>();
+            auto length = buf.As<Napi::Buffer<char>>().Length();
+            auto value = buf.As<Napi::Buffer<char>>().Data();
+            return std::string(value, length);
+        } else {
+            return std::string();
+        }
+    }();
+
+    for (auto& part : parts) {
+        if (zmq_msg_set_group(part, group.c_str()) < 0) {
+            ErrnoException(value.Env(), zmq_errno()).ThrowAsJavaScriptException();
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool OutgoingMsg::Parts::SetRoutingId(Napi::Value value) {
+    if (value.IsUndefined()) {
+        ErrnoException(value.Env(), EINVAL).ThrowAsJavaScriptException();
+        return false;
+    }
+
+    auto id = value.As<Napi::Number>().Uint32Value();
+
+    for (auto& part : parts) {
+        if (zmq_msg_set_routing_id(part, id) < 0) {
+            ErrnoException(value.Env(), zmq_errno()).ThrowAsJavaScriptException();
+            return false;
+        }
+    }
+
+    return true;
+}
 }

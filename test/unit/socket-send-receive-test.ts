@@ -1,4 +1,4 @@
-import * as zmq from "../.."
+import * as zmq from "../../src"
 import {assert} from "chai"
 import {testProtos, uniqAddress} from "./helpers"
 
@@ -16,6 +16,36 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
       sockA.close()
       sockB.close()
       global.gc()
+    })
+
+    describe("when not applicable", function() {
+      it("should fail sending", function() {
+        try {
+          (new zmq.Subscriber() as any).send()
+        } catch (err) {
+          assert.instanceOf(err, Error)
+          assert.include(err.message, "send is not a function")
+        }
+      })
+
+      it("should fail receiving", function() {
+        try {
+          (new zmq.Publisher() as any).receive()
+        } catch (err) {
+          assert.instanceOf(err, Error)
+          assert.include(err.message, "receive is not a function")
+        }
+      })
+
+      it("should fail iterating", async function() {
+        try {
+          /* tslint:disable-next-line: no-empty */
+          for await (const msg of (new zmq.Publisher() as any)) {}
+        } catch (err) {
+          assert.instanceOf(err, Error)
+          assert.include(err.message, "receive is not a function")
+        }
+      })
     })
 
     describe("when not connected", function() {
@@ -289,7 +319,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
           const orig = Buffer.alloc(2048)
           await sockA.send(orig)
 
-          const echo = async (sock: zmq.Socket) => {
+          const echo = async (sock: zmq.Pair) => {
             const msg = await sock.receive()
             sock.send(msg)
           }

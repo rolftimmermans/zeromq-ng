@@ -1,5 +1,6 @@
-const {assert} = require("chai")
-const {spawn} = require("child_process")
+/* tslint:disable: no-unused-expression */
+import {assert} from "chai"
+import {spawn} from "child_process"
 
 /* This file is in JavaScript instead of TypeScript because most code is
    being evaluated with toString() and executed in a sub-process. */
@@ -8,7 +9,7 @@ describe("context process exit", function() {
     it("should occur when sockets are closed", async function() {
       this.slow(200)
       await ensureExit(function() {
-        const zmq = require(__dirname)
+        const zmq = require(".")
         const socket1 = new zmq.Dealer
         socket1.close()
         const socket2 = new zmq.Router
@@ -19,7 +20,7 @@ describe("context process exit", function() {
     it("should occur when sockets are not closed", async function() {
       this.slow(200)
       await ensureExit(function() {
-        const zmq = require(__dirname)
+        const zmq = require(".")
         const socket1 = new zmq.Dealer
         const socket2 = new zmq.Router
       })
@@ -28,7 +29,7 @@ describe("context process exit", function() {
     it("should not occur when sockets are open and polling", async function() {
       this.slow(750)
       await ensureNoExit(function() {
-        const zmq = require(__dirname)
+        const zmq = require(".")
         const socket1 = new zmq.Dealer
         socket1.connect("inproc://foo")
         socket1.receive()
@@ -40,7 +41,7 @@ describe("context process exit", function() {
     it("should occur when sockets are closed", async function() {
       this.slow(200)
       await ensureExit(function() {
-        const zmq = require(__dirname)
+        const zmq = require(".")
         const context = new zmq.Context
         const socket1 = new zmq.Dealer({context})
         socket1.close()
@@ -52,7 +53,7 @@ describe("context process exit", function() {
     it("should occur when sockets are closed and context is gced", async function() {
       this.slow(200)
       await ensureExit(function() {
-        const zmq = require(__dirname)
+        const zmq = require(".")
         function run() {
           const context = new zmq.Context
           const socket1 = new zmq.Dealer({context})
@@ -69,7 +70,7 @@ describe("context process exit", function() {
     it("should occur when sockets are not closed", async function() {
       this.slow(200)
       await ensureExit(function() {
-        const zmq = require(__dirname)
+        const zmq = require(".")
         const context = new zmq.Context
         const socket1 = new zmq.Dealer({context})
         const socket2 = new zmq.Router({context})
@@ -79,7 +80,7 @@ describe("context process exit", function() {
     it("should not occur when sockets are open and polling", async function() {
       this.slow(750)
       await ensureNoExit(function() {
-        const zmq = require(__dirname)
+        const zmq = require(".")
         const context = new zmq.Context
         const socket1 = new zmq.Dealer({context})
         socket1.connect("inproc://foo")
@@ -89,16 +90,16 @@ describe("context process exit", function() {
   })
 })
 
-async function ensureExit(fn) {
+async function ensureExit(fn: () => void): Promise<void> {
   return new Promise((resolve) => {
     const child = spawn(process.argv[0], ["--expose_gc"])
     child.stdin.write(`(${fn})()`)
     child.stdin.end()
 
-    child.stdout.on("data", data => console.log(data.toString()))
-    child.stderr.on("data", data => console.error(data.toString()))
+    child.stdout.on("data", (data: Buffer) => console.log(data.toString()))
+    child.stderr.on("data", (data: Buffer) => console.error(data.toString()))
 
-    child.on("close", (code) => {
+    child.on("close", (code: number) => {
       assert.equal(code, 0)
       resolve()
     })
@@ -110,16 +111,16 @@ async function ensureExit(fn) {
   })
 }
 
-async function ensureNoExit(fn) {
+async function ensureNoExit(fn: () => void): Promise<void> {
   return new Promise((resolve, reject) => {
-    const child = spawn(process.argv[0])
+    const child = spawn(process.argv[0], ["--expose_gc"])
     child.stdin.write(`(${fn})()`)
     child.stdin.end()
 
-    child.stdout.on("data", data => console.log(data.toString()))
-    child.stderr.on("data", data => console.error(data.toString()))
+    child.stdout.on("data", (data: Buffer) => console.log(data.toString()))
+    child.stderr.on("data", (data: Buffer) => console.error(data.toString()))
 
-    child.on("close", (code) => {
+    child.on("close", (code: number) => {
       reject(new Error(`Exit with code ${code}`))
     })
 

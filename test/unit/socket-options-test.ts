@@ -1,4 +1,4 @@
-import * as zmq from "../.."
+import * as zmq from "../../src"
 import * as semver from "semver"
 import {assert} from "chai"
 import {uniqAddress} from "./helpers"

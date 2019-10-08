@@ -1,4 +1,4 @@
-import * as zmq from "../.."
+import * as zmq from "../../src"
 import {assert} from "chai"
 
 describe("socket construction", function() {

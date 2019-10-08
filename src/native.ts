@@ -1,30 +1,30 @@
-/* tslint:disable: no-var-requires */
+/* tslint:disable: no-var-requires ban-types */
 
 /* Declare all native C++ classes and methods in this file. */
 const path = require("path")
 module.exports = require("node-gyp-build")(path.join(__dirname, ".."))
 
-export type Message = (
-  ArrayBufferView |
-  ArrayBuffer |
-  SharedArrayBuffer |
-  string |
-  null
-)
 
-export const enum SocketType {
-  Pair = 0,
-  Publisher = 1,
-  Subscriber = 2,
-  Request = 3,
-  Reply = 4,
-  Dealer = 5,
-  Router = 6,
-  Pull = 7,
-  Push = 8,
-  XPublisher = 9,
-  XSubscriber = 10,
-  Stream = 11,
+/* We are removing public methods from the Socket prototype that do not apply
+   to all socket types. We will re-assign them to the prototypes of the
+   relevant sockets later. For send/receive it is important that they are not
+   wrapped in JS methods later, to ensure best performance. Any changes to
+   their signatures should be handled in C++ exclusively. */
+const sack: any = {}
+const target = module.exports.Socket.prototype
+for (const key of ["send", "receive", "join", "leave"]) {
+  sack[key] = target[key]
+  delete target[key]
+}
+
+module.exports.methods = sack
+
+
+export declare const methods: {
+  send: Function,
+  receive: Function,
+  join: Function,
+  leave: Function,
 }
 
 
@@ -69,50 +69,6 @@ export declare class Context {
 export declare const global: Context
 
 
-export type SocketOptions<T extends Socket> = Options<T, {context: Context}>
-
-export declare class Socket implements Readable<Buffer[]> {
-  readonly events: Observer
-  readonly context: Context
-
-  readonly closed: boolean
-  readonly readable: boolean
-  readonly writable: boolean
-
-  /**
-   * Creates a new ØMQ socket of the given type and sets any provided socket options.
-   */
-  protected constructor(type: SocketType, options?: Options<Socket, {context: Context}>)
-
-  close(): void
-  bind(address: string): Promise<void>
-  unbind(address: string): Promise<void>
-  connect(address: string): void
-  disconnect(address: string): void
-
-  send(message: Message | Message[]): Promise<void>
-  receive(): Promise<Buffer[]>
-
-  protected getBoolOption(option: number): boolean
-  protected setBoolOption(option: number, value: boolean): void
-
-  protected getInt32Option(option: number): number
-  protected setInt32Option(option: number, value: number): void
-
-  protected getUint32Option(option: number): number
-  protected setUint32Option(option: number, value: number): void
-
-  protected getInt64Option(option: number): number
-  protected setInt64Option(option: number, value: number): void
-
-  protected getUint64Option(option: number): number
-  protected setUint64Option(option: number, value: number): void
-
-  protected getStringOption(option: number): string | null
-  protected setStringOption(option: number, value: string | null): void
-}
-
-
 export declare class ErrnoError extends Error {
   code?: string
   errno?: number
@@ -136,21 +92,24 @@ export interface EventDetails {
   error?: ErrnoError,
 }
 
-export declare class Observer implements Readable<[Event, EventDetails]> {
+export declare class Observer {
   readonly closed: boolean
 
-  protected constructor(socket: Socket)
+  constructor(socket: Socket)
 
   close(): void
   receive(): Promise<[Event, EventDetails]>
 }
 
 
-export declare class Proxy {
-  readonly frontEnd: Socket
-  readonly backEnd: Socket
+export declare class Proxy<
+  F extends Socket = Socket,
+  B extends Socket = Socket,
+> {
+  readonly frontEnd: F
+  readonly backEnd: B
 
-  constructor(frontEnd: Socket, backEnd: Socket)
+  constructor(frontEnd: F, backEnd: B)
 
   run(): Promise<void>
   pause(): void
@@ -158,12 +117,67 @@ export declare class Proxy {
   terminate(): void
 }
 
-export interface Readable<T> {
+
+export declare abstract class Socket {
+  readonly events: Observer
+  readonly context: Context
+
   readonly closed: boolean
+  readonly readable: boolean
+  readonly writable: boolean
+
+  protected constructor(type: SocketType, options?: {})
 
   close(): void
-  receive(): Promise<T>
+  bind(address: string): Promise<void>
+  unbind(address: string): Promise<void>
+  connect(address: string): void
+  disconnect(address: string): void
+
+  protected getBoolOption(option: number): boolean
+  protected setBoolOption(option: number, value: boolean): void
+
+  protected getInt32Option(option: number): number
+  protected setInt32Option(option: number, value: number): void
+
+  protected getUint32Option(option: number): number
+  protected setUint32Option(option: number, value: number): void
+
+  protected getInt64Option(option: number): number
+  protected setInt64Option(option: number, value: number): void
+
+  protected getUint64Option(option: number): number
+  protected setUint64Option(option: number, value: number): void
+
+  protected getStringOption(option: number): string | null
+  protected setStringOption(option: number, value: string | Buffer | null): void
 }
+
+
+export const enum SocketType {
+  Pair = 0,
+  Publisher = 1,
+  Subscriber = 2,
+  Request = 3,
+  Reply = 4,
+  Dealer = 5,
+  Router = 6,
+  Pull = 7,
+  Push = 8,
+  XPublisher = 9,
+  XSubscriber = 10,
+  Stream = 11,
+
+  /* DRAFT socket types. */
+  Server = 12,
+  Client = 13,
+  Radio = 14,
+  Dish = 15,
+  Gather = 16,
+  Scatter = 17,
+  Datagram = 18,
+}
+
 
 /* Utility types. */
 
@@ -175,11 +189,13 @@ type IfEquals<X, Y, A, B = never> =
 /* https://stackoverflow.com/questions/57683303 */
 type Expand<T> = T extends infer O ? { [K in keyof O]: O[K] } : never
 
+/** @internal */
 export type ReadableKeys<T> = {
   /* tslint:disable-next-line: ban-types */
   [P in keyof T]-?: T[P] extends Function ? never : P
 }[keyof T]
 
+/** @internal */
 export type WritableKeys<T> = {
   /* tslint:disable-next-line: ban-types */
   [P in keyof T]-?: T[P] extends Function ?

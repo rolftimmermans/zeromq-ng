@@ -1,7 +1,22 @@
-/* tslint:disable: variable-name no-bitwise */
+/* tslint:disable: variable-name */
 import {EventEmitter} from "events"
 import * as zmq from "."
 
+
+type AnySocket = (
+  zmq.Pair |
+  zmq.Publisher |
+  zmq.Subscriber |
+  zmq.Request |
+  zmq.Reply |
+  zmq.Dealer |
+  zmq.Router |
+  zmq.Pull |
+  zmq.Push |
+  zmq.XPublisher |
+  zmq.XSubscriber |
+  zmq.Stream
+)
 
 let count = 1
 const types = {
@@ -172,11 +187,11 @@ class Socket extends EventEmitter {
   [key: string]: any
 
   type: SocketType
-  private _msg: zmq.Message[] = []
-  private _recvQueue: Buffer[][] = []
-  private _sendQueue: Array<[zmq.Message[], Callback | undefined]> = []
+  private _msg: zmq.MessageLike[] = []
+  private _recvQueue: zmq.Message[][] = []
+  private _sendQueue: Array<[zmq.MessageLike[], Callback | undefined]> = []
   private _paused = false
-  private _socket: zmq.Socket
+  private _socket: AnySocket
   private _count: number = 0
 
   constructor(type: SocketType) {
@@ -225,6 +240,13 @@ class Socket extends EventEmitter {
   }
 
   async _recv() {
+    if (
+      this._socket instanceof zmq.Push ||
+      this._socket instanceof zmq.Publisher
+    ) {
+      throw new Error("Cannot receive on this socket type.")
+    }
+
     try {
       if (this._recvQueue.length) {
         const msg = this._recvQueue.shift()!
@@ -247,6 +269,13 @@ class Socket extends EventEmitter {
   }
 
   async _send() {
+    if (
+      this._socket instanceof zmq.Pull ||
+      this._socket instanceof zmq.Subscriber
+    ) {
+      throw new Error("Cannot send on this socket type.")
+    }
+
     if (this._sendQueue.length) {
       const [msg, cb] = this._sendQueue.shift()!
       try {
@@ -310,7 +339,7 @@ class Socket extends EventEmitter {
     return this
   }
 
-  send(message: zmq.Message[], flags: number = 0, cb?: Callback) {
+  send(message: zmq.MessageLike[], flags: number = 0, cb?: Callback) {
     flags = flags | 0
     this._msg = this._msg.concat(message)
     if ((flags & sendOptions.ZMQ_SNDMORE) === 0) {
@@ -670,17 +699,17 @@ function proxy(frontend: Socket, backend: Socket, capture?: Socket) {
   case "push/pull":
   case "pull/push":
   case "xpub/xsub":
-    frontend.on("message", (...args: zmq.Message[]) => {
+    frontend.on("message", (...args: zmq.MessageLike[]) => {
       backend.send(args)
     })
 
     if (capture) {
-      backend.on("message", (...args: zmq.Message[]) => {
+      backend.on("message", (...args: zmq.MessageLike[]) => {
         frontend.send(args)
         capture.send(args)
       })
     } else {
-      backend.on("message", (...args: zmq.Message[]) => {
+      backend.on("message", (...args: zmq.MessageLike[]) => {
         frontend.send(args)
       })
     }
@@ -688,17 +717,17 @@ function proxy(frontend: Socket, backend: Socket, capture?: Socket) {
 
   case "router/dealer":
   case "xrep/xreq":
-    frontend.on("message", (...args: zmq.Message[]) => {
+    frontend.on("message", (...args: zmq.MessageLike[]) => {
       backend.send(args)
     })
 
     if (capture) {
-      backend.on("message", (...args: zmq.Message[]) => {
+      backend.on("message", (...args: zmq.MessageLike[]) => {
         frontend.send(args)
         capture.send(args.slice(2))
       })
     } else {
-      backend.on("message", (...args: zmq.Message[]) => {
+      backend.on("message", (...args: zmq.MessageLike[]) => {
         frontend.send(args)
       })
     }

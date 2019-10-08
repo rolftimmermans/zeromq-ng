@@ -755,8 +755,12 @@ The property names may differ somewhat from the native option names. This is int
 * **typeOfService** – ZMQ_TOS <br/>
   <[number]> Sets the ToS fields (the *Differentiated Services* (DS) and *Explicit Congestion Notification* (ECN) field) of the IP header. The ToS field is typically used to specify a packet's priority. The availability of this option is dependent on intermediate network equipment that inspect the ToS field and provide a path for low-delay, high-throughput, highly-reliable service, etc.
 
-* **verbose** (write only, on `XPublisher` sockets only) – ZMQ_XPUB_VERBOSE <br/>
-  <[boolean]> If set to `true` the socket passes all subscribe messages to the caller. If set to `false` (default) these are not visible to the caller.
+* **verbosity** (write only, on `XPublisher` sockets only) – ZMQ_XPUB_VERBOSE / ZMQ_XPUB_VERBOSER <br/>
+  <[null] | [string]> If set to `true` the socket passes all subscribe messages to the caller. If set to `false` (default) these are not visible to the caller.
+
+  * `null` – No security mechanism is used.
+  * `"plain"` – The PLAIN mechanism defines a simple username/password mechanism that lets a server authenticate a client. PLAIN makes no attempt at security or confidentiality.
+  * `"curve"` – The CURVE mechanism defines a mechanism for secure authentication and confidentiality for communications between a client and a server. CURVE is intended for use on public networks.
 
 * **verboser** (write only, on `XPublisher` sockets only) – ZMQ_XPUB_VERBOSER <br/>
   <[boolean]>If set to `true` the socket passes all subscribe **and** unsubscribe messages to the caller. If set to `false` (default) these are not visible to the caller.

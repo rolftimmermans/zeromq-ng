@@ -45,10 +45,11 @@ else
 
   test -d "${SRC_DIR}" || tar xzf "${TARBALL}"
 
-  echo "Building libzmq..."
-
-  if [ "${npm_config_zmq_draft}" = "true" ] || [ -n "${ZMQ_DRAFT}" ]; then
+  if [ "${npm_config_zmq_draft}" = "true" ]; then
+    echo "Building libzmq (with draft support)..."
     BUILD_OPTIONS="-DENABLE_DRAFTS=ON ${BUILD_OPTIONS}"
+  else
+    echo "Building libzmq..."
   fi
 
   # ClangFormat include causes issues but is not required to build.
