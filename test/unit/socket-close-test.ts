@@ -1,4 +1,5 @@
 import * as zmq from "../../src"
+
 import {assert} from "chai"
 import {testProtos, uniqAddress} from "./helpers"
 
@@ -114,7 +115,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
 
         await task()
         global.gc()
-        await new Promise(resolve => setTimeout(resolve, 5))
+        await new Promise((resolve) => setTimeout(resolve, 5))
         assert.equal(released, true)
       })
     })
@@ -126,6 +127,8 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
         let released = false
         const task = async () => {
           let context: zmq.Context|undefined = new zmq.Context
+
+          /* tslint:disable-next-line: no-unused-expression */
           new zmq.Dealer({context, linger: 0})
 
           weak(context, () => {released = true})
@@ -135,7 +138,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
 
         await task()
         global.gc()
-        await new Promise(resolve => setTimeout(resolve, 5))
+        await new Promise((resolve) => setTimeout(resolve, 5))
         assert.equal(released, true)
       })
     })

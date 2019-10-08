@@ -1,4 +1,5 @@
 import * as zmq from "../../src"
+
 import {assert} from "chai"
 import {testProtos, uniqAddress} from "./helpers"
 
@@ -47,9 +48,9 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
           for (const msg of messages) {
             await req.send(Buffer.from(msg))
 
-            const [rep] = await req.receive()
-            received.push(rep.toString())
-            if (received.length == messages.length) break
+            const [res] = await req.receive()
+            received.push(res.toString())
+            if (received.length === messages.length) break
           }
 
           rep.close()

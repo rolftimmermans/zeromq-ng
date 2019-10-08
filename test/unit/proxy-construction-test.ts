@@ -1,5 +1,6 @@
-import * as zmq from "../../src"
 import * as semver from "semver"
+import * as zmq from "../../src"
+
 import {assert} from "chai"
 
 describe("proxy construction", function() {
@@ -39,6 +40,7 @@ describe("proxy construction", function() {
 
     it("should throw with invalid socket", function() {
       try {
+        /* tslint:disable-next-line: no-unused-expression */
         new (zmq.Proxy as any)({}, {})
         assert.ok(false)
       } catch (err) {

@@ -5,7 +5,7 @@ describe("typings", function() {
     /* To test the TypeScript typings this file should compile successfully.
        We don't actually execute the code in this function. */
 
-    // @ts-ignore unused function
+    /* @ts-ignore unused function */
     function test() {
       const version: string = zmq.version
       console.log(version)
@@ -57,9 +57,9 @@ describe("typings", function() {
         socket.disconnect("tcp://foobar")
         router.connect("tcp://foobar", {routingId: "remote_id"})
 
-        for await (const [part1, part2] of socket) {
-          console.log(part1)
-          console.log(part2)
+        for await (const [p1, p2] of socket) {
+          console.log(p1)
+          console.log(p2)
         }
 
         const [part1, part2] = await socket.receive()
@@ -74,14 +74,14 @@ describe("typings", function() {
 
         socket.close()
 
-        socket.events.on("bind", details => {
+        socket.events.on("bind", (details) => {
           console.log(details.address)
           console.log(details.interval)
           console.log(details.error)
         })
 
         for await (const [event, details] of socket.events) {
-          if (event == "bind") {
+          if (event === "bind") {
             console.log(details.address)
             console.log(details.interval)
             console.log(details.error)

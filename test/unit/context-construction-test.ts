@@ -1,4 +1,5 @@
 import * as zmq from "../../src"
+
 import {assert} from "chai"
 
 describe("context construction", function() {
@@ -10,7 +11,7 @@ describe("context construction", function() {
     assert.throws(
       () => (zmq.Context as any)(),
       TypeError,
-      "Class constructors cannot be invoked without 'new'"
+      "Class constructors cannot be invoked without 'new'",
     )
   })
 
@@ -18,7 +19,7 @@ describe("context construction", function() {
     assert.throws(
       () => new (zmq.Context as any)(1),
       TypeError,
-      "Options must be an object"
+      "Options must be an object",
     )
   })
 
@@ -26,7 +27,7 @@ describe("context construction", function() {
     assert.throws(
       () => new (zmq.Context as any)({}, 2),
       TypeError,
-      "Expected 1 argument"
+      "Expected 1 argument",
     )
   })
 
@@ -39,7 +40,7 @@ describe("context construction", function() {
     assert.throws(
       () => new (zmq.Context as any)({ioThreads: "hello"}),
       TypeError,
-      "Option value must be a number"
+      "Option value must be a number",
     )
   })
 
@@ -47,7 +48,7 @@ describe("context construction", function() {
     assert.throws(
       () => new (zmq.Context as any)({maxSocketsLimit: 1}),
       TypeError,
-      "Cannot set property maxSocketsLimit of #<Context> which has only a getter"
+      "Cannot set property maxSocketsLimit of #<Context> which has only a getter",
     )
   })
 
@@ -55,7 +56,7 @@ describe("context construction", function() {
     assert.throws(
       () => new (zmq.Context as any)({doesNotExist: 1}),
       TypeError,
-      "Cannot add property doesNotExist, object is not extensible"
+      "Cannot add property doesNotExist, object is not extensible",
     )
   })
 })

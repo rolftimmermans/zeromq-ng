@@ -1,11 +1,12 @@
-import * as zmq from "../../src"
 import * as semver from "semver"
+import * as zmq from "../../src"
+
 import {assert} from "chai"
 import {testProtos, uniqAddress} from "./helpers"
 
 for (const proto of testProtos("tcp", "ipc", "inproc")) {
   describe(`socket with ${proto} connect/disconnect`, function() {
-    let sock: zmq.Dealer
+    let sock: zmq.Dealer | zmq.Router
 
     beforeEach(function() {
       sock = new zmq.Dealer
@@ -45,7 +46,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
 
       if (semver.satisfies(zmq.version, ">= 4.1")) {
         it("should allow setting routing id on router", async function() {
-          const sock = new zmq.Router({mandatory: true, linger: 0})
+          sock = new zmq.Router({mandatory: true, linger: 0})
           await sock.connect(uniqAddress(proto), {routingId: "remoteId"})
           await sock.send(["remoteId", "hi"])
         })

@@ -1,4 +1,5 @@
 import * as zmq from "../../src"
+
 import {assert} from "chai"
 import {testProtos, uniqAddress} from "./helpers"
 
@@ -50,7 +51,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
 
           for await (const msg of sockA) {
             received.push(msg.toString())
-            if (received.length == messages.length) break
+            if (received.length === messages.length) break
           }
 
           sockB.close()

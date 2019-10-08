@@ -1,3 +1,4 @@
+/* tslint:disable: no-console */
 import {Router} from "zeromq-ng"
 
 import {Service} from "./service"
@@ -6,8 +7,8 @@ import {Header, Message} from "./types"
 export class Broker {
   address: string
   socket: Router = new Router({sendHighWaterMark: 1, sendTimeout: 1})
-  services: Map<string, Service> = new Map
-  workers: Map<string, Buffer> = new Map
+  services: Map<string, Service> = new Map()
+  workers: Map<string, Buffer> = new Map()
 
   constructor(address: string = "tcp://127.0.0.1:5555") {
     this.address = address
@@ -87,22 +88,22 @@ export class Broker {
     this.getService(service).deregister(worker)
   }
 
-  getService(service: Buffer): Service {
-    const name = service.toString()
-    if (this.services.has(name)) {
-      return this.services.get(name)!
+  getService(name: Buffer): Service {
+    const key = name.toString()
+    if (this.services.has(key)) {
+      return this.services.get(key)!
     } else {
-      const service = new Service(this.socket, name)
-      this.services.set(name, service)
+      const service = new Service(this.socket, key)
+      this.services.set(key, service)
       return service
     }
   }
 
   getWorkerService(worker: Buffer): Buffer {
-    return this.workers.get(worker.toString('hex'))!
+    return this.workers.get(worker.toString("hex"))!
   }
 
   setWorkerService(worker: Buffer, service: Buffer) {
-    this.workers.set(worker.toString('hex'), service)
+    this.workers.set(worker.toString("hex"), service)
   }
 }

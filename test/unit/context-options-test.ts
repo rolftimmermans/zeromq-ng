@@ -1,4 +1,5 @@
 import * as zmq from "../../src"
+
 import {assert} from "chai"
 
 describe("context options", function() {
@@ -25,7 +26,7 @@ describe("context options", function() {
     assert.throws(
       () => (context as any).maxSocketsLimit = 1,
       TypeError,
-      "Cannot set property maxSocketsLimit of #<Context> which has only a getter"
+      "Cannot set property maxSocketsLimit of #<Context> which has only a getter",
     )
   })
 
@@ -34,7 +35,7 @@ describe("context options", function() {
     assert.throws(
       () => (context as any).doesNotExist = 1,
       TypeError,
-      "Cannot add property doesNotExist, object is not extensible"
+      "Cannot add property doesNotExist, object is not extensible",
     )
   })
 })

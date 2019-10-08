@@ -1,10 +1,12 @@
-import * as zmq from "../../src"
+/* tslint:disable: whitespace align */
 import * as semver from "semver"
+import * as zmq from "../../src"
+
 import {assert} from "chai"
 import {uniqAddress} from "./helpers"
 
 describe("socket options", function() {
-  let warningListeners: Function[]
+  let warningListeners: NodeJS.WarningListener[]
 
   beforeEach(function() {
     warningListeners = process.listeners("warning")
@@ -143,7 +145,7 @@ describe("socket options", function() {
     assert.throws(
       () => (sock as any).securityMechanism = 1,
       TypeError,
-      "Cannot set property securityMechanism of #<Socket> which has only a getter"
+      "Cannot set property securityMechanism of #<Socket> which has only a getter",
     )
   })
 
@@ -152,7 +154,7 @@ describe("socket options", function() {
     assert.throws(
       () => (sock as any).doesNotExist = 1,
       TypeError,
-      "Cannot add property doesNotExist, object is not extensible"
+      "Cannot add property doesNotExist, object is not extensible",
     )
   })
 
@@ -182,7 +184,7 @@ describe("socket options", function() {
     it("should be emitted for set after connect", async function() {
       const warnings: Error[] = []
       process.removeAllListeners("warning")
-      process.on("warning", warning => warnings.push(warning))
+      process.on("warning", (warning) => warnings.push(warning))
 
       const sock = new zmq.Dealer
       sock.connect(uniqAddress("inproc"))
@@ -190,8 +192,8 @@ describe("socket options", function() {
 
       await new Promise(process.nextTick)
       assert.deepEqual(
-        warnings.map(w => w.message),
-        ["Socket option will not take effect until next connect/bind"]
+        warnings.map((w) => w.message),
+        ["Socket option will not take effect until next connect/bind"],
       )
 
       sock.close()
@@ -200,7 +202,7 @@ describe("socket options", function() {
     it("should be emitted for set during bind", async function() {
       const warnings: Error[] = []
       process.removeAllListeners("warning")
-      process.on("warning", warning => warnings.push(warning))
+      process.on("warning", (warning) => warnings.push(warning))
 
       const sock = new zmq.Dealer
       const promise = sock.bind(uniqAddress("inproc"))
@@ -208,8 +210,8 @@ describe("socket options", function() {
 
       await new Promise(process.nextTick)
       assert.deepEqual(
-        warnings.map(w => w.message),
-        ["Socket option will not take effect until next connect/bind"]
+        warnings.map((w) => w.message),
+        ["Socket option will not take effect until next connect/bind"],
       )
 
       await promise
@@ -219,7 +221,7 @@ describe("socket options", function() {
     it("should be emitted for set after bind", async function() {
       const warnings: Error[] = []
       process.removeAllListeners("warning")
-      process.on("warning", warning => warnings.push(warning))
+      process.on("warning", (warning) => warnings.push(warning))
 
       const sock = new zmq.Dealer
       await sock.bind(uniqAddress("inproc"))
@@ -227,8 +229,8 @@ describe("socket options", function() {
 
       await new Promise(process.nextTick)
       assert.deepEqual(
-        warnings.map(w => w.message),
-        ["Socket option will not take effect until next connect/bind"]
+        warnings.map((w) => w.message),
+        ["Socket option will not take effect until next connect/bind"],
       )
 
       sock.close()
@@ -237,7 +239,7 @@ describe("socket options", function() {
     it("should be emitted when setting large uint64 socket option", async function() {
       const warnings: Error[] = []
       process.removeAllListeners("warning")
-      process.on("warning", warning => warnings.push(warning))
+      process.on("warning", (warning) => warnings.push(warning))
 
       const sock = new zmq.Dealer
       ;(sock as any).setUint64Option(4, 0xfffffff7fab7fb)
@@ -245,8 +247,11 @@ describe("socket options", function() {
 
       await new Promise(process.nextTick)
       assert.deepEqual(
-        warnings.map(w => w.message),
-        ["Value is larger than Number.MAX_SAFE_INTEGER and may have been rounded inaccurately"]
+        warnings.map((w) => w.message),
+        [
+          "Value is larger than Number.MAX_SAFE_INTEGER and " +
+          "may have been rounded inaccurately",
+        ],
       )
     })
   })

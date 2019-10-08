@@ -1,4 +1,5 @@
 import * as zmq from "../../src"
+
 import {assert} from "chai"
 import {testProtos, uniqAddress} from "./helpers"
 
@@ -69,7 +70,9 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
           assert.ok(false)
         } catch (err) {
           assert.instanceOf(err, Error)
-          assert.equal(err.message, "Socket is blocked by async operation (e.g. bind/unbind)")
+          assert.equal(err.message,
+            "Socket is blocked by async operation (e.g. bind/unbind)",
+          )
           assert.equal(err.code, "EBUSY")
           assert.typeOf(err.errno, "number")
         }
@@ -121,7 +124,9 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
           assert.ok(false)
         } catch (err) {
           assert.instanceOf(err, Error)
-          assert.equal(err.message, "Socket is blocked by async operation (e.g. bind/unbind)")
+          assert.equal(err.message,
+            "Socket is blocked by async operation (e.g. bind/unbind)",
+          )
           assert.equal(err.code, "EBUSY")
           assert.typeOf(err.errno, "number")
         }

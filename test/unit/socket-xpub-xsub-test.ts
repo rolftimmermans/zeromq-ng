@@ -1,4 +1,5 @@
 import * as zmq from "../../src"
+
 import {assert} from "chai"
 import {testProtos, uniqAddress} from "./helpers"
 
@@ -48,7 +49,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
 
         const send = async () => {
           /* Wait briefly before publishing to avoid slow joiner syndrome. */
-          await new Promise(resolve => setTimeout(resolve, 25))
+          await new Promise((resolve) => setTimeout(resolve, 25))
           for (const msg of messages) {
             await pub.send(msg)
           }
@@ -59,7 +60,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
           for await (const [msg] of xpub) {
             assert.instanceOf(msg, Buffer)
             await xsub.send(msg)
-            if (++subbed == 1) break
+            if (++subbed === 1) break
           }
         }
 
@@ -68,7 +69,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
           for await (const [msg] of xsub) {
             assert.instanceOf(msg, Buffer)
             await xpub.send(msg)
-            if (++pubbed == messages.length) break
+            if (++pubbed === messages.length) break
           }
         }
 
@@ -76,7 +77,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
           for await (const [msg] of sub) {
             assert.instanceOf(msg, Buffer)
             received.push(msg.toString())
-            if (received.length == messages.length) break
+            if (received.length === messages.length) break
           }
         }
 
@@ -109,7 +110,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
 
         const send = async () => {
           /* Wait briefly before publishing to avoid slow joiner syndrome. */
-          await new Promise(resolve => setTimeout(resolve, 25))
+          await new Promise((resolve) => setTimeout(resolve, 25))
 
           for (const msg of messages) {
             await pub.send(msg)
@@ -121,7 +122,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
           for await (const [msg] of xpub) {
             assert.instanceOf(msg, Buffer)
             await xsub.send(msg)
-            if (++subbed == 1) break
+            if (++subbed === 1) break
           }
         }
 
@@ -130,7 +131,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
           for await (const [msg] of xsub) {
             assert.instanceOf(msg, Buffer)
             await xpub.send(msg)
-            if (++pubbed == 2) break
+            if (++pubbed === 2) break
           }
         }
 
@@ -138,7 +139,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
           for await (const [msg] of sub) {
             assert.instanceOf(msg, Buffer)
             received.push(msg.toString())
-            if (received.length == 2) break
+            if (received.length === 2) break
           }
         }
 
@@ -162,7 +163,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
         await sub2.connect(address)
 
         const subscribe = async () => {
-          await new Promise(resolve => setTimeout(resolve, 25))
+          await new Promise((resolve) => setTimeout(resolve, 25))
           sub1.subscribe("fo")
           sub2.subscribe("fo")
           sub2.unsubscribe("fo")
@@ -173,7 +174,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
             assert.instanceOf(msg, Buffer)
             await xsub.send(msg)
             subs.push(msg)
-            if (subs.length == 1) break
+            if (subs.length === 1) break
           }
         }
 
@@ -197,7 +198,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
         await sub2.connect(address)
 
         const subscribe = async () => {
-          await new Promise(resolve => setTimeout(resolve, 25))
+          await new Promise((resolve) => setTimeout(resolve, 25))
           sub1.subscribe("fo")
           sub2.subscribe("fo")
           sub2.unsubscribe("fo")
@@ -208,7 +209,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
             assert.instanceOf(msg, Buffer)
             await xsub.send(msg)
             subs.push(msg)
-            if (subs.length == 2) break
+            if (subs.length === 2) break
           }
         }
 
@@ -235,7 +236,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
         await sub2.connect(address)
 
         const subscribe = async () => {
-          await new Promise(resolve => setTimeout(resolve, 25))
+          await new Promise((resolve) => setTimeout(resolve, 25))
           sub1.subscribe("fo")
           sub2.subscribe("fo")
           sub2.unsubscribe("fo")
@@ -246,7 +247,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
             assert.instanceOf(msg, Buffer)
             await xsub.send(msg)
             subs.push(msg)
-            if (subs.length == 3) break
+            if (subs.length === 3) break
           }
         }
 

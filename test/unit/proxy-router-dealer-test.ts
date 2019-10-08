@@ -1,5 +1,6 @@
-import * as zmq from "../../src"
 import * as semver from "semver"
+import * as zmq from "../../src"
+
 import {assert} from "chai"
 import {testProtos, uniqAddress} from "./helpers"
 
@@ -69,16 +70,16 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
 
         const send = async () => {
           for (const msg of messages) {
-            if (received.length == 2) {
+            if (received.length === 2) {
               proxy.pause()
               proxy.resume()
             }
 
             await req.send(Buffer.from(msg))
 
-            const [rep] = await req.receive()
-            received.push(rep.toString())
-            if (received.length == messages.length) break
+            const [res] = await req.receive()
+            received.push(res.toString())
+            if (received.length === messages.length) break
           }
 
           rep.close()

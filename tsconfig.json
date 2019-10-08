@@ -1,5 +1,5 @@
 {
-  "exclude": ["*.d.ts", "test", "examples"],
+  "exclude": ["*.d.ts"],
   "compilerOptions": {
     "target": "es2017",
     "outDir": "lib",

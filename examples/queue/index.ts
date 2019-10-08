@@ -1,9 +1,10 @@
+/* tslint:disable: no-console */
 import {Dealer} from "zeromq-ng"
 
 import {Queue} from "./queue"
 
 async function main() {
-  const sender = new Dealer
+  const sender = new Dealer()
   await sender.bind("tcp://127.0.0.1:5555")
 
   const queue = new Queue(sender)
@@ -11,11 +12,11 @@ async function main() {
   queue.send("world!")
   queue.send(null)
 
-  const receiver = new Dealer
+  const receiver = new Dealer()
   receiver.connect("tcp://127.0.0.1:5555")
 
   for await (const [msg] of receiver) {
-    if (msg.length == 0) {
+    if (msg.length === 0) {
       receiver.close()
       console.log("received: <empty message>")
     } else {
@@ -24,7 +25,7 @@ async function main() {
   }
 }
 
-main().catch(err => {
+main().catch((err) => {
   console.error(err)
   process.exit(1)
 })

@@ -1,5 +1,6 @@
-import * as zmq from "../../src"
 import * as semver from "semver"
+import * as zmq from "../../src"
+
 import {assert} from "chai"
 import {testProtos, uniqAddress} from "./helpers"
 
@@ -47,12 +48,12 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
 
           for await (const msg of dealerA) {
             receivedA.push(msg.toString())
-            if (receivedA.length == messages.length) break
+            if (receivedA.length === messages.length) break
           }
 
           for await (const msg of dealerB) {
             receivedB.push(msg.toString())
-            if (receivedB.length == messages.length) break
+            if (receivedB.length === messages.length) break
           }
 
           router.close()

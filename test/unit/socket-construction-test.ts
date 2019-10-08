@@ -1,4 +1,5 @@
 import * as zmq from "../../src"
+
 import {assert} from "chai"
 
 describe("socket construction", function() {
@@ -49,6 +50,7 @@ describe("socket construction", function() {
 
     it("should throw with wrong type id", function() {
       try {
+        /* tslint:disable-next-line: no-unused-expression */
         new (zmq.Socket as any)(37, new zmq.Context)
         assert.ok(false)
       } catch (err) {
@@ -61,6 +63,7 @@ describe("socket construction", function() {
 
     it("should throw with invalid context", function() {
       try {
+        /* tslint:disable-next-line: no-unused-expression */
         new (zmq.Socket as any)(1, {context: {}})
         assert.ok(false)
       } catch (err) {
@@ -124,7 +127,7 @@ describe("socket construction", function() {
       assert.throws(
         () => new (zmq.Dealer as any)({recoveryInterval: "hello"}),
         TypeError,
-        "Option value must be a number"
+        "Option value must be a number",
       )
     })
 
@@ -132,7 +135,7 @@ describe("socket construction", function() {
       assert.throws(
         () => new (zmq.Dealer as any)({securityMechanism: 1}),
         TypeError,
-        "Cannot set property securityMechanism of #<Socket> which has only a getter"
+        "Cannot set property securityMechanism of #<Socket> which has only a getter",
       )
     })
 
@@ -140,7 +143,7 @@ describe("socket construction", function() {
       assert.throws(
         () => new (zmq.Dealer as any)({doesNotExist: 1}),
         TypeError,
-        "Cannot add property doesNotExist, object is not extensible"
+        "Cannot add property doesNotExist, object is not extensible",
       )
     })
 

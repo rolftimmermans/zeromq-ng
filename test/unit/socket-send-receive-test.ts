@@ -1,4 +1,5 @@
 import * as zmq from "../../src"
+
 import {assert} from "chai"
 import {testProtos, uniqAddress} from "./helpers"
 
@@ -89,7 +90,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
 
         await send(16)
         global.gc()
-        await new Promise(resolve => setTimeout(resolve, 5))
+        await new Promise((resolve) => setTimeout(resolve, 5))
         assert.equal(released, true)
       })
 
@@ -106,7 +107,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
 
         await send(1025)
         global.gc()
-        await new Promise(resolve => setTimeout(resolve, 5))
+        await new Promise((resolve) => setTimeout(resolve, 5))
         assert.equal(released, false)
       })
     })
@@ -128,7 +129,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
 
       it("should be readable if message is available", async function() {
         await sockB.send(Buffer.from("foo"))
-        await new Promise(resolve => setTimeout(resolve, 15))
+        await new Promise((resolve) => setTimeout(resolve, 15))
         assert.equal(sockA.readable, true)
       })
 
@@ -173,7 +174,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
         const received: string[] = []
         for await (const msg of sockB) {
           received.push(msg.toString())
-          if (received.length == messages.length) break
+          if (received.length === messages.length) break
         }
 
         assert.deepEqual(received, messages)
@@ -194,7 +195,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
         const received: string[] = []
         for await (const msg of sockB) {
           received.push(msg.toString())
-          if (received.length == messages.length) break
+          if (received.length === messages.length) break
         }
 
         assert.deepEqual(received, [
@@ -206,6 +207,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
       })
 
       it("should deliver messages coercible to string", async function() {
+        /* tslint:disable-next-line: no-empty */
         const messages = [null, function() {}, 16.19, true, {}, Promise.resolve()]
         for (const msg of messages) {
           await sockA.send(msg as any)
@@ -214,7 +216,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
         const received: string[] = []
         for await (const msg of sockB) {
           received.push(msg.toString())
-          if (received.length == messages.length) break
+          if (received.length === messages.length) break
         }
 
         /* Unify different output across Node/TypeScript versions. */
@@ -222,7 +224,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
         received[1] = received[1].replace("function () { }", "function () {}")
         assert.deepEqual(
           received,
-          ["", "function () {}", "16.19", "true", "[object Object]", "[object Promise]"]
+          ["", "function () {}", "16.19", "true", "[object Object]", "[object Promise]"],
         )
       })
 
@@ -248,7 +250,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
       })
 
       it("should poll simultaneously after delay", async function() {
-        await new Promise(resolve => setTimeout(resolve, 15))
+        await new Promise((resolve) => setTimeout(resolve, 15))
         const sendReceiveA = async () => {
           const [msg1] = await Promise.all([
             sockA.receive(),
@@ -310,11 +312,11 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
         await sockB.unbind(address)
 
         global.gc()
-        await new Promise(resolve => setTimeout(resolve, 5))
-        assert.equal(released, proto == "inproc" ? 1 : 2)
+        await new Promise((resolve) => setTimeout(resolve, 5))
+        assert.equal(released, proto === "inproc" ? 1 : 2)
       })
 
-      if (proto == "inproc") {
+      if (proto === "inproc") {
         it("should share memory of large buffers", async function() {
           const orig = Buffer.alloc(2048)
           await sockA.send(orig)
@@ -326,8 +328,8 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
 
           echo(sockB)
 
-          const [msg] = await sockA.receive()
-          msg.writeUInt8(0x40, 0)
+          const [final] = await sockA.receive()
+          final.writeUInt8(0x40, 0)
           assert.equal(orig.slice(0, 1).toString(), "@")
         })
       }
@@ -375,6 +377,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
     describe("during close", function() {
       it("should gracefully stop async iterator", async function() {
         process.nextTick(() => sockA.close())
+        /* tslint:disable-next-line: no-empty */
         for await (const _ of sockA) {}
       })
 
@@ -382,6 +385,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
         sockA = new zmq.Request
         process.nextTick(() => sockA.close())
         try {
+          /* tslint:disable-next-line: no-empty */
           for await (const _ of sockA) {}
           assert.ok(false)
         } catch (err) {

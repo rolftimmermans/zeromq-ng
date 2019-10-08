@@ -1,4 +1,5 @@
 import * as zmq from "../../src"
+
 import {assert} from "chai"
 import {testProtos, uniqAddress} from "./helpers"
 
@@ -40,13 +41,13 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
         for await (const [msg] of pull) {
           assert.instanceOf(msg, Buffer)
           received.push(msg.toString())
-          if (received.length == messages.length) break
+          if (received.length === messages.length) break
         }
 
         assert.deepEqual(received, messages)
       })
 
-      if (proto != "inproc") {
+      if (proto !== "inproc") {
         it("should deliver messages with immediate", async function() {
           const address = uniqAddress(proto)
           const messages = ["foo", "bar", "baz", "qux"]
@@ -67,7 +68,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
           for await (const [msg] of pull) {
             assert.instanceOf(msg, Buffer)
             received.push(msg.toString())
-            if (received.length == messages.length) break
+            if (received.length === messages.length) break
           }
 
           assert.deepEqual(received, messages)
