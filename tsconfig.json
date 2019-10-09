@@ -1,6 +1,7 @@
 {
   "exclude": ["*.d.ts"],
   "compilerOptions": {
+    "allowJs": false,
     "target": "es2017",
     "outDir": "lib",
     "declaration": true,
