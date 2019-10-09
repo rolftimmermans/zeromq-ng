@@ -104,7 +104,7 @@ Socket::Socket(const Napi::CallbackInfo& info)
 
     /* Currently only some DRAFT sockets are threadsafe. */
     if (thread_safe) {
-#ifdef ZMQ_HAS_POLLER_FD
+#ifdef ZMQ_HAS_POLLABLE_THREAD_SAFE
         /* Threadsafe sockets do not expose an FD we can integrate into the
            event loop, so we have to construct one by creating a zmq_poller. */
         auto poll = zmq_poller_new();
@@ -304,7 +304,7 @@ void Socket::Receive(const Napi::Promise::Deferred& res) {
 
         list[i++] = part.IntoBuffer(Env());
 
-#ifdef ZMQ_HAS_THREAD_SAFE
+#ifdef ZMQ_HAS_POLLABLE_THREAD_SAFE
         switch (type) {
         case ZMQ_SERVER: {
             auto meta = Napi::Object::New(Env());
@@ -485,7 +485,7 @@ inline bool IsNotUndefined(const Napi::Value& value) {
 
 Napi::Value Socket::Send(const Napi::CallbackInfo& info) {
     switch (type) {
-#ifdef ZMQ_HAS_THREAD_SAFE
+#ifdef ZMQ_HAS_POLLABLE_THREAD_SAFE
     case ZMQ_SERVER:
     case ZMQ_RADIO: {
         auto args = {
@@ -511,7 +511,7 @@ Napi::Value Socket::Send(const Napi::CallbackInfo& info) {
 
     OutgoingMsg::Parts parts(info[0]);
 
-#ifdef ZMQ_HAS_THREAD_SAFE
+#ifdef ZMQ_HAS_POLLABLE_THREAD_SAFE
     switch (type) {
     case ZMQ_SERVER: {
         if (!parts.SetRoutingId(info[1].As<Napi::Object>().Get("routingId"))) {
@@ -583,7 +583,7 @@ Napi::Value Socket::Receive(const Napi::CallbackInfo& info) {
 }
 
 void Socket::Join(const Napi::CallbackInfo& info) {
-#ifdef ZMQ_HAS_THREAD_SAFE
+#ifdef ZMQ_HAS_POLLABLE_THREAD_SAFE
     auto args = {
         Argument{"Group must be a string or buffer", &Napi::Value::IsString,
             &Napi::Value::IsBuffer},
@@ -611,7 +611,7 @@ void Socket::Join(const Napi::CallbackInfo& info) {
 }
 
 void Socket::Leave(const Napi::CallbackInfo& info) {
-#ifdef ZMQ_HAS_THREAD_SAFE
+#ifdef ZMQ_HAS_POLLABLE_THREAD_SAFE
     auto args = {
         Argument{"Group must be a string or buffer", &Napi::Value::IsString,
             &Napi::Value::IsBuffer},

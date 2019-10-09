@@ -40,15 +40,10 @@
 #define ZMQ_HAS_STEERABLE_PROXY 1
 #endif
 
-#if ZMQ_VERSION >= ZMQ_MAKE_VERSION(4, 2, 0)
-#ifdef ZMQ_BUILD_DRAFT_API
-#define ZMQ_HAS_THREAD_SAFE 1
-#endif
-#endif
-
+/* Threadsafe sockets can only be used if zmq_poller_fd() is available. */
 #if ZMQ_VERSION >= ZMQ_MAKE_VERSION(4, 3, 2)
 #ifdef ZMQ_BUILD_DRAFT_API
-#define ZMQ_HAS_POLLER_FD 1
+#define ZMQ_HAS_POLLABLE_THREAD_SAFE 1
 #endif
 #endif
 

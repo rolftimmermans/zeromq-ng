@@ -111,7 +111,7 @@ OutgoingMsg::Parts::Parts(Napi::Value value) {
     }
 }
 
-#ifdef ZMQ_HAS_THREAD_SAFE
+#ifdef ZMQ_HAS_POLLABLE_THREAD_SAFE
 bool OutgoingMsg::Parts::SetGroup(Napi::Value value) {
     if (value.IsUndefined()) {
         ErrnoException(value.Env(), EINVAL).ThrowAsJavaScriptException();

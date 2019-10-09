@@ -25,6 +25,13 @@ static inline Napi::Object Capabilities(Napi::Env& env) {
     for (auto& option : options) {
         result.Set(option, static_cast<bool>(zmq_has(option)));
     }
+
+    /* Disable DRAFT sockets if there is no way to poll them (< 4.3.2), even
+       if libzmq was built with DRAFT support. */
+#ifndef ZMQ_HAS_POLLABLE_THREAD_SAFE
+    result.Set("draft", false);
+#endif
+
 #else
 #if !defined(ZMQ_HAVE_WINDOWS) && !defined(ZMQ_HAVE_OPENVMS)
     result.Set("ipc", true);
