@@ -4,7 +4,7 @@ if (process.env.INCLUDE_COMPAT_TESTS) {
   const {testProtos, uniqAddress} = require("../helpers")
   const http = require("http")
 
-  describe("compat socket stream", function() {
+  describe.only("compat socket stream", function() {
     it("should support a stream socket type", function(done) {
       const stream = zmq.socket("stream")
       const address = uniqAddress("tcp")

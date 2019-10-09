@@ -1,0 +1,57 @@
+import * as zmq from "../../src"
+
+import {assert} from "chai"
+import {get} from "http"
+import {testProtos, uniqAddress} from "./helpers"
+
+for (const proto of testProtos("tcp")) {
+  describe(`socket with ${proto} stream`, function() {
+    let stream: zmq.Stream
+
+    beforeEach(function() {
+      stream = new zmq.Stream
+    })
+
+    afterEach(function() {
+      stream.close()
+      global.gc()
+    })
+
+    describe("send/receive", function() {
+      it("should deliver messages", async function() {
+        const address = uniqAddress(proto)
+
+        await stream.bind(address)
+
+        const reply = async () => {
+          for await (const [id, msg] of stream) {
+            if (!msg.length) continue
+            assert.equal(msg.toString().split("\r\n")[0], "GET /foo HTTP/1.1")
+
+            await stream.send([id,
+              "HTTP/1.0 200 OK\r\n" +
+              "Content-Type: text/plan\r\n" +
+              "\r\n" +
+              "Hello world!",
+            ])
+
+            stream.close()
+          }
+        }
+
+        let body = ""
+        const request = async () => {
+          return new Promise((resolve) => {
+            get(address.replace("tcp:", "http:") + "/foo", (res) => {
+              res.on("data", (buffer) => {body += buffer.toString()})
+              res.on("end", resolve)
+            })
+          })
+        }
+
+        await Promise.all([request(), reply()])
+        assert.equal(body, "Hello world!")
+      })
+    })
+  })
+}

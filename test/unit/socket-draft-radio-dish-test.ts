@@ -22,7 +22,7 @@ if (zmq.capability.draft) {
         global.gc()
       })
 
-      describe("send", function() {
+      describe("send/receive", function() {
         it("should deliver messages", async function() {
           /* RADIO -> foo -> DISH
                   -> bar -> joined all

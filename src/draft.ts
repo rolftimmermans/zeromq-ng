@@ -110,6 +110,5 @@ export class Datagram extends Socket {
 }
 
 export interface Datagram extends
-  Readable<[Message]>, Writable<[MessageLike, MessageLike]> {}
-
+  Readable<[Message, Message]>, Writable<[MessageLike, MessageLike]> {}
 Object.assign(Datagram.prototype, {send, receive})

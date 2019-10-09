@@ -19,7 +19,7 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
       global.gc()
     })
 
-    describe("send", function() {
+    describe("send/receive", function() {
       it("should deliver messages", async function() {
         /* PUSH  -> foo ->  PULL
                  -> bar ->

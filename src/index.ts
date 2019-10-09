@@ -437,7 +437,8 @@ export class Stream extends Socket {
   }
 }
 
-export interface Stream extends Readable, Writable {}
+export interface Stream extends
+  Readable<[Message, Message]>, Writable<[[MessageLike, MessageLike]]> {}
 Object.assign(Stream.prototype, {send, receive})
 
 

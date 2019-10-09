@@ -279,7 +279,7 @@ class Socket extends EventEmitter {
     if (this._sendQueue.length) {
       const [msg, cb] = this._sendQueue.shift()!
       try {
-        await this._socket.send(msg)
+        await (this._socket as zmq.Writable).send(msg)
         if (cb) cb()
       } catch (err) {
         if (cb) {
