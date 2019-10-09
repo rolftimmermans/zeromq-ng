@@ -46,5 +46,7 @@
 #endif
 
 #if ZMQ_VERSION >= ZMQ_MAKE_VERSION(4, 3, 2)
+#ifdef ZMQ_BUILD_DRAFT_API
 #define ZMQ_HAS_POLLER_FD 1
+#endif
 #endif

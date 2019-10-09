@@ -81,9 +81,7 @@ Socket::Socket(const Napi::CallbackInfo& info)
     if (Env().IsExceptionPending()) return;
 
     socket = zmq_socket(context->context, type);
-    if (socket != nullptr) {
-        ActivePtrs.insert(socket);
-    } else {
+    if (socket == nullptr) {
         ErrnoException(Env(), zmq_errno()).ThrowAsJavaScriptException();
         return;
     }
@@ -97,8 +95,7 @@ Socket::Socket(const Napi::CallbackInfo& info)
         size_t length = sizeof(value);
         if (zmq_getsockopt(socket, ZMQ_THREAD_SAFE, &value, &length) < 0) {
             ErrnoException(Env(), zmq_errno()).ThrowAsJavaScriptException();
-            zmq_close(socket);
-            return;
+            goto error;
         }
 
         thread_safe = value;
@@ -113,8 +110,7 @@ Socket::Socket(const Napi::CallbackInfo& info)
         auto poll = zmq_poller_new();
         if (poll == nullptr) {
             ErrnoException(Env(), zmq_errno()).ThrowAsJavaScriptException();
-            zmq_close(socket);
-            return;
+            goto error;
         }
 
         /* Callback to free the underlying poller. Move the poller to transfer
@@ -127,37 +123,36 @@ Socket::Socket(const Napi::CallbackInfo& info)
         if (zmq_poller_add(poll, socket, nullptr, ZMQ_POLLIN | ZMQ_POLLOUT) < 0) {
             ErrnoException(Env(), zmq_errno()).ThrowAsJavaScriptException();
             finalize();
-            zmq_close(socket);
-            return;
+            goto error;
         }
 
         if (zmq_poller_fd(poll, &fd) < 0) {
             ErrnoException(Env(), zmq_errno()).ThrowAsJavaScriptException();
             finalize();
-            zmq_close(socket);
-            return;
+            goto error;
         }
 #else
         /* A thread safe socket was requested, but there is no support for
            retrieving a poller FD, so we cannot construct them. */
         ErrnoException(Env(), EINVAL).ThrowAsJavaScriptException();
-        zmq_close(socket);
-        return;
+        goto error;
 #endif
     } else {
         size_t length = sizeof(fd);
         if (zmq_getsockopt(socket, ZMQ_FD, &fd, &length) < 0) {
             ErrnoException(Env(), zmq_errno()).ThrowAsJavaScriptException();
-            zmq_close(socket);
-            return;
+            goto error;
         }
     }
 
     if (poller.Initialize(info.Env(), fd, finalize) < 0) {
         ErrnoException(Env(), errno).ThrowAsJavaScriptException();
-        zmq_close(socket);
-        return;
+        goto error;
     }
+
+    /* Initialization was successful, store the socket pointer in a list for
+       cleanup at process exit. */
+    ActivePtrs.insert(socket);
 
     /* Sealing causes setting/getting invalid options to throw an error.
        Otherwise they would fail silently, which is very confusing. */
@@ -167,6 +162,15 @@ Socket::Socket(const Napi::CallbackInfo& info)
     if (info[1].IsObject()) {
         Assign(info.This().As<Napi::Object>(), info[1].As<Napi::Object>());
     }
+
+    return;
+
+error:
+    auto err = zmq_close(socket);
+    assert(err == 0);
+
+    socket = nullptr;
+    return;
 }
 
 Socket::~Socket() {

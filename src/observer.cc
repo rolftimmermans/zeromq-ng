@@ -68,29 +68,41 @@ Observer::Observer(const Napi::CallbackInfo& info)
 
     auto context = Context::Unwrap(target->context_ref.Value());
     socket = zmq_socket(context->context, ZMQ_PAIR);
-    if (socket != nullptr) {
-        Socket::ActivePtrs.insert(socket);
-    } else {
-        ErrnoException(Env(), zmq_errno()).ThrowAsJavaScriptException();
-        return;
-    }
-
-    if (zmq_connect(socket, address.c_str()) < 0) {
+    if (socket == nullptr) {
         ErrnoException(Env(), zmq_errno()).ThrowAsJavaScriptException();
         return;
     }
 
     uv_os_sock_t fd;
     size_t length = sizeof(fd);
+
+    if (zmq_connect(socket, address.c_str()) < 0) {
+        ErrnoException(Env(), zmq_errno()).ThrowAsJavaScriptException();
+        goto error;
+    }
+
     if (zmq_getsockopt(socket, ZMQ_FD, &fd, &length) < 0) {
         ErrnoException(Env(), zmq_errno()).ThrowAsJavaScriptException();
-        return;
+        goto error;
     }
 
     if (poller.Initialize(info.Env(), fd) < 0) {
         ErrnoException(Env(), errno).ThrowAsJavaScriptException();
-        return;
+        goto error;
     }
+
+    /* Initialization was successful, store the socket pointer in a list for
+       cleanup at process exit. */
+    Socket::ActivePtrs.insert(socket);
+
+    return;
+
+error:
+    auto err = zmq_close(socket);
+    assert(err == 0);
+
+    socket = nullptr;
+    return;
 }
 
 Observer::~Observer() {
