@@ -1,3 +1,13 @@
+### v5.0.0-beta.25
+
+* BREAKING: Removed send()/receive() from the base Socket class and assign them only to sockets that can send/receive respectively.
+
+* Minor TypeScript type improvements.
+
+* Support DRAFT sockets when compiled with `--zmq-draft`. Require with `require("zeromq-ng/draft")`.
+
+* Incoming messages will be copied if they are small. In trivial cases the overhead of sharing memory between JS and ZeroMQ is too big. This is the same strategy as is used for outgoing messages.
+
 ### v5.0.0-beta.24
 
 * BREAKING: Reimplemented two interacting boolean properties XPublisher.verbose/verboser as XPublisher.verbosity to make actual the behaviour more obvious.
