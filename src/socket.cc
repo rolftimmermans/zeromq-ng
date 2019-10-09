@@ -579,6 +579,7 @@ Napi::Value Socket::Receive(const Napi::CallbackInfo& info) {
 }
 
 void Socket::Join(const Napi::CallbackInfo& info) {
+#ifdef ZMQ_HAS_THREAD_SAFE
     auto args = {
         Argument{"Group must be a string or buffer", &Napi::Value::IsString,
             &Napi::Value::IsBuffer},
@@ -602,9 +603,11 @@ void Socket::Join(const Napi::CallbackInfo& info) {
         ErrnoException(Env(), zmq_errno()).ThrowAsJavaScriptException();
         return;
     }
+#endif
 }
 
 void Socket::Leave(const Napi::CallbackInfo& info) {
+#ifdef ZMQ_HAS_THREAD_SAFE
     auto args = {
         Argument{"Group must be a string or buffer", &Napi::Value::IsString,
             &Napi::Value::IsBuffer},
@@ -628,6 +631,7 @@ void Socket::Leave(const Napi::CallbackInfo& info) {
         ErrnoException(Env(), zmq_errno()).ThrowAsJavaScriptException();
         return;
     }
+#endif
 }
 
 template <>
