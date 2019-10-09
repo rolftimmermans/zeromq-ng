@@ -6,7 +6,7 @@ import {testProtos, uniqAddress} from "./helpers"
 
 if (zmq.capability.draft) {
   for (const proto of testProtos("tcp", "ipc", "inproc", "udp")) {
-    describe.only(`draft socket with ${proto} radio/dish`, function() {
+    describe(`draft socket with ${proto} radio/dish`, function() {
       let radio: draft.Radio
       let dish: draft.Dish
 
@@ -22,7 +22,7 @@ if (zmq.capability.draft) {
         global.gc()
       })
 
-      describe.only("send", function() {
+      describe("send", function() {
         it("should deliver messages", async function() {
           /* RADIO -> foo -> DISH
                   -> bar -> joined all
