@@ -3,7 +3,7 @@
 
 namespace zmq {
 /* Static collection of outgoing message references that can be recycled. */
-Trash<OutgoingMsg::Reference> OutgoingMsg::Trash;
+Trash<OutgoingMsg::Reference> OutgoingMsg::trash;
 
 OutgoingMsg::OutgoingMsg(Napi::Value value) {
     static auto constexpr zero_copy_threshold = 32;
@@ -19,7 +19,7 @@ OutgoingMsg::OutgoingMsg(Napi::Value value) {
                on the main v8 thread in order to safely dispose of the reference. */
             auto ref = new Reference(value);
             auto recycle = [](void*, void* item) {
-                Trash.Add(static_cast<Reference*>(item));
+                trash.Add(static_cast<Reference*>(item));
             };
 
             if (zmq_msg_init_data(&msg, data, length, recycle, ref) < 0) {
@@ -92,11 +92,11 @@ OutgoingMsg::~OutgoingMsg() {
 }
 
 void OutgoingMsg::Initialize(Napi::Env env) {
-    Trash.Initialize(env);
+    trash.Initialize(env);
 }
 
 void OutgoingMsg::Terminate() {
-    Trash.Terminate();
+    trash.Terminate();
 }
 
 OutgoingMsg::Parts::Parts(Napi::Value value) {
