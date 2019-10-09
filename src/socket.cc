@@ -314,7 +314,9 @@ void Socket::Receive(const Napi::Promise::Deferred& res) {
         }
 
         case ZMQ_RADIO: {
-            // TODO
+            auto meta = Napi::Object::New(Env());
+            meta.Set("group", zmq_msg_group(part));
+            list[i++] = meta;
             break;
         }
         }

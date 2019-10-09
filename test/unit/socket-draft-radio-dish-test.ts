@@ -48,8 +48,9 @@ if (zmq.capability.draft) {
           }
 
           const receive = async () => {
-            for await (const [msg] of dish) {
+            for await (const [msg, {group}] of dish) {
               assert.instanceOf(msg, Buffer)
+              assert.equal(group, "test")
               received.push(msg.toString())
               if (received.length === messages.length) break
             }
@@ -88,8 +89,9 @@ if (zmq.capability.draft) {
           }
 
           const receive = async () => {
-            for await (const [msg] of dish) {
+            for await (const [msg, {group}] of dish) {
               assert.instanceOf(msg, Buffer)
+              assert.equal(group, msg.slice(0, 2).toString())
               received.push(msg.toString())
               if (received.length === 2) break
             }
