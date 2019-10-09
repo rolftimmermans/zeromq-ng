@@ -12,10 +12,11 @@ IncomingMsg::~IncomingMsg() {
 }
 
 Napi::Value IncomingMsg::IntoBuffer(const Napi::Env& env) {
-    /* If ownership has been transferred, do not attempt to read the buffer
-       again in any case. */
     if (moved) {
-        return env.Null();
+        /* If ownership has been transferred, do not attempt to read the buffer
+           again in any case. This should not happen of course. */
+        ErrnoException(env, EINVAL).ThrowAsJavaScriptException();
+        return env.Undefined();
     }
 
     static auto constexpr zero_copy_threshold = 32;
@@ -36,7 +37,7 @@ Napi::Value IncomingMsg::IntoBuffer(const Napi::Env& env) {
         return Napi::Buffer<uint8_t>::Copy(env, data, length);
     }
 
-    return env.Null();
+    return Napi::Buffer<uint8_t>::New(env, 0);
 }
 
 IncomingMsg::Reference::Reference() {
