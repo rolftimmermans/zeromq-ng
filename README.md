@@ -62,6 +62,12 @@ If you want to link against a shared ZeroMQ library, you can build and link with
 npm install zeromq-ng --zmq-shared
 ```
 
+If you wish to use any DRAFT sockets then it is also necessary to compile the library from source:
+
+```sh
+npm install zeromq-ng --zmq-draft
+```
+
 Make sure you have the following installed before attempting to build from source:
 
 * Node.js 10+ or Electron 3+
@@ -756,11 +762,11 @@ The property names may differ somewhat from the native option names. This is int
   <[number]> Sets the ToS fields (the *Differentiated Services* (DS) and *Explicit Congestion Notification* (ECN) field) of the IP header. The ToS field is typically used to specify a packet's priority. The availability of this option is dependent on intermediate network equipment that inspect the ToS field and provide a path for low-delay, high-throughput, highly-reliable service, etc.
 
 * **verbosity** (write only, on `XPublisher` sockets only) – ZMQ_XPUB_VERBOSE / ZMQ_XPUB_VERBOSER <br/>
-  <[null] | [string]> If set to `true` the socket passes all subscribe messages to the caller. If set to `false` (default) these are not visible to the caller.
+  <[null] | [string]> Whether to pass any duplicate subscription/unsuscription messages.
 
-  * `null` – No security mechanism is used.
-  * `"plain"` – The PLAIN mechanism defines a simple username/password mechanism that lets a server authenticate a client. PLAIN makes no attempt at security or confidentiality.
-  * `"curve"` – The CURVE mechanism defines a mechanism for secure authentication and confidentiality for communications between a client and a server. CURVE is intended for use on public networks.
+  * `null` (default) – Only unique subscribe and unsubscribe messages are visible to the caller.
+  * `"allSubs"` – All subscribe messages (including duplicates) are visible to the caller, but only unique unsubscribe messages are visible.
+  * `"allSubsUnsubs"` – All subscribe and unsubscribe messages (including duplicates) are visible to the caller.
 
 * **verboser** (write only, on `XPublisher` sockets only) – ZMQ_XPUB_VERBOSER <br/>
   <[boolean]>If set to `true` the socket passes all subscribe **and** unsubscribe messages to the caller. If set to `false` (default) these are not visible to the caller.
