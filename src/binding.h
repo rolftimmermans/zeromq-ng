@@ -40,7 +40,9 @@
 #endif
 
 #if ZMQ_VERSION >= ZMQ_MAKE_VERSION(4, 2, 0)
+#ifdef ZMQ_BUILD_DRAFT_API
 #define ZMQ_HAS_THREAD_SAFE 1
+#endif
 #endif
 
 #if ZMQ_VERSION >= ZMQ_MAKE_VERSION(4, 3, 2)
