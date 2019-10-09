@@ -9,7 +9,7 @@ public:
     IncomingMsg();
     ~IncomingMsg();
 
-    Napi::Value ToBuffer(const Napi::Env& env);
+    Napi::Value IntoBuffer(const Napi::Env& env);
 
     inline operator zmq_msg_t*() {
         return *ref;
@@ -28,7 +28,7 @@ private:
         }
     };
 
-    Napi::ObjectReference buf;
     Reference* ref = nullptr;
+    bool moved = false;
 };
 }

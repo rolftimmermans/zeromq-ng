@@ -57,7 +57,7 @@
     "ci:prebuild": "prebuildify --napi --strip",
     "ci:compile": "tsc --project .",
     "dev:test": "tsc --project tsconfig-build.json && mocha && tslint -t stylish --project . && script/format.sh && rm -f tmp/*",
-    "dev:bench": "node --harmony --expose-gc --require ./test/ts test/bench"
+    "dev:bench": "node --expose-gc test/bench"
   },
   "keywords": [
     "zeromq",

@@ -3,7 +3,6 @@
 
 #include "binding.h"
 #include "poller.h"
-#include "util/callback_scope.h"
 
 namespace zmq {
 class Observer : public Napi::ObjectWrap<Observer> {

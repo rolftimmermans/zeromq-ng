@@ -37,7 +37,7 @@ private:
         inline explicit Reference(Napi::Value val) : persistent(Napi::Persistent(val)) {}
     };
 
-    static Trash<Reference> trash;
+    static Trash<Reference> Trash;
 
     zmq_msg_t msg;
 };

@@ -3,7 +3,7 @@
 #include "context.h"
 #include "socket.h"
 
-#include "util/callback_scope.h"
+#include "util/async_scope.h"
 #include "util/uvwork.h"
 
 #ifdef ZMQ_HAS_STEERABLE_PROXY
@@ -110,7 +110,7 @@ Napi::Value Proxy::Run(const Napi::CallbackInfo& info) {
             }
         },
         [=]() {
-            CallbackScope scope(Env());
+            AsyncScope scope(Env());
 
             front->Close();
             back->Close();

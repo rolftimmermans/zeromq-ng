@@ -6,6 +6,9 @@
 #include "socket.h"
 
 namespace zmq {
+/* Global async context that is used to create async callbacks repeatedly. */
+napi_async_context AsyncContext;
+
 static inline Napi::String Version(Napi::Env& env) {
     int32_t major, minor, patch;
     zmq_version(&major, &minor, &patch);
@@ -59,9 +62,13 @@ static inline Napi::Value CurveKeyPair(const Napi::CallbackInfo& info) {
 }
 
 Napi::Object init(Napi::Env env, Napi::Object exports) {
+    zmq::AsyncContext = Napi::AsyncContext(env, "zmq");
+
     exports.Set("version", zmq::Version(env));
     exports.Set("capability", zmq::Capabilities(env));
     exports.Set("curveKeyPair", Napi::Function::New(env, zmq::CurveKeyPair));
+
+    zmq::OutgoingMsg::Initialize(env);
 
     zmq::Context::Initialize(env, exports);
     zmq::Socket::Initialize(env, exports);
@@ -71,7 +78,6 @@ Napi::Object init(Napi::Env env, Napi::Object exports) {
     zmq::Proxy::Initialize(env, exports);
 #endif
 
-    zmq::OutgoingMsg::Initialize(env);
     return exports;
 }
 

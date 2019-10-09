@@ -31,14 +31,27 @@ const benchmarks = {
 /* Set the exported libraries: current and next-gen. */
 const zmq = {
   /* Assumes zeromq.js directory is checked out in a directory next to this. */
-  cur: require("../../../zeromq.js"),
+  // cur: require("../../../zeromq.js"),
   ng: require("../.."),
 }
 
+/* Windows cannot bind on a ports just above 1014; start higher to be safe. */
+let seq = 5000
+
+function uniqAddress(proto) {
+  const id = seq++
+  switch (proto) {
+  case "ipc":
+    return `${proto}://${__dirname}/../../tmp/${proto}-${id}`
+  case "tcp":
+  case "udp":
+    return `${proto}://127.0.0.1:${id}`
+  default:
+    return `${proto}://${proto}-${id}`
+  }
+}
 
 /* Continue to load and execute benchmarks. */
-const {uniqAddress} = require("../unit/helpers")
-
 const fs = require("fs")
 const bench = require("benchmark")
 const suite = new bench.Suite

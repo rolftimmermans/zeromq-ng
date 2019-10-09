@@ -4,7 +4,7 @@
 #include "observer.h"
 
 #include "incoming_msg.h"
-#include "util/napi_util.h"
+#include "util/async_scope.h"
 #include "util/uvloop.h"
 #include "util/uvwork.h"
 
@@ -302,7 +302,7 @@ void Socket::Receive(const Napi::Promise::Deferred& res) {
             }
         }
 
-        list[i++] = part.ToBuffer(Env());
+        list[i++] = part.IntoBuffer(Env());
 
 #ifdef ZMQ_HAS_THREAD_SAFE
         switch (type) {
@@ -350,7 +350,7 @@ Napi::Value Socket::Bind(const Napi::CallbackInfo& info) {
             }
         },
         [=]() {
-            CallbackScope scope(Env());
+            AsyncScope scope(Env());
             state = Socket::State::Open;
 
             if (request_close) {
@@ -402,7 +402,7 @@ Napi::Value Socket::Unbind(const Napi::CallbackInfo& info) {
             }
         },
         [=]() {
-            CallbackScope scope(Env());
+            AsyncScope scope(Env());
             state = Socket::State::Open;
 
             if (request_close) {
@@ -857,12 +857,12 @@ void Socket::Initialize(Napi::Env& env, Napi::Object& exports) {
 }
 
 void Socket::Poller::ReadableCallback() {
-    CallbackScope scope(read_deferred.Env());
+    AsyncScope scope(read_deferred.Env());
     socket.Receive(read_deferred);
 }
 
 void Socket::Poller::WritableCallback() {
-    CallbackScope scope(write_deferred.Env());
+    AsyncScope scope(write_deferred.Env());
     socket.Send(write_deferred, write_value);
     write_value.Clear();
 }

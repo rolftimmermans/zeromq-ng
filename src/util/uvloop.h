@@ -1,8 +1,6 @@
 /* Copyright (c) 2017-2019 Rolf Timmermans */
 #pragma once
 
-#include "napi_util.h"
-
 namespace zmq {
 inline uv_loop_t* UvLoop(Napi::Env env) {
     uv_loop_t* loop = nullptr;

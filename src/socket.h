@@ -4,7 +4,6 @@
 #include "binding.h"
 #include "outgoing_msg.h"
 #include "poller.h"
-#include "util/callback_scope.h"
 
 #include <unordered_set>
 

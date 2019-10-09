@@ -4,6 +4,7 @@
 #include "socket.h"
 
 #include "incoming_msg.h"
+#include "util/async_scope.h"
 
 #include <array>
 
@@ -255,7 +256,7 @@ void Observer::Initialize(Napi::Env& env, Napi::Object& exports) {
 }
 
 void Observer::Poller::ReadableCallback() {
-    CallbackScope scope(read_deferred.Env());
+    AsyncScope scope(read_deferred.Env());
     socket.Receive(read_deferred);
 }
 
