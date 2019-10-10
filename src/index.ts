@@ -457,33 +457,33 @@ type PrototypeOf<T> = T extends Function & {prototype: infer U} ? U : never
 
 /* Readable properties may be set as readonly. */
 function defineOpt<T, K extends ReadableKeys<PrototypeOf<T>>>(
-  targets: T | T[],
+  targets: T[],
   name: K,
   id: number,
   type: Type,
   acc: Acc.ReadOnly,
-  values?: any[],
+  values?: Array<string | null>,
 ): void
 
 /* Writable properties may be set as writeable or readable & writable. */
 function defineOpt<T, K extends WritableKeys<PrototypeOf<T>>>(
-  targets: T | T[],
+  targets: T[],
   name: K,
   id: number,
   type: Type,
   acc?: Acc.ReadWrite | Acc.WriteOnly,
-  values?: any[],
+  values?: Array<string | null>,
 ): void
 
 /* The default is to use R/w. The overloads above ensure the correct flag is
    set if the property has been defined as readonly in the interface/class. */
-function defineOpt<T, K extends ReadableKeys<PrototypeOf<T>>>(
-  targets: T | T[],
+function defineOpt<T extends {prototype: any}, K extends ReadableKeys<PrototypeOf<T>>>(
+  targets: T[],
   name: K,
   id: number,
   type: Type,
   acc: Acc = Acc.ReadWrite,
-  values?: any[],
+  values?: Array<string | null>,
 ): void {
   const desc: PropertyDescriptor = {}
 
@@ -511,20 +511,20 @@ function defineOpt<T, K extends ReadableKeys<PrototypeOf<T>>>(
     }
   }
 
-  for (const target of Array.isArray(targets) ? targets : [targets]) {
-    Object.defineProperty(target, name, desc)
+  for (const target of targets) {
+    Object.defineProperty(target.prototype, name, desc)
   }
 }
 
 /* Context options. ALSO include any options in the Context interface above. */
-defineOpt(Context, "ioThreads", 1, Type.Int32)
-defineOpt(Context, "maxSockets", 2, Type.Int32)
-defineOpt(Context, "maxSocketsLimit", 3, Type.Int32, Acc.ReadOnly)
-defineOpt(Context, "threadPriority", 3, Type.Int32, Acc.WriteOnly)
-defineOpt(Context, "threadSchedulingPolicy", 4, Type.Int32, Acc.WriteOnly)
-defineOpt(Context, "maxMessageSize", 5, Type.Int32)
-defineOpt(Context, "ipv6", 42, Type.Bool)
-defineOpt(Context, "blocky", 70, Type.Bool)
+defineOpt([Context], "ioThreads", 1, Type.Int32)
+defineOpt([Context], "maxSockets", 2, Type.Int32)
+defineOpt([Context], "maxSocketsLimit", 3, Type.Int32, Acc.ReadOnly)
+defineOpt([Context], "threadPriority", 3, Type.Int32, Acc.WriteOnly)
+defineOpt([Context], "threadSchedulingPolicy", 4, Type.Int32, Acc.WriteOnly)
+defineOpt([Context], "maxMessageSize", 5, Type.Int32)
+defineOpt([Context], "ipv6", 42, Type.Bool)
+defineOpt([Context], "blocky", 70, Type.Bool)
 
 /* This option is fairly useless in JS. */
 /* defineOpt(Context, "msgTSize", 6, Type.Int32) */
@@ -558,91 +558,91 @@ defineOpt(readables, "receiveBufferSize", 12, Type.Int32)
 defineOpt(readables, "receiveHighWaterMark", 24, Type.Int32)
 defineOpt(readables, "receiveTimeout", 27, Type.Int32)
 
-defineOpt(Socket, "affinity", 4, Type.Uint64)
+defineOpt([Socket], "affinity", 4, Type.Uint64)
 defineOpt([Request, Reply, Router, Dealer], "routingId", 5, Type.String)
-defineOpt(Socket, "rate", 8, Type.Int32)
-defineOpt(Socket, "recoveryInterval", 9, Type.Int32)
-defineOpt(Socket, "type", 16, Type.Int32, Acc.ReadOnly)
-defineOpt(Socket, "linger", 17, Type.Int32)
-defineOpt(Socket, "reconnectInterval", 18, Type.Int32)
-defineOpt(Socket, "backlog", 19, Type.Int32)
-defineOpt(Socket, "reconnectMaxInterval", 21, Type.Int32)
-defineOpt(Socket, "maxMessageSize", 22, Type.Int64)
-defineOpt(Socket, "lastEndpoint", 32, Type.String, Acc.ReadOnly)
-defineOpt(Router, "mandatory", 33, Type.Bool)
-defineOpt(Socket, "tcpKeepalive", 34, Type.Int32)
-defineOpt(Socket, "tcpKeepaliveCount", 35, Type.Int32)
-defineOpt(Socket, "tcpKeepaliveIdle", 36, Type.Int32)
-defineOpt(Socket, "tcpKeepaliveInterval", 37, Type.Int32)
-defineOpt(Socket, "tcpAcceptFilter", 38, Type.String)
-defineOpt(Socket, "immediate", 39, Type.Bool)
+defineOpt([Socket], "rate", 8, Type.Int32)
+defineOpt([Socket], "recoveryInterval", 9, Type.Int32)
+defineOpt([Socket], "type", 16, Type.Int32, Acc.ReadOnly)
+defineOpt([Socket], "linger", 17, Type.Int32)
+defineOpt([Socket], "reconnectInterval", 18, Type.Int32)
+defineOpt([Socket], "backlog", 19, Type.Int32)
+defineOpt([Socket], "reconnectMaxInterval", 21, Type.Int32)
+defineOpt([Socket], "maxMessageSize", 22, Type.Int64)
+defineOpt([Socket], "lastEndpoint", 32, Type.String, Acc.ReadOnly)
+defineOpt([Router], "mandatory", 33, Type.Bool)
+defineOpt([Socket], "tcpKeepalive", 34, Type.Int32)
+defineOpt([Socket], "tcpKeepaliveCount", 35, Type.Int32)
+defineOpt([Socket], "tcpKeepaliveIdle", 36, Type.Int32)
+defineOpt([Socket], "tcpKeepaliveInterval", 37, Type.Int32)
+defineOpt([Socket], "tcpAcceptFilter", 38, Type.String)
+defineOpt([Socket], "immediate", 39, Type.Bool)
 /* Option 'verbose' is implemented as verbosity on XPublisher. */
-defineOpt(Socket, "ipv6", 42, Type.Bool)
-defineOpt(Socket, "securityMechanism", 43, Type.Int32,
+defineOpt([Socket], "ipv6", 42, Type.Bool)
+defineOpt([Socket], "securityMechanism", 43, Type.Int32,
   Acc.ReadOnly, [null, "plain", "curve", "gssapi"])
-defineOpt(Socket, "plainServer", 44, Type.Bool)
-defineOpt(Socket, "plainUsername", 45, Type.String)
-defineOpt(Socket, "plainPassword", 46, Type.String)
+defineOpt([Socket], "plainServer", 44, Type.Bool)
+defineOpt([Socket], "plainUsername", 45, Type.String)
+defineOpt([Socket], "plainPassword", 46, Type.String)
 
 if (capability.curve) {
-  defineOpt(Socket, "curveServer", 47, Type.Bool)
-  defineOpt(Socket, "curvePublicKey", 48, Type.String)
-  defineOpt(Socket, "curveSecretKey", 49, Type.String)
-  defineOpt(Socket, "curveServerKey", 50, Type.String)
+  defineOpt([Socket], "curveServer", 47, Type.Bool)
+  defineOpt([Socket], "curvePublicKey", 48, Type.String)
+  defineOpt([Socket], "curveSecretKey", 49, Type.String)
+  defineOpt([Socket], "curveServerKey", 50, Type.String)
 }
 
 defineOpt([Router, Dealer, Request], "probeRouter", 51, Type.Bool, Acc.WriteOnly)
-defineOpt(Request, "correlate", 52, Type.Bool, Acc.WriteOnly)
-defineOpt(Request, "relaxed", 53, Type.Bool, Acc.WriteOnly)
+defineOpt([Request], "correlate", 52, Type.Bool, Acc.WriteOnly)
+defineOpt([Request], "relaxed", 53, Type.Bool, Acc.WriteOnly)
 
 defineOpt([Pull, Push, Subscriber, Publisher, Dealer, draft.Scatter, draft.Gather],
   "conflate", 54, Type.Bool, Acc.WriteOnly)
 
-defineOpt(Socket, "zapDomain", 55, Type.String)
-defineOpt(Router, "handover", 56, Type.Bool, Acc.WriteOnly)
-defineOpt(Socket, "typeOfService", 57, Type.Uint32)
+defineOpt([Socket], "zapDomain", 55, Type.String)
+defineOpt([Router], "handover", 56, Type.Bool, Acc.WriteOnly)
+defineOpt([Socket], "typeOfService", 57, Type.Uint32)
 
 if (capability.gssapi) {
-  defineOpt(Socket, "gssapiServer", 62, Type.Bool)
-  defineOpt(Socket, "gssapiPrincipal", 63, Type.String)
-  defineOpt(Socket, "gssapiServicePrincipal", 64, Type.String)
-  defineOpt(Socket, "gssapiPlainText", 65, Type.Bool)
-  defineOpt(Socket, "gssapiPrincipalNameType", 90, Type.Int32,
+  defineOpt([Socket], "gssapiServer", 62, Type.Bool)
+  defineOpt([Socket], "gssapiPrincipal", 63, Type.String)
+  defineOpt([Socket], "gssapiServicePrincipal", 64, Type.String)
+  defineOpt([Socket], "gssapiPlainText", 65, Type.Bool)
+  defineOpt([Socket], "gssapiPrincipalNameType", 90, Type.Int32,
     Acc.ReadWrite, ["hostBased", "userName", "krb5Principal"])
-  defineOpt(Socket, "gssapiServicePrincipalNameType", 91, Type.Int32,
+  defineOpt([Socket], "gssapiServicePrincipalNameType", 91, Type.Int32,
     Acc.ReadWrite, ["hostBased", "userName", "krb5Principal"])
 }
 
-defineOpt(Socket, "handshakeInterval", 66, Type.Int32)
-defineOpt(Socket, "socksProxy", 68, Type.String)
+defineOpt([Socket], "handshakeInterval", 66, Type.Int32)
+defineOpt([Socket], "socksProxy", 68, Type.String)
 defineOpt([XPublisher, Publisher], "noDrop", 69, Type.Bool, Acc.WriteOnly)
-defineOpt(XPublisher, "manual", 71, Type.Bool, Acc.WriteOnly)
-defineOpt(XPublisher, "welcomeMessage", 72, Type.String, Acc.WriteOnly)
-defineOpt(Stream, "notify", 73, Type.Bool, Acc.WriteOnly)
+defineOpt([XPublisher], "manual", 71, Type.Bool, Acc.WriteOnly)
+defineOpt([XPublisher], "welcomeMessage", 72, Type.String, Acc.WriteOnly)
+defineOpt([Stream], "notify", 73, Type.Bool, Acc.WriteOnly)
 defineOpt([Publisher, Subscriber, XPublisher], "invertMatching", 74, Type.Bool)
-defineOpt(Socket, "heartbeatInterval", 75, Type.Int32)
-defineOpt(Socket, "heartbeatTimeToLive", 76, Type.Int32)
-defineOpt(Socket, "heartbeatTimeout", 77, Type.Int32)
+defineOpt([Socket], "heartbeatInterval", 75, Type.Int32)
+defineOpt([Socket], "heartbeatTimeToLive", 76, Type.Int32)
+defineOpt([Socket], "heartbeatTimeout", 77, Type.Int32)
 /* Option 'verboser' is implemented as verbosity on XPublisher. */
-defineOpt(Socket, "connectTimeout", 79, Type.Int32)
-defineOpt(Socket, "tcpMaxRetransmitTimeout", 80, Type.Int32)
-defineOpt(Socket, "threadSafe", 81, Type.Bool, Acc.ReadOnly)
-defineOpt(Socket, "multicastMaxTransportDataUnit", 84, Type.Int32)
-defineOpt(Socket, "vmciBufferSize", 85, Type.Uint64)
-defineOpt(Socket, "vmciBufferMinSize", 86, Type.Uint64)
-defineOpt(Socket, "vmciBufferMaxSize", 87, Type.Uint64)
-defineOpt(Socket, "vmciConnectTimeout", 88, Type.Int32)
+defineOpt([Socket], "connectTimeout", 79, Type.Int32)
+defineOpt([Socket], "tcpMaxRetransmitTimeout", 80, Type.Int32)
+defineOpt([Socket], "threadSafe", 81, Type.Bool, Acc.ReadOnly)
+defineOpt([Socket], "multicastMaxTransportDataUnit", 84, Type.Int32)
+defineOpt([Socket], "vmciBufferSize", 85, Type.Uint64)
+defineOpt([Socket], "vmciBufferMinSize", 86, Type.Uint64)
+defineOpt([Socket], "vmciBufferMaxSize", 87, Type.Uint64)
+defineOpt([Socket], "vmciConnectTimeout", 88, Type.Int32)
 /* Option 'useFd' is fairly useless in Node.js. */
-defineOpt(Socket, "interface", 92, Type.String)
-defineOpt(Socket, "zapEnforceDomain", 93, Type.Bool)
-defineOpt(Socket, "loopbackFastPath", 94, Type.Bool)
+defineOpt([Socket], "interface", 92, Type.String)
+defineOpt([Socket], "zapEnforceDomain", 93, Type.Bool)
+defineOpt([Socket], "loopbackFastPath", 94, Type.Bool)
 
 /* The following options are still in DRAFT. */
-/* defineOpt(Socket, "metadata", 95, Type.String) */
-/* defineOpt(Socket, "multicastLoop", 96, Type.String) */
+/* defineOpt([Socket], "metadata", 95, Type.String) */
+/* defineOpt([Socket], "multicastLoop", 96, Type.String) */
 /* defineOpt(Router.prototype, "notify", 97, Type.String) */
 /* defineOpt(XPublisher.prototype, "manualLastValue", 98, Type.String) */
-/* defineOpt(Socket, "socksUsername", 99, Type.String) */
-/* defineOpt(Socket, "socksPassword", 100, Type.String) */
-/* defineOpt(Socket, "inBatchSize", 101, Type.String) */
-/* defineOpt(Socket, "outBatchSize", 102, Type.String) */
+/* defineOpt([Socket], "socksUsername", 99, Type.String) */
+/* defineOpt([Socket], "socksPassword", 100, Type.String) */
+/* defineOpt([Socket], "inBatchSize", 101, Type.String) */
+/* defineOpt([Socket], "outBatchSize", 102, Type.String) */
