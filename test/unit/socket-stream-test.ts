@@ -23,7 +23,7 @@ for (const proto of testProtos("tcp")) {
 
         await stream.bind(address)
 
-        const reply = async () => {
+        const serve = async () => {
           for await (const [id, msg] of stream) {
             if (!msg.length) continue
             assert.equal(msg.toString().split("\r\n")[0], "GET /foo HTTP/1.1")
@@ -49,7 +49,7 @@ for (const proto of testProtos("tcp")) {
           })
         }
 
-        await Promise.all([request(), reply()])
+        await Promise.all([request(), serve()])
         assert.equal(body, "Hello world!")
       })
     })
