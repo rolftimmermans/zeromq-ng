@@ -313,7 +313,7 @@ void Socket::Receive(const Napi::Promise::Deferred& res) {
             break;
         }
 
-        case ZMQ_RADIO: {
+        case ZMQ_DISH: {
             auto meta = Napi::Object::New(Env());
             meta.Set("group", zmq_msg_group(part));
             list[i++] = meta;
