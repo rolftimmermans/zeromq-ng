@@ -5,7 +5,7 @@ require("async_hooks").createHook({
       console.log("Created async context", id, type, triggerId, resource)
     }
 
-    if (triggerId < 0) {
+    if (triggerId < 0 || id < 0) {
       process._rawDebug("init", {id, type, triggerId})
       Error.stackTraceLimit = Infinity
       throw new Error("bad async trigger id")
