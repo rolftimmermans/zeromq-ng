@@ -505,9 +505,7 @@ socket.close()
 
 Asynchronously iterate over messages becoming available on the socket. When the socket is closed with `close()`, the iterator will return. Returning early from the iterator will **not** close the socket.
 
-Async iterators are a TC39 stage 3 proposal. They can be used with Babel, TypeScript or natively in Node 8+ with the `--harmony_async_iteration` flag.
-
-The well-known symbol `Symbol.asyncIterator` must be present for this method to be defined. That means any polyfill must be enabled **before** loading this library.
+Async iterators can be used natively in Node 10+.
 
 * **Arguments** <br/>
   (none)
