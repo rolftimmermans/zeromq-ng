@@ -6,7 +6,12 @@
 #include "socket.h"
 
 namespace zmq {
-/* Global async context that is used to create async callbacks repeatedly. */
+/* Global async context that is used to create async callbacks repeatedly.
+   This is fairly useless. We don't play nicely with the async hooks feature.
+   For more info see: https://nodejs.org/api/async_hooks.html
+   The solution is to properly set up an async context for read/write polling
+   (probably just one for all reading and one for all writing, on each socket)
+   and for bind/unbind (one for each individual operation). */
 napi_async_context AsyncContext;
 
 static inline Napi::String Version(Napi::Env& env) {
