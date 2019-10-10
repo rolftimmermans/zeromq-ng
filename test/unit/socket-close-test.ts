@@ -97,6 +97,8 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
       })
 
       it("should release reference to context", async function() {
+        this.slow(200)
+
         const weak = require("weak-napi")
 
         let released = false
@@ -122,6 +124,8 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
 
     describe("in gc finalizer", function() {
       it("should release reference to context", async function() {
+        this.slow(200)
+
         const weak = require("weak-napi")
 
         let released = false
