@@ -41,8 +41,11 @@ export type MessageLike = (
   null
 )
 
-export interface Writable<S extends [any, ...any[]] = [MessageLike | MessageLike[]]> {
-  send(...message: S): Promise<void>
+export interface Writable<
+  S extends any | any[] = MessageLike | MessageLike[],
+  O extends [...any[]] = [],
+> {
+  send(message: S, ...options: O): Promise<void>
 }
 
 export interface Readable<R extends any = Message[]> {
@@ -438,7 +441,7 @@ export class Stream extends Socket {
 }
 
 export interface Stream extends
-  Readable<[Message, Message]>, Writable<[[MessageLike, MessageLike]]> {}
+  Readable<[Message, Message]>, Writable<[MessageLike, MessageLike]> {}
 Object.assign(Stream.prototype, {send, receive})
 
 

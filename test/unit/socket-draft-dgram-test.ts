@@ -29,7 +29,7 @@ if (zmq.capability.draft) {
 
           const echo = async () => {
             for await (const [id, msg] of dgram) {
-              await (dgram as any).send([id, msg])
+              await dgram.send([id, msg])
             }
           }
 

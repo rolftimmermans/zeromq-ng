@@ -28,7 +28,7 @@ export class Server extends Socket {
 
 export interface Server extends
   Readable<[Message, ServerRoutingOptions]>,
-  Writable<[MessageLike, ServerRoutingOptions]> {}
+  Writable<MessageLike, [ServerRoutingOptions]> {}
 Object.assign(Server.prototype, {send, receive})
 
 
@@ -38,7 +38,7 @@ export class Client extends Socket {
   }
 }
 
-export interface Client extends Readable<[Message]>, Writable<[MessageLike]> {}
+export interface Client extends Readable<[Message]>, Writable<MessageLike> {}
 Object.assign(Client.prototype, {send, receive})
 
 
@@ -52,7 +52,7 @@ export class Radio extends Socket {
   }
 }
 
-export interface Radio extends Writable<[MessageLike, RadioDishGroupOptions]> {}
+export interface Radio extends Writable<MessageLike, [RadioDishGroupOptions]> {}
 Object.assign(Radio.prototype, {send})
 
 
@@ -96,7 +96,7 @@ export class Scatter extends Socket {
   }
 }
 
-export interface Scatter extends Writable<[MessageLike]> {
+export interface Scatter extends Writable<MessageLike> {
   conflate: boolean
 }
 
