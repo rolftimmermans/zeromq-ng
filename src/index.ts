@@ -525,18 +525,16 @@ defineOpt([Context], "threadSchedulingPolicy", 4, Type.Int32, Acc.WriteOnly)
 defineOpt([Context], "maxMessageSize", 5, Type.Int32)
 defineOpt([Context], "ipv6", 42, Type.Bool)
 defineOpt([Context], "blocky", 70, Type.Bool)
-
-/* This option is fairly useless in JS. */
-/* defineOpt(Context, "msgTSize", 6, Type.Int32) */
+/* Option 'msgTSize' is fairly useless in Node.js. */
 /* These options should be methods. */
-/* defineOpt(Context, "threadAffinityCpuAdd", 7, Type.Int32) */
-/* defineOpt(Context, "threadAffinityCpuRemove", 8, Type.Int32) */
+/* defineOpt([Context], "threadAffinityCpuAdd", 7, Type.Int32) */
+/* defineOpt([Context], "threadAffinityCpuRemove", 8, Type.Int32) */
 /* To be released in a new ZeroMQ version. */
 /* if (Context.prototype.setStringOption) {
-  defineOpt(Context, "threadNamePrefix", 9, Type.String)
+  defineOpt([Context], "threadNamePrefix", 9, Type.String)
 } */
 /* There should be no reason to change this in JS. */
-/* defineOpt(Context, "zeroCopyRecv", 10, Type.Bool) */
+/* defineOpt([Context], "zeroCopyRecv", 10, Type.Bool) */
 
 /* Socket options. ALSO include any options in the Socket interface above. */
 const writables = [
@@ -640,8 +638,8 @@ defineOpt([Socket], "loopbackFastPath", 94, Type.Bool)
 /* The following options are still in DRAFT. */
 /* defineOpt([Socket], "metadata", 95, Type.String) */
 /* defineOpt([Socket], "multicastLoop", 96, Type.String) */
-/* defineOpt(Router.prototype, "notify", 97, Type.String) */
-/* defineOpt(XPublisher.prototype, "manualLastValue", 98, Type.String) */
+/* defineOpt([Router], "notify", 97, Type.String) */
+/* defineOpt([XPublisher], "manualLastValue", 98, Type.String) */
 /* defineOpt([Socket], "socksUsername", 99, Type.String) */
 /* defineOpt([Socket], "socksPassword", 100, Type.String) */
 /* defineOpt([Socket], "inBatchSize", 101, Type.String) */
