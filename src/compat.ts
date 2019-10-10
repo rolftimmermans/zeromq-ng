@@ -479,9 +479,9 @@ class Socket extends EventEmitter {
     case longOptions.ZMQ_RECOVERY_IVL:
       this._socket.recoveryInterval = value; break
     case longOptions.ZMQ_SNDBUF:
-      this._socket.sendBufferSize = value; break
+      (this._socket as zmq.Writable).sendBufferSize = value; break
     case longOptions.ZMQ_RCVBUF:
-      this._socket.receiveBufferSize = value; break
+      (this._socket as zmq.Readable).receiveBufferSize = value; break
     case longOptions.ZMQ_LINGER:
       this._socket.linger = value; break
     case longOptions.ZMQ_RECONNECT_IVL:
@@ -495,15 +495,15 @@ class Socket extends EventEmitter {
     case longOptions.ZMQ_MAXMSGSIZE:
       this._socket.maxMessageSize = value; break
     case longOptions.ZMQ_SNDHWM:
-      this._socket.sendHighWaterMark = value; break
+      (this._socket as zmq.Writable).sendHighWaterMark = value; break
     case longOptions.ZMQ_RCVHWM:
-      this._socket.receiveHighWaterMark = value; break
+      (this._socket as zmq.Readable).receiveHighWaterMark = value; break
     case longOptions.ZMQ_MULTICAST_HOPS:
-      this._socket.multicastHops = value; break
+      (this._socket as zmq.Writable).multicastHops = value; break
     case longOptions.ZMQ_RCVTIMEO:
-      this._socket.receiveTimeout = value; break
+      (this._socket as zmq.Readable).receiveTimeout = value; break
     case longOptions.ZMQ_SNDTIMEO:
-      this._socket.sendTimeout = value; break
+      (this._socket as zmq.Writable).sendTimeout = value; break
     case longOptions.ZMQ_IPV4ONLY:
       this._socket.ipv6 = !value; break
     case longOptions.ZMQ_ROUTER_MANDATORY:
@@ -572,9 +572,9 @@ class Socket extends EventEmitter {
     case longOptions.ZMQ_RECOVERY_IVL:
       return this._socket.recoveryInterval
     case longOptions.ZMQ_SNDBUF:
-      return this._socket.sendBufferSize
+      return (this._socket as zmq.Writable).sendBufferSize
     case longOptions.ZMQ_RCVBUF:
-      return this._socket.receiveBufferSize
+      return (this._socket as zmq.Readable).receiveBufferSize
     case longOptions.ZMQ_RCVMORE:
       throw new Error("ZMQ_RCVMORE is not supported in compatibility mode")
     case longOptions.ZMQ_FD:
@@ -597,15 +597,15 @@ class Socket extends EventEmitter {
     case longOptions.ZMQ_MAXMSGSIZE:
       return this._socket.maxMessageSize
     case longOptions.ZMQ_SNDHWM:
-      return this._socket.sendHighWaterMark
+      return (this._socket as zmq.Writable).sendHighWaterMark
     case longOptions.ZMQ_RCVHWM:
-      return this._socket.receiveHighWaterMark
+      return (this._socket as zmq.Readable).receiveHighWaterMark
     case longOptions.ZMQ_MULTICAST_HOPS:
-      return this._socket.multicastHops
+      return (this._socket as zmq.Writable).multicastHops
     case longOptions.ZMQ_RCVTIMEO:
-      return this._socket.receiveTimeout
+      return (this._socket as zmq.Readable).receiveTimeout
     case longOptions.ZMQ_SNDTIMEO:
-      return this._socket.sendTimeout
+      return (this._socket as zmq.Writable).sendTimeout
     case longOptions.ZMQ_IPV4ONLY:
       return !this._socket.ipv6
     case longOptions.ZMQ_LAST_ENDPOINT:
