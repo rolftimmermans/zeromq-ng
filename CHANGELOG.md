@@ -1,6 +1,6 @@
 ### v5.0.0-beta.25
 
-* BREAKING: Removed send()/receive() from the base Socket class and assign them only to sockets that can send/receive respectively.
+* BREAKING: Removed send()/receive() and associated options from the base Socket class and assign them only to sockets that can send/receive respectively.
 
 * Minor TypeScript type improvements.
 
