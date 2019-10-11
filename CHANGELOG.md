@@ -1,8 +1,10 @@
 ### v5.0.0-beta.25
 
+* BREAKING: Events now are returned as objects that include the type, instead of a tuple. Their associated data is now type safe in the TypeScript type definitions.
+
 * BREAKING: Removed send()/receive() and associated options from the base Socket class and assign them only to sockets that can send/receive respectively.
 
-* Minor TypeScript type improvements.
+* Other minor TypeScript type improvements.
 
 * Support DRAFT sockets when compiled with `--zmq-draft`. Require with `require("zeromq-ng/draft")`.
 

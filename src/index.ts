@@ -5,7 +5,8 @@ export {
   global,
   Context,
   Event,
-  EventDetails,
+  EventOfType,
+  EventType,
   Socket,
   SocketType,
   Observer,
@@ -16,6 +17,8 @@ import {
   capability,
   methods,
   Context,
+  EventOfType,
+  EventType,
   Observer,
   Options,
   ReadableKeys,
@@ -40,6 +43,7 @@ export type MessageLike = (
   string |
   null
 )
+
 
 export interface Writable<
   S extends any | any[] = MessageLike | MessageLike[],
@@ -101,10 +105,24 @@ function asyncIterator<T extends SocketLikeIterable<U>, U>(this: T) {
 (Observer.prototype as any)[Symbol.asyncIterator] = asyncIterator
 
 
+interface EventSubscriber {
+  on<E extends EventType>(
+    type: E,
+    callback: (data: EventOfType<E>) => void,
+  ): EventSubscriber
+}
+
+interface EventEmitter {
+  emit<E extends EventType>(
+    type: E,
+    data: EventOfType<E>,
+  ): void
+}
+
 Object.defineProperty(Observer.prototype, "emitter", {
   get: function emitter(this: Observer) {
-    const {EventEmitter} = require("events")
-    const value: NodeJS.EventEmitter = new EventEmitter()
+    const events = require("events")
+    const value: EventEmitter = new events.EventEmitter()
 
     const boundReceive = this.receive.bind(this)
     Object.defineProperty(this, "receive", {
@@ -119,8 +137,8 @@ Object.defineProperty(Observer.prototype, "emitter", {
 
     const run = async () => {
       while (!this.closed) {
-        const [event, data] = await boundReceive()
-        value.emit(event, data)
+        const event = await boundReceive()
+        value.emit(event.type, event)
       }
     }
 
@@ -131,7 +149,7 @@ Object.defineProperty(Observer.prototype, "emitter", {
   },
 })
 
-Observer.prototype.on = function on(this: {emitter: NodeJS.EventEmitter}, ...args) {
+Observer.prototype.on = function on(this: {emitter: EventSubscriber}, ...args) {
   return this.emitter.on(...args)
 }
 
@@ -207,11 +225,11 @@ declare module "./native" {
     readonly threadSafe: boolean
   }
 
-  interface Observer {
-    on(event: Event, callback: (details: EventDetails) => void): NodeJS.EventEmitter
+  interface Observer extends EventSubscriber {
     [Symbol.asyncIterator](): AsyncIterator<ReceiveType<this>, undefined>
   }
 }
+
 
 /* Concrete socket types. */
 export class Pair extends Socket {

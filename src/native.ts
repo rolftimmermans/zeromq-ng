@@ -69,28 +69,48 @@ export declare class Context {
 export declare const global: Context
 
 
-export declare class ErrnoError extends Error {
-  code?: string
-  errno?: number
+interface ErrnoError extends Error {
+  code: string
+  errno: number
 }
+
+interface EventAddress {
+  address: string
+}
+
+interface EventInterval {
+  interval: number
+}
+
+interface EventError {
+  error: ErrnoError
+}
+
+type EventFor<S extends string, D = {}> = Expand<{type: S} & D>
 
 export type Event = (
-  "accept" | "accept:error" |
-  "bind" | "bind:error" |
-  "connect" | "connect:delay" | "connect:retry" |
-  "close" | "close:error" |
-  "disconnect" |
-  "end" |
-  "handshake" | "handshake:error:protocol" |
-  "handshake:error:auth" | "handshake:error:other" |
-  "unknown"
+  EventFor<"accept", EventAddress> |
+  EventFor<"accept:error", EventAddress & EventError> |
+  EventFor<"bind", EventAddress> |
+  EventFor<"bind:error", EventAddress & EventError> |
+  EventFor<"connect", EventAddress> |
+  EventFor<"connect:delay", EventAddress> |
+  EventFor<"connect:retry", EventAddress & EventInterval> |
+  EventFor<"close", EventAddress> |
+  EventFor<"close:error", EventAddress & EventError> |
+  EventFor<"disconnect", EventAddress> |
+  EventFor<"end"> |
+  EventFor<"handshake", EventAddress> |
+  EventFor<"handshake:error:protocol", EventAddress> | /* TODO add error data */
+  EventFor<"handshake:error:auth", EventAddress> | /* TODO add error data */
+  EventFor<"handshake:error:other", EventAddress & EventError> |
+  EventFor<"unknown">
 )
 
-export interface EventDetails {
-  address?: string,
-  interval?: number,
-  error?: ErrnoError,
-}
+export type EventType = Event["type"]
+
+export type EventOfType<E extends EventType = EventType> =
+  Expand<Extract<Event, Event & EventFor<E>>>
 
 export declare class Observer {
   readonly closed: boolean
@@ -98,7 +118,7 @@ export declare class Observer {
   constructor(socket: Socket)
 
   close(): void
-  receive(): Promise<[Event, EventDetails]>
+  receive(): Promise<Event>
 }
 
 

@@ -76,15 +76,38 @@ describe("typings", function() {
 
         socket.events.on("bind", (details) => {
           console.log(details.address)
-          console.log(details.interval)
-          console.log(details.error)
         })
 
-        for await (const [event, details] of socket.events) {
-          if (event === "bind") {
-            console.log(details.address)
-            console.log(details.interval)
-            console.log(details.error)
+        socket.events.on("connect:retry", (details) => {
+          console.log(details.interval)
+          console.log(details.address)
+        })
+
+        socket.events.on("accept:error", (details) => {
+          console.log(details.error.code)
+          console.log(details.error.errno)
+          console.log(details.address)
+        })
+
+        for await (const event of socket.events) {
+          switch (event.type) {
+          case "end":
+          case "unknown":
+            break
+          case "connect:retry":
+            console.log(event.interval)
+            console.log(event.address)
+            break
+          case "accept:error":
+          case "bind:error":
+          case "close:error":
+          case "handshake:error:other":
+            console.log(event.error.code)
+            console.log(event.error.errno)
+            console.log(event.address)
+            break
+          default:
+            console.log(event.address)
           }
         }
 

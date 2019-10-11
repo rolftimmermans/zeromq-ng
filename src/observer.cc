@@ -179,32 +179,34 @@ void Observer::Receive(const Napi::Promise::Deferred& res) {
     auto data2 = reinterpret_cast<char*>(zmq_msg_data(&msg2));
     auto length = zmq_msg_size(&msg2);
 
-    auto details = Napi::Object::New(Env());
+    auto event = Napi::Object::New(Env());
+    event["type"] = Napi::String::New(Env(), EventName(event_id));
+
     if (length > 0) {
-        details["address"] = Napi::String::New(Env(), data2, length);
+        event["address"] = Napi::String::New(Env(), data2, length);
     }
 
     zmq_msg_close(&msg2);
 
     switch (event_id) {
     case ZMQ_EVENT_CONNECT_RETRIED:
-        details["interval"] = Napi::Number::New(Env(), event_value);
+        event["interval"] = Napi::Number::New(Env(), event_value);
         break;
     case ZMQ_EVENT_BIND_FAILED:
     case ZMQ_EVENT_ACCEPT_FAILED:
     case ZMQ_EVENT_CLOSE_FAILED:
-        details["error"] = ErrnoException(Env(), event_value).Value();
+    case ZMQ_EVENT_HANDSHAKE_FAILED_NO_DETAIL:
+        event["error"] = ErrnoException(Env(), event_value).Value();
         break;
     case ZMQ_EVENT_MONITOR_STOPPED:
         /* Also close the monitoring socket. */
         Close();
         break;
+        // case ZMQ_EVENT_HANDSHAKE_FAILED_PROTOCOL:
+        // case ZMQ_EVENT_HANDSHAKE_FAILED_AUTH:
     }
 
-    auto msg = Napi::Array::New(Env(), 1);
-    msg[0u] = Napi::String::New(Env(), EventName(event_id));
-    msg[1u] = details;
-    res.Resolve(msg);
+    res.Resolve(event);
 }
 
 void Observer::Close(const Napi::CallbackInfo& info) {

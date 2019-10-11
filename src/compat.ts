@@ -408,25 +408,27 @@ class Socket extends EventEmitter {
     const read = async () => {
       while (!events.closed) {
         try {
-          let [event, data]: [string, zmq.EventDetails] = await events.receive()
-          if (event === "end") return
+          /* Let go of type-safety because we'll do some juggling around with
+             the data here for compatibility reasons. */
+          let {type, ...data}: any = await events.receive()
+          if (type === "end") return
 
-          switch (event) {
+          switch (type) {
           case "connect": break
-          case "connect:delay": event = "connect_delay"; break
-          case "connect:retry": event = "connect_retry"; break
-          case "bind": event = "listen"; break
-          case "bind:error": event = "bind_error"; break
-          case "accept": event = "accept"; break
-          case "accept:error": event = "accept_error"; break
+          case "connect:delay": type = "connect_delay"; break
+          case "connect:retry": type = "connect_retry"; break
+          case "bind": type = "listen"; break
+          case "bind:error": type = "bind_error"; break
+          case "accept": type = "accept"; break
+          case "accept:error": type = "accept_error"; break
           case "close": break
-          case "close:error": event = "close_error"; break
+          case "close:error": type = "close_error"; break
           case "disconnect": break
           default: continue
           }
 
           const value = data.interval || (data.error ? data.error.errno : 0)
-          this.emit(event, value, data.address, data.error)
+          this.emit(type, value, data.address, data.error)
         } catch (err) {
           if (!this._socket.closed) {
             this.emit("error", err)
