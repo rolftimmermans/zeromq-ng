@@ -195,7 +195,9 @@ void Observer::Receive(const Napi::Promise::Deferred& res) {
     case ZMQ_EVENT_BIND_FAILED:
     case ZMQ_EVENT_ACCEPT_FAILED:
     case ZMQ_EVENT_CLOSE_FAILED:
+#ifdef ZMQ_EVENT_HANDSHAKE_FAILED_NO_DETAIL
     case ZMQ_EVENT_HANDSHAKE_FAILED_NO_DETAIL:
+#endif
         event["error"] = ErrnoException(Env(), event_value).Value();
         break;
     case ZMQ_EVENT_MONITOR_STOPPED:
