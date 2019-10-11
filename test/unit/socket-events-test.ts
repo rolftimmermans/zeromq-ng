@@ -129,8 +129,10 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
         await done
 
         if (proto === "tcp") {
+          let bindError = false
           for (const event of events) {
             if (event.type === "bind:error") {
+              bindError = true
               assert.equal("tcp://" + event.address, address)
               assert.instanceOf(event.error, Error)
               assert.equal(event.error!.message, "Address already in use")
@@ -138,6 +140,8 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
               assert.typeOf(event.error!.errno, "number")
             }
           }
+
+          assert.equal(true, bindError)
         }
 
         assert.deepInclude(events, {type: "end"})
