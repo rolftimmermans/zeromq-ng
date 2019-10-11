@@ -408,27 +408,53 @@ class Socket extends EventEmitter {
     const read = async () => {
       while (!events.closed) {
         try {
-          /* Let go of type-safety because we'll do some juggling around with
-             the data here for compatibility reasons. */
-          let {type, ...data}: any = await events.receive()
-          if (type === "end") return
+          const event = await events.receive()
 
-          switch (type) {
-          case "connect": break
-          case "connect:delay": type = "connect_delay"; break
-          case "connect:retry": type = "connect_retry"; break
-          case "bind": type = "listen"; break
-          case "bind:error": type = "bind_error"; break
-          case "accept": type = "accept"; break
-          case "accept:error": type = "accept_error"; break
-          case "close": break
-          case "close:error": type = "close_error"; break
-          case "disconnect": break
-          default: continue
+          let type = event.type as string
+          let value
+          let error
+
+          switch (event.type) {
+          case "connect":
+            break
+          case "connect:delay":
+            type = "connect_delay"
+            break
+          case "connect:retry":
+            value = event.interval
+            type = "connect_retry"
+            break
+          case "bind":
+            type = "listen"
+            break
+          case "bind:error":
+            error = event.error
+            value = event.error ? event.error.errno : 0
+            type = "bind_error"
+            break
+          case "accept":
+            break
+          case "accept:error":
+            error = event.error
+            value = event.error ? event.error.errno : 0
+            type = "accept_error"
+            break
+          case "close":
+            break
+          case "close:error":
+            error = event.error
+            value = event.error ? event.error.errno : 0
+            type = "close_error"
+            break
+          case "disconnect":
+            break
+          case "end":
+            return
+          default:
+            continue
           }
 
-          const value = data.interval || (data.error ? data.error.errno : 0)
-          this.emit(type, value, data.address, data.error)
+          this.emit(type, value, event.address, error)
         } catch (err) {
           if (!this._socket.closed) {
             this.emit("error", err)
