@@ -135,9 +135,9 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
               bindError = true
               assert.equal("tcp://" + event.address, address)
               assert.instanceOf(event.error, Error)
-              assert.equal(event.error!.message, "Address already in use")
-              assert.equal(event.error!.code, "EADDRINUSE")
-              assert.typeOf(event.error!.errno, "number")
+              assert.equal(event.error.message, "Address already in use")
+              assert.equal(event.error.code, "EADDRINUSE")
+              assert.typeOf(event.error.errno, "number")
             }
           }
 
