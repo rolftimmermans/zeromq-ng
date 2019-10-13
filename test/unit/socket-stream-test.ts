@@ -1,7 +1,7 @@
 import * as zmq from "../../src"
 
 import {assert} from "chai"
-import {get} from "http"
+import {createServer, get, Server} from "http"
 import {testProtos, uniqAddress} from "./helpers"
 
 for (const proto of testProtos("tcp")) {
@@ -17,7 +17,7 @@ for (const proto of testProtos("tcp")) {
       global.gc()
     })
 
-    describe("send/receive", function() {
+    describe("send/receive as server", function() {
       it("should deliver messages", async function() {
         const address = uniqAddress(proto)
 
@@ -51,6 +51,48 @@ for (const proto of testProtos("tcp")) {
 
         await Promise.all([request(), serve()])
         assert.equal(body, "Hello world!")
+      })
+    })
+
+    describe("send/receive as client", function() {
+      it("should deliver messages", async function() {
+        const address = uniqAddress(proto)
+        const port = parseInt(address.split(":").pop()!, 10)
+
+        const server = await new Promise<Server>((resolve) => {
+          const http = createServer((req, res) => {
+            res.writeHead(200, {"Content-Type": "text/plain", "Content-Length": 12})
+            res.end("Hello world!")
+          })
+
+          http.listen(port, () => resolve(http))
+        })
+
+        const routingId = "abcdef1234567890"
+        stream.connect(address, {routingId})
+
+        let body = ""
+        const request = async () => {
+          await stream.send([
+            routingId,
+            "GET /foo HTTP/1.1\r\n" +
+            `Host: ${address.replace("tcp://", "")}\r\n\r\n`,
+          ])
+
+          for await (const [id, data] of stream) {
+            assert.equal(id.toString(), routingId)
+            if (data.length) {
+              body += data
+              break
+            }
+          }
+
+          stream.close()
+          server.close()
+        }
+
+        await Promise.all([request()])
+        assert.equal(body.split("\r\n\r\n").pop(), "Hello world!")
       })
     })
   })

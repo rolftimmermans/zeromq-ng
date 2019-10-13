@@ -158,7 +158,7 @@ describe("socket construction", function() {
     if (!zmq.capability.draft) {
       it("should throw with draft type", function() {
         assert.throws(
-          () => new (zmq.Socket as any)(zmq.SocketType.Radio),
+          () => new (zmq.Socket as any)(14),
           Error,
           "Invalid argument",
         )
