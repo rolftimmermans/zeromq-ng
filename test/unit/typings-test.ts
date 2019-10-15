@@ -44,6 +44,7 @@ describe("typings", function() {
       })
 
       const router = new zmq.Router
+      if (router.type !== 6) throw new Error()
 
       console.log(socket.context)
       console.log(socket.sendTimeout)
@@ -75,6 +76,10 @@ describe("typings", function() {
         socket.close()
 
         socket.events.on("bind", (details) => {
+          console.log(details.address)
+        })
+
+        socket.events.off("bind", (details) => {
           console.log(details.address)
         })
 

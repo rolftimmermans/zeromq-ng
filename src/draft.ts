@@ -1,6 +1,7 @@
 import {
   methods,
   Socket,
+  SocketType,
 } from "./native"
 
 import {
@@ -8,7 +9,6 @@ import {
   MessageLike,
   Readable,
   SocketOptions,
-  SocketType,
   Writable,
 } from "."
 

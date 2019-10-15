@@ -192,11 +192,10 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
       })
     })
 
-    describe("when closed", function() {
+    describe("when closed automatically", function() {
       it("should not be able to receive", async function() {
         const events = sockA.events
         sockA.close()
-        sockB.close()
 
         const {type} = await events.receive()
         assert.equal(type, "end")
@@ -210,6 +209,13 @@ for (const proto of testProtos("tcp", "ipc", "inproc")) {
           assert.equal(err.code, "EBADF")
           assert.typeOf(err.errno, "number")
         }
+      })
+
+      it("should be closed", async function() {
+        const events = sockA.events
+        sockA.close()
+        await events.receive()
+        assert.equal(events.closed, true)
       })
     })
   })
