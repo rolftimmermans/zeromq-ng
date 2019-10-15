@@ -221,12 +221,12 @@ void Context::Initialize(Napi::Env& env, Napi::Object& exports) {
     auto constructor = DefineClass(env, "Context", proto);
 
     /* Create global context that is closed on process exit. */
-    auto global = constructor.New({});
+    auto context = constructor.New({});
 
-    GlobalContext = Napi::Persistent(global);
+    GlobalContext = Napi::Persistent(context);
     GlobalContext.SuppressDestruct();
 
-    exports.Set("global", global);
+    exports.Set("context", context);
 
     Constructor = Napi::Persistent(constructor);
     Constructor.SuppressDestruct();

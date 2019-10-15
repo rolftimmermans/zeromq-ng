@@ -146,19 +146,19 @@ const shortOptions = {
 
 class Context {
   static setMaxThreads(value: number) {
-    zmq.global.ioThreads = value
+    zmq.context.ioThreads = value
   }
 
   static getMaxThreads() {
-    return zmq.global.ioThreads
+    return zmq.context.ioThreads
   }
 
   static setMaxSockets(value: number) {
-    zmq.global.maxSockets = value
+    zmq.context.maxSockets = value
   }
 
   static getMaxSockets() {
-    return zmq.global.maxSockets
+    return zmq.context.maxSockets
   }
 
   constructor() {

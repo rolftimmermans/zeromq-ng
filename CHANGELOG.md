@@ -1,5 +1,7 @@
 ### v5.0.0-beta.26
 
+* BREAKING: Rename the default global context from `global` (which clashes with the built-in variable `global`) to `context`.
+
 * Include documentation inline in source & TypeScript definitions.
 
 ### v5.0.0-beta.25

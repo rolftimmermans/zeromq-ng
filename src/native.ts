@@ -92,8 +92,8 @@ export declare function curveKeyPair(): {
  * A ØMQ context. Contexts manage the background I/O to send and receive
  * messages of their associated sockets.
  *
- * It is usually not necessary to instantiate a new context – the
- * {@link global} context is used for new sockets by default.
+ * It is usually not necessary to instantiate a new context – the global
+ * {@link context} is used for new sockets by default.
  *
  * ```typescript
  * // Use default context (recommended).
@@ -128,7 +128,7 @@ export declare class Context {
  * be associated with this context. The default context is exposed in order to
  * be able to change its behaviour with {@link Context} options.
  */
-export declare const global: Context
+export declare const context: Context
 
 
 interface ErrnoError extends Error {

@@ -33,11 +33,11 @@ describe("typings", function() {
       console.log(context.ioThreads)
       console.log(context.ipv6)
 
-      zmq.global.ioThreads = 5
-      zmq.global.ipv6 = true
+      zmq.context.ioThreads = 5
+      zmq.context.ipv6 = true
 
       const socket = new zmq.Dealer({
-        context: zmq.global,
+        context: zmq.context,
         sendTimeout: 200,
         probeRouter: true,
         routingId: "foobar",

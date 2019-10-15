@@ -1,8 +1,8 @@
 export {
   capability,
+  context,
   curveKeyPair,
   version,
-  global,
   Context,
   Event,
   EventOfType,

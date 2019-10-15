@@ -108,7 +108,7 @@ describe("socket construction", function() {
     it("should create socket with default context", function() {
       const sock = new zmq.Dealer
       assert.instanceOf(sock, zmq.Dealer)
-      assert.equal(sock.context, zmq.global)
+      assert.equal(sock.context, zmq.context)
     })
 
     it("should create socket with given context", function() {

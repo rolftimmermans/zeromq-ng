@@ -11,7 +11,7 @@ describe("zmq", function() {
         "version", "capability", "curveKeyPair",
 
         /* The global/default context. */
-        "global",
+        "context",
 
         /* Generic constructors. */
         "Context", "Socket", "Observer", "Proxy",
