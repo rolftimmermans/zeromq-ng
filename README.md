@@ -268,7 +268,7 @@ npm version <new version>
 git push && git push --tags
 ```
 
-Wait for continuous integration to finish. Prebuilds will be generated for all supported platforms and attached to a Github release. Then, a new NPM package version will be automatically released.
+Wait for continuous integration to finish. Prebuilds will be generated for all supported platforms and attached to a Github release. Documentation is automatically generated and committed to `gh-pages`. Finally, a new NPM package version will be automatically released.
 
 
 # History
