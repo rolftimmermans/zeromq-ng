@@ -1,3 +1,7 @@
+### v5.0.0-beta.26
+
+* Include documentation inline in source & TypeScript definitions.
+
 ### v5.0.0-beta.25
 
 * BREAKING: Events now are returned as objects that include the type, instead of a tuple. Their associated data is now type safe in the TypeScript type definitions.
