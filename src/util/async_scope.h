@@ -11,6 +11,6 @@ public:
         : handle_scope(env), callback_scope(env, std::move(context)) {}
 
     inline explicit AsyncScope(Napi::Env env, const char* name)
-        : AsyncScope(env, Napi::AsyncContext(env, name)) {}
+        : handle_scope(env), callback_scope(env, Napi::AsyncContext(env, name)) {}
 };
 }

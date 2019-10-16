@@ -109,3 +109,6 @@ private:
     friend class Proxy;
 };
 }
+
+static_assert(!std::is_copy_constructible<zmq::Socket>::value, "not copyable");
+static_assert(!std::is_move_constructible<zmq::Socket>::value, "not movable");

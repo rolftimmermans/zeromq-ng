@@ -54,3 +54,6 @@ private:
     friend class Socket;
 };
 }
+
+static_assert(!std::is_copy_constructible<zmq::Observer>::value, "not copyable");
+static_assert(!std::is_move_constructible<zmq::Observer>::value, "not movable");

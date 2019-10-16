@@ -36,4 +36,7 @@ private:
 };
 }
 
+static_assert(!std::is_copy_constructible<zmq::Proxy>::value, "not copyable");
+static_assert(!std::is_move_constructible<zmq::Proxy>::value, "not movable");
+
 #endif
