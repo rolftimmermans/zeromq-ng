@@ -47,13 +47,13 @@ Napi::Value Proxy::Run(const Napi::CallbackInfo& info) {
     if (Env().IsExceptionPending()) return Env().Undefined();
 
     if (front->endpoints == 0) {
-        Napi::Error::New(info.Env(), "Front-end socket must be bound or connected")
+        Napi::Error::New(Env(), "Front-end socket must be bound or connected")
             .ThrowAsJavaScriptException();
         return Env().Undefined();
     }
 
     if (back->endpoints == 0) {
-        Napi::Error::New(info.Env(), "Back-end socket must be bound or connected")
+        Napi::Error::New(Env(), "Back-end socket must be bound or connected")
             .ThrowAsJavaScriptException();
         return Env().Undefined();
     }
@@ -96,7 +96,8 @@ Napi::Value Proxy::Run(const Napi::CallbackInfo& info) {
     auto front_ptr = front->socket;
     auto back_ptr = back->socket;
 
-    auto status = UvQueue(info.Env(),
+    auto async = Napi::AsyncContext(Env(), "Proxy.run");
+    auto status = UvQueue(Env(),
         [=]() {
             /* Don't access V8 internals here! Executed in worker thread. */
             if (zmq_bind(control_sub, run_ctx->address.c_str()) < 0) {
@@ -109,8 +110,8 @@ Napi::Value Proxy::Run(const Napi::CallbackInfo& info) {
                 return;
             }
         },
-        [=]() {
-            AsyncScope scope(Env());
+        [=, async = std::move(async)]() mutable {
+            AsyncScope scope(Env(), std::move(async));
 
             front->Close();
             back->Close();

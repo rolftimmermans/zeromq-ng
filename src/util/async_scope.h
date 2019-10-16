@@ -7,7 +7,10 @@ class AsyncScope {
     Napi::CallbackScope callback_scope;
 
 public:
-    inline explicit AsyncScope(Napi::Env env)
-        : handle_scope(env), callback_scope(env, AsyncContext) {}
+    inline explicit AsyncScope(Napi::Env env, Napi::AsyncContext&& context)
+        : handle_scope(env), callback_scope(env, std::move(context)) {}
+
+    inline explicit AsyncScope(Napi::Env env, const char* name)
+        : AsyncScope(env, Napi::AsyncContext(env, name)) {}
 };
 }

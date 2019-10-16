@@ -87,7 +87,7 @@ Observer::Observer(const Napi::CallbackInfo& info)
         goto error;
     }
 
-    if (poller.Initialize(info.Env(), fd) < 0) {
+    if (poller.Initialize(Env(), fd) < 0) {
         ErrnoException(Env(), errno).ThrowAsJavaScriptException();
         goto error;
     }
@@ -260,7 +260,7 @@ void Observer::Initialize(Napi::Env& env, Napi::Object& exports) {
 }
 
 void Observer::Poller::ReadableCallback() {
-    AsyncScope scope(read_deferred.Env());
+    AsyncScope scope(read_deferred.Env(), "Observer.receive");
     socket.Receive(read_deferred);
 }
 
