@@ -91,6 +91,7 @@ private:
         void WritableCallback();
     };
 
+    Napi::AsyncContext async_context;
     Napi::ObjectReference context_ref;
     Napi::ObjectReference observer_ref;
     Socket::Poller poller;

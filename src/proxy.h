@@ -27,6 +27,7 @@ protected:
 private:
     inline void SendCommand(const char* command);
 
+    Napi::AsyncContext async_context;
     Napi::ObjectReference front_ref;
     Napi::ObjectReference back_ref;
     Napi::ObjectReference capture_ref;

@@ -54,7 +54,7 @@ Napi::FunctionReference Socket::Constructor;
 std::unordered_set<void*> Socket::ActivePtrs;
 
 Socket::Socket(const Napi::CallbackInfo& info)
-    : Napi::ObjectWrap<Socket>(info), poller(*this) {
+    : Napi::ObjectWrap<Socket>(info), async_context(Env(), "Socket"), poller(*this) {
     auto args = {
         Argument{"Socket type must be a number", &Napi::Value::IsNumber},
         Argument{"Options must be an object", &Napi::Value::IsObject,
@@ -343,7 +343,6 @@ Napi::Value Socket::Bind(const Napi::CallbackInfo& info) {
     auto run_ctx =
         std::make_shared<AddressContext>(info[0].As<Napi::String>().Utf8Value());
 
-    auto async = Napi::AsyncContext(Env(), "Socket.bind");
     auto status = UvQueue(Env(),
         [=]() {
             /* Don't access V8 internals here! Executed in worker thread. */
@@ -354,8 +353,8 @@ Napi::Value Socket::Bind(const Napi::CallbackInfo& info) {
                 }
             }
         },
-        [=, async = std::move(async)]() mutable {
-            AsyncScope scope(Env(), std::move(async));
+        [=]() {
+            AsyncScope scope(Env(), async_context);
             state = Socket::State::Open;
 
             if (request_close) {
@@ -396,7 +395,6 @@ Napi::Value Socket::Unbind(const Napi::CallbackInfo& info) {
     auto run_ctx =
         std::make_shared<AddressContext>(info[0].As<Napi::String>().Utf8Value());
 
-    auto async = Napi::AsyncContext(Env(), "Socket.unbind");
     auto status = UvQueue(Env(),
         [=]() {
             /* Don't access V8 internals here! Executed in worker thread. */
@@ -407,8 +405,8 @@ Napi::Value Socket::Unbind(const Napi::CallbackInfo& info) {
                 }
             }
         },
-        [=, async = std::move(async)]() mutable {
-            AsyncScope scope(Env(), std::move(async));
+        [=]() {
+            AsyncScope scope(Env(), async_context);
             state = Socket::State::Open;
 
             if (request_close) {
@@ -863,12 +861,12 @@ void Socket::Initialize(Napi::Env& env, Napi::Object& exports) {
 }
 
 void Socket::Poller::ReadableCallback() {
-    AsyncScope scope(read_deferred.Env(), "Socket.receive");
+    AsyncScope scope(read_deferred.Env(), socket.async_context);
     socket.Receive(read_deferred);
 }
 
 void Socket::Poller::WritableCallback() {
-    AsyncScope scope(write_deferred.Env(), "Socket.send");
+    AsyncScope scope(write_deferred.Env(), socket.async_context);
     socket.Send(write_deferred, write_value);
     write_value.Clear();
 }

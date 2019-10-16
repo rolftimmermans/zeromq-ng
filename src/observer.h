@@ -48,6 +48,7 @@ private:
         inline void WritableCallback() {}
     };
 
+    Napi::AsyncContext async_context;
     Observer::Poller poller;
     void* socket = nullptr;
 

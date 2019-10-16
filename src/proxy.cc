@@ -18,7 +18,8 @@ struct ProxyContext {
     ProxyContext(std::string&& address) : address(std::move(address)) {}
 };
 
-Proxy::Proxy(const Napi::CallbackInfo& info) : Napi::ObjectWrap<Proxy>(info) {
+Proxy::Proxy(const Napi::CallbackInfo& info)
+    : Napi::ObjectWrap<Proxy>(info), async_context(Env(), "Proxy") {
     auto args = {
         Argument{"Front-end must be a socket object", &Napi::Value::IsObject},
         Argument{"Back-end must be a socket object", &Napi::Value::IsObject},
@@ -96,7 +97,6 @@ Napi::Value Proxy::Run(const Napi::CallbackInfo& info) {
     auto front_ptr = front->socket;
     auto back_ptr = back->socket;
 
-    auto async = Napi::AsyncContext(Env(), "Proxy.run");
     auto status = UvQueue(Env(),
         [=]() {
             /* Don't access V8 internals here! Executed in worker thread. */
@@ -110,8 +110,8 @@ Napi::Value Proxy::Run(const Napi::CallbackInfo& info) {
                 return;
             }
         },
-        [=, async = std::move(async)]() mutable {
-            AsyncScope scope(Env(), std::move(async));
+        [=]() {
+            AsyncScope scope(Env(), async_context);
 
             front->Close();
             back->Close();
