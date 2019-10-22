@@ -13,8 +13,9 @@ jobs:
 
   - os: linux
     arch: arm64
-    language: c++
-    compiler: gcc
+    language:
+    - c++
+    - node_js
     node_js: "10.16"
     env: ZMQ_DRAFT=true INCLUDE_COMPAT_TESTS=true
 
