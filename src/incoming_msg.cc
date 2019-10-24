@@ -33,15 +33,11 @@ Napi::Value IncomingMsg::IntoBuffer(const Napi::Env& env) {
         moved = true;
 
         /* Put appropriate GC pressure according to the size of the buffer. */
-        auto res = Napi::MemoryManagement::AdjustExternalMemory(env, length);
-        std::cout << "before " << res << std::endl;
+        Napi::MemoryManagement::AdjustExternalMemory(env, length);
 
         auto release = [](const Napi::Env& env, uint8_t*, Reference* ref) {
-            std::cout << "get size" << std::endl;
             ptrdiff_t length = zmq_msg_size(*ref);
-            std::cout << length << " - >" << (-length) << std::endl;
-            auto res = Napi::MemoryManagement::AdjustExternalMemory(env, -length);
-            std::cout << "after " << res << std::endl;
+            Napi::MemoryManagement::AdjustExternalMemory(env, -length);
             delete ref;
         };
 
