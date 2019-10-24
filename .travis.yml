@@ -7,17 +7,17 @@ jobs:
   ## TEST STAGE
 
   # Test main OSes on Node 10.x branch.
-  # - os: linux
-  #   node_js: "10.16"
-  #   env: ZMQ_DRAFT=true INCLUDE_COMPAT_TESTS=true
+  - os: linux
+    node_js: "10.16"
+    env: ZMQ_DRAFT=true INCLUDE_COMPAT_TESTS=true
 
-  # - os: linux
-  #   env: ALPINE_CHROOT=3.10 ZMQ_DRAFT=true INCLUDE_COMPAT_TESTS=true
-  #   sudo: required
+  - os: linux
+    env: ALPINE_CHROOT=3.10 ZMQ_DRAFT=true INCLUDE_COMPAT_TESTS=true
+    sudo: required
 
-  # - os: osx
-  #   env: ZMQ_DRAFT=true
-  #   node_js: "10.16"
+  - os: osx
+    env: ZMQ_DRAFT=true
+    node_js: "10.16"
 
   - os: windows
     node_js: "10.16"
@@ -30,29 +30,29 @@ jobs:
     env: ZMQ_DRAFT=true YARN_GPG=no
 
   # Test shared libraries on Linux and macOS.
-  # - os: linux
-  #   node_js: "10.16"
-  #   env: ZMQ_SHARED=true
-  #   addons: {apt: {packages: libzmq3-dev}}
+  - os: linux
+    node_js: "10.16"
+    env: ZMQ_SHARED=true
+    addons: {apt: {packages: libzmq3-dev}}
 
-  # - os: osx
-  #   node_js: "10.16"
-  #   env: ZMQ_SHARED=true
-  #   addons: {homebrew: {packages: zeromq, update: true}}
+  - os: osx
+    node_js: "10.16"
+    env: ZMQ_SHARED=true
+    addons: {homebrew: {packages: zeromq, update: true}}
 
-  # # Test older versions of ZMQ.
-  # - os: linux
-  #   node_js: "10.16"
-  #   env: ZMQ_VERSION=4.2.4
+  # Test older versions of ZMQ.
+  - os: linux
+    node_js: "10.16"
+    env: ZMQ_VERSION=4.2.4
 
-  # # Test recent Node versions.
-  # - os: linux
-  #   node_js: "12"
-  #   env: ZMQ_DRAFT=true INCLUDE_COMPAT_TESTS=true
+  # Test recent Node versions.
+  - os: linux
+    node_js: "12"
+    env: ZMQ_DRAFT=true INCLUDE_COMPAT_TESTS=true
 
-  # - os: linux
-  #   node_js: "13"
-  #   env: ZMQ_DRAFT=true
+  - os: linux
+    node_js: "13"
+    env: ZMQ_DRAFT=true
 
   ## PREBUILD STAGE
 
