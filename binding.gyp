@@ -22,7 +22,7 @@
     },
 
     {
-      'target_name': 'zeromq-ng',
+      'target_name': 'zeromq',
       'dependencies': ['libzmq'],
       'sources': [
         'src/context.cc',
