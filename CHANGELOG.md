@@ -1,3 +1,11 @@
+### v5.0.0-beta.27
+
+* Support using ZeroMQ in [worker threads](https://nodejs.org/api/worker_threads.html), with the ability to communicate between threads via the `inproc://` protocol.
+
+* Support Node versions that [call destructors](https://github.com/nodejs/node/pull/28428) when the environment is cleaned up.
+
+* Add example for multithreaded usage.
+
 ### v5.0.0-beta.26
 
 * BREAKING: Rename the default global context from `global`, which clashes with the built-in variable `global`, to `context`.
