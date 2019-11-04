@@ -1,3 +1,7 @@
+### v5.0.0-beta.28
+
+* Development has moved back to ZeroMQ.js. This provides a simple wrapper around ZeroMQ.js.
+
 ### v5.0.0-beta.27
 
 * Support using ZeroMQ in [worker threads](https://nodejs.org/api/worker_threads.html), with the ability to communicate between threads via the `inproc://` protocol.

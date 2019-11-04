@@ -1,5 +1,5 @@
 import * as semver from "semver"
-import * as zmq from "../../src"
+import * as zmq from "../.."
 
 import {assert} from "chai"
 

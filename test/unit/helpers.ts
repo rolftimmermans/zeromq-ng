@@ -2,7 +2,7 @@ import * as path from "path"
 import * as semver from "semver"
 import {Worker} from "worker_threads"
 
-import * as zmq from "../../src"
+import * as zmq from "../.."
 
 /* Stop pending messages in test suite from preventing process exit. */
 zmq.context.blocky = false

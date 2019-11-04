@@ -1,4 +1,4 @@
-import * as zmq from "../../src"
+import * as zmq from "../.."
 
 import {assert} from "chai"
 import {createWorker, testProtos, uniqAddress} from "./helpers"

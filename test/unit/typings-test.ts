@@ -1,4 +1,4 @@
-import * as zmq from "../../src"
+import * as zmq from "../.."
 
 describe("typings", function() {
   it("should compile successfully", function() {

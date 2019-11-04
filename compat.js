@@ -1,1 +1,1 @@
-module.exports = require("./lib/compat")
+module.exports = require("zeromq/v5-compat")

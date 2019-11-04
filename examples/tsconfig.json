@@ -1,9 +1,0 @@
-{
-  "include": ["*"],
-  "compilerOptions": {
-    "target": "es2018",
-    "module": "commonjs",
-    "lib": ["es2018", "esnext.asynciterable"],
-    "strict": true,
-  }
-}

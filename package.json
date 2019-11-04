@@ -1,17 +1,15 @@
 {
   "name": "zeromq-ng",
-  "version": "5.0.0-beta.27",
+  "version": "5.0.0-beta.28",
   "description": "Next-generation ZeroMQ bindings for Node.js",
-  "main": "lib/index.js",
-  "types": "lib/index.d.ts",
-  "gypfile": true,
+  "main": "index.js",
+  "types": "index.d.ts",
   "repository": {
     "type": "git",
     "url": "https://github.com/rolftimmermans/zeromq-ng.git"
   },
   "dependencies": {
-    "node-addon-api": "^1.7.1",
-    "node-gyp-build": "^4.1.0"
+    "zeromq": ">= 6.0.0-beta.1"
   },
   "devDependencies": {
     "@gnd/typedoc": "^0.15.0-0",
@@ -19,17 +17,11 @@
     "@types/mocha": ">= 5.2",
     "@types/node": ">= 8.0",
     "@types/semver": ">= 0",
-    "benchmark": ">= 0",
     "chai": ">= 4.1",
     "choma": ">= 1.2",
-    "gunzip-maybe": "^1.4.1",
     "mocha": ">= 4.0",
-    "node-fetch": "^2.6.0",
-    "prebuildify": "^3.0",
     "semver": ">= 0",
-    "tar-fs": "^2.0.0",
     "ts-node": ">= 7",
-    "tslint": "^5.20.0",
     "typescript": ">= 3",
     "weak-napi": ">= 1.0"
   },
@@ -40,44 +32,16 @@
     "CHANGELOG.md",
     "LICENSE",
     "README.md",
-    "binding.gyp",
     "compat.js",
     "compat.d.ts",
     "draft.js",
     "draft.d.ts",
-    "lib/*.d.ts",
-    "lib/*.js",
-    "src/util/*.h",
-    "src/*.cc",
-    "src/*.h",
-    "script/build.sh",
-    "prebuilds"
+    "index.js",
+    "index.d.ts"
   ],
   "scripts": {
-    "install": "node-gyp-build",
-    "ci:compile": "tsc --project tsconfig-build.json",
-    "ci:doc": "typedoc --out docs --name zeromq.js --excludeProtected --excludePrivate --excludeNotExported --excludeExternals --externalPattern 'src/+(draft|native|compat).ts' --tsconfig tsconfig-build.json --mode file",
-    "ci:prebuild": "prebuildify --napi --strip",
-    "dev:test": "tsc --project tsconfig-build.json && mocha && tslint -t stylish --project . && script/format.sh && rm -f tmp/*",
-    "dev:bench": "node --expose-gc test/bench"
+    "test": "mocha"
   },
-  "keywords": [
-    "zeromq",
-    "zmq",
-    "0mq",
-    "ømq",
-    "libzmq",
-    "zmtp",
-    "message",
-    "messaging",
-    "queue",
-    "async",
-    "sockets",
-    "native",
-    "binding",
-    "addon",
-    "napi"
-  ],
   "license": "MIT",
   "author": "Rolf Timmermans <rolf@zxcv.nl>"
 }

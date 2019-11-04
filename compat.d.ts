@@ -1,1 +1,1 @@
-export * from "./lib/compat"
+export * from "zeromq/v5-compat"

@@ -1,4 +1,4 @@
-test/unit/*-test.ts test/unit/compat/*-test.{ts,js}
+test/unit/*-test.ts
 --experimental-worker
 --require ts-node/register
 --require choma
